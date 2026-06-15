@@ -1,0 +1,22 @@
+# Spring Boot
+backend/build/
+backend/.gradle/
+backend/bin/
+backend/*.class
+backend/application-prod.properties
+
+# Flutter
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/build/
+frontend/.packages
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
