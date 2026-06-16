@@ -10,6 +10,9 @@ on:
     paths:
       - 'backend/**'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-and-test:
     name: Build & Test Spring Boot
@@ -47,6 +50,10 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: gradle-${{ hashFiles('backend/**/*.gradle*') }}
+
+      - name: Grant execute permission for gradlew
+        working-directory: backend
+        run: chmod +x gradlew
 
       - name: Build with Gradle
         working-directory: backend
