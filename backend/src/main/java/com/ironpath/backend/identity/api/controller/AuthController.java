@@ -4,10 +4,8 @@ import com.ironpath.backend.identity.api.dto.LoginRequest;
 import com.ironpath.backend.identity.api.dto.LoginResponse;
 import com.ironpath.backend.identity.api.dto.RefreshRequest;
 import com.ironpath.backend.identity.api.dto.RegisterRequest;
-import com.ironpath.backend.identity.application.LoginUserUseCase;
-import com.ironpath.backend.identity.application.RefreshTokenUseCase;
-import com.ironpath.backend.identity.application.RegisterUserUseCase;
-import com.ironpath.backend.identity.application.VerifyEmailUseCase;
+import com.ironpath.backend.identity.application.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -60,4 +60,5 @@ public class AuthController {
         String newAccessToken = refreshTokenUseCase.execute(request.refreshToken());
         return ResponseEntity.ok(new LoginResponse(newAccessToken, request.refreshToken()));
     }
+
 }
