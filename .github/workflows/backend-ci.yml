@@ -61,8 +61,8 @@ jobs:
 
       - name: Grant PostgreSQL permissions
         run: |
-          PGPASSWORD=ironpath_pass psql -h localhost -U ironpath_user -d ironpath_test -c "GRANT ALL ON SCHEMA public TO ironpath_user;" || true
-          PGPASSWORD=ironpath_pass psql -h localhost -U ironpath_user -d ironpath_test -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ironpath_user;" || true
+          PGPASSWORD=ironpath_pass psql -h localhost -U ironpath_user -d ironpath_test -c "GRANT ALL ON SCHEMA public TO ironpath_user;"
+
       - name: Run tests
         working-directory: backend
         env:
@@ -71,9 +71,53 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: ironpath_pass
         run: ./gradlew test
 
+      - name: Checkstyle
+        working-directory: backend
+        run: ./gradlew checkstyleMain checkstyleTest
+
+      - name: SpotBugs
+        working-directory: backend
+        run: ./gradlew spotbugsMain
+
+      - name: JaCoCo Coverage Report
+        working-directory: backend
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ironpath_test
+          SPRING_DATASOURCE_USERNAME: ironpath_user
+          SPRING_DATASOURCE_PASSWORD: ironpath_pass
+        run: ./gradlew jacocoTestReport jacocoTestCoverageVerification
+
+      - name: OWASP Dependency Check
+        working-directory: backend
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: ./gradlew dependencyCheckAnalyze
+        continue-on-error: true
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
           path: backend/build/reports/tests/
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: backend/build/reports/jacoco/
+
+      - name: Upload SpotBugs report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spotbugs-report
+          path: backend/build/reports/spotbugs/
+
+      - name: Upload OWASP report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owasp-report
+          path: backend/build/reports/dependency-check-report.html
