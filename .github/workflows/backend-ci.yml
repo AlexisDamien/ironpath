@@ -59,6 +59,10 @@ jobs:
         working-directory: backend
         run: ./gradlew build -x test
 
+      - name: Grant PostgreSQL permissions
+        run: |
+          PGPASSWORD=ironpath_pass psql -h localhost -U ironpath_user -d ironpath_test -c "GRANT ALL ON SCHEMA public TO ironpath_user;"
+
       - name: Run tests
         working-directory: backend
         env:
