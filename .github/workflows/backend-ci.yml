@@ -61,8 +61,8 @@ jobs:
 
       - name: Grant PostgreSQL permissions
         run: |
-          PGPASSWORD=ironpath_pass psql -h localhost -U ironpath_user -d ironpath_test -c "GRANT ALL ON SCHEMA public TO ironpath_user;"
-
+          PGPASSWORD=ironpath_pass psql -h localhost -U ironpath_user -d ironpath_test -c "GRANT ALL ON SCHEMA public TO ironpath_user;" || true
+          PGPASSWORD=ironpath_pass psql -h localhost -U ironpath_user -d ironpath_test -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ironpath_user;" || true
       - name: Run tests
         working-directory: backend
         env:
