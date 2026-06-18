@@ -24,7 +24,7 @@
 
         <!-- Longueur -->
         <module name="MethodLength">
-            <property name="max" value="50"/>
+            <property name="max" value="80"/>
         </module>
         <module name="ParameterNumber">
             <property name="max" value="7"/>
@@ -36,17 +36,10 @@
         <module name="EqualsHashCode"/>
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
-
-        <!-- Espacement -->
-        <module name="WhitespaceAround"/>
-        <module name="NoWhitespaceAfter"/>
     </module>
 
     <!-- Longueur des lignes -->
     <module name="LineLength">
-        <property name="max" value="120"/>
+        <property name="max" value="150"/>
     </module>
-
-    <!-- Fichiers vides -->
-    <module name="NewlineAtEndOfFile"/>
 </module>

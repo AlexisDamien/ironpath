@@ -1,5 +1,6 @@
 package com.ironpath.backend.identity.domain.model;
 
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
