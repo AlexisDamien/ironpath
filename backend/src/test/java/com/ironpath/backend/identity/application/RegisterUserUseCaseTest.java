@@ -3,6 +3,7 @@ package com.ironpath.backend.identity.application;
 import com.ironpath.backend.identity.api.dto.RegisterRequest;
 import com.ironpath.backend.identity.domain.model.EmailVerificationToken;
 import com.ironpath.backend.identity.domain.model.User;
+import com.ironpath.backend.identity.domain.repository.ConsentRecordRepository;
 import com.ironpath.backend.identity.domain.repository.EmailVerificationTokenRepository;
 import com.ironpath.backend.identity.domain.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,9 @@ class RegisterUserUseCaseTest {
 
     @Mock
     private EmailService emailService;
+
+    @Mock
+    private ConsentRecordRepository consentRecordRepository;
 
     @InjectMocks
     private RegisterUserUseCase registerUserUseCase;
