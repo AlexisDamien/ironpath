@@ -55,6 +55,10 @@ checkstyle {
 	maxWarnings = 0
 }
 
+checkstyleTest {
+	configFile = file("${rootDir}/config/checkstyle/checkstyle-test.xml")
+}
+
 jacoco {
 	toolVersion = '0.8.12'
 }

@@ -7,9 +7,8 @@
     <property name="fileExtensions" value="java"/>
 
     <module name="TreeWalker">
-        <!-- Nommage -->
+        <!-- Nommage — sans MethodName pour autoriser les underscores dans les tests -->
         <module name="TypeName"/>
-        <module name="MethodName"/>
         <module name="ParameterName"/>
         <module name="LocalVariableName"/>
         <module name="MemberName"/>
@@ -38,7 +37,6 @@
         <module name="SimplifyBooleanReturn"/>
     </module>
 
-    <!-- Longueur des lignes -->
     <module name="LineLength">
         <property name="max" value="150"/>
     </module>
