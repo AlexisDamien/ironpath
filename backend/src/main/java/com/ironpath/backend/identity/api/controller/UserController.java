@@ -1,7 +1,9 @@
 package com.ironpath.backend.identity.api.controller;
 
+import com.ironpath.backend.identity.api.dto.DeleteAccountRequest;
 import com.ironpath.backend.identity.api.dto.UpdateEmailRequest;
 import com.ironpath.backend.identity.api.dto.UpdatePasswordRequest;
+import com.ironpath.backend.identity.application.DeleteAccountUseCase;
 import com.ironpath.backend.identity.application.LogoutUserUseCase;
 import com.ironpath.backend.identity.application.UpdateEmailUseCase;
 import com.ironpath.backend.identity.application.UpdatePasswordUseCase;
@@ -10,8 +12,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
@@ -22,6 +29,8 @@ public class UserController {
 
     private final LogoutUserUseCase logoutUserUseCase;
     private final UpdateEmailUseCase updateEmailUseCase;
+    private final UpdatePasswordUseCase updatePasswordUseCase;
+    private final DeleteAccountUseCase deleteAccountUseCase;
 
     @GetMapping("/me")
     public ResponseEntity<String> me(Authentication authentication) {
@@ -44,14 +53,21 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    private final UpdatePasswordUseCase updatePasswordUseCase;
-
     @PutMapping("/password")
     public ResponseEntity<Void> updatePassword(
             @Valid @RequestBody UpdatePasswordRequest request,
             Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
         updatePasswordUseCase.execute(userId, request.currentPassword(), request.newPassword());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/account")
+    public ResponseEntity<Void> deleteAccount(
+            @Valid @RequestBody DeleteAccountRequest request,
+            Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        deleteAccountUseCase.execute(userId, request.currentPassword());
         return ResponseEntity.ok().build();
     }
 }
