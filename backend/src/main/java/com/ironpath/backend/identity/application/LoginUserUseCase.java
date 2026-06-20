@@ -35,7 +35,7 @@ public class LoginUserUseCase {
             throw new UnauthorizedException("Veuillez confirmer votre email avant de vous connecter");
         }
 
-        String accessToken = jwtService.generateToken(user.getId(), user.getEmail());
+        String token = jwtService.generateToken(user.getId(), user.getEmail());
 
         refreshTokenRepository.revokeAllByUserId(user.getId());
 
@@ -46,6 +46,6 @@ public class LoginUserUseCase {
 
         refreshTokenRepository.save(refreshToken);
 
-        return new LoginResponse(accessToken, refreshToken.getToken());
+        return new LoginResponse(token, refreshToken.getToken());
     }
 }
