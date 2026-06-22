@@ -1,0 +1,3 @@
+ALTER TABLE profiles
+    ADD COLUMN avatar_url VARCHAR(500),
+    ADD COLUMN username VARCHAR(50) UNIQUE;
