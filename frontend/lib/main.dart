@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
+import 'core/ui/app_theme.dart';
 
 void main() {
   runApp(
@@ -19,10 +20,9 @@ class IronPathApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'IronPath',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      theme: buildIronLightTheme(),
+      darkTheme: buildIronDarkTheme(),
+      themeMode: ThemeMode.dark,
       routerConfig: router,
     );
   }
