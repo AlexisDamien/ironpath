@@ -8,7 +8,7 @@ class IdentityRepository {
   IdentityRepository({
     required Dio dio,
     required TokenStorage tokenStorage,
-  }) : _dio = dio,
+  })  : _dio = dio,
         _tokenStorage = tokenStorage;
 
   Future<void> register({

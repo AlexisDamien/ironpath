@@ -35,8 +35,10 @@ class ApiClient {
                 'refreshToken': refreshToken,
               });
               final newAccessToken = response.data['token'];
-              await tokenStorage.write(key: 'access_token', value: newAccessToken);
-              error.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
+              await tokenStorage.write(
+                  key: 'access_token', value: newAccessToken);
+              error.requestOptions.headers['Authorization'] =
+                  'Bearer $newAccessToken';
               return handler.resolve(await dio.fetch(error.requestOptions));
             } catch (refreshError) {
               await tokenStorage.deleteAll();

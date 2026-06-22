@@ -104,20 +104,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               authState.status == AuthStatus.loading
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
-                onPressed: _rgpdConsent
-                    ? () {
-                  if (_formKey.currentState!.validate()) {
-                    ref
-                        .read(identityProvider.notifier)
-                        .register(
-                      _emailController.text,
-                      _passwordController.text,
-                    );
-                  }
-                }
-                    : null,
-                child: const Text('S\'inscrire'),
-              ),
+                      onPressed: _rgpdConsent
+                          ? () {
+                              if (_formKey.currentState!.validate()) {
+                                ref.read(identityProvider.notifier).register(
+                                      _emailController.text,
+                                      _passwordController.text,
+                                    );
+                              }
+                            }
+                          : null,
+                      child: const Text('S\'inscrire'),
+                    ),
               TextButton(
                 onPressed: () => context.go('/login'),
                 child: const Text('Déjà un compte ? Se connecter'),

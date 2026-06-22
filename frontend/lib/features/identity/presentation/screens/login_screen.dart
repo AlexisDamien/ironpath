@@ -73,16 +73,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               authState.status == AuthStatus.loading
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    ref.read(identityProvider.notifier).login(
-                      _emailController.text,
-                      _passwordController.text,
-                    );
-                  }
-                },
-                child: const Text('Se connecter'),
-              ),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          ref.read(identityProvider.notifier).login(
+                                _emailController.text,
+                                _passwordController.text,
+                              );
+                        }
+                      },
+                      child: const Text('Se connecter'),
+                    ),
               TextButton(
                 onPressed: () => context.go('/register'),
                 child: const Text('Pas encore de compte ? S\'inscrire'),

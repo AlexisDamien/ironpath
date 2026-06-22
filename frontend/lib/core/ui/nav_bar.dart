@@ -13,10 +13,10 @@ class IronNavBar extends StatelessWidget {
   final ValueChanged<int> onDestinationSelected;
 
   static const List<_IronNavDestination> _destinations = [
-    _IronNavDestination(icon: Icons.home_outlined,  label: 'Accueil'),
-    _IronNavDestination(icon: Icons.fitness_center,  label: 'Entraîner'),
-    _IronNavDestination(icon: Icons.show_chart,      label: 'Progrès'),
-    _IronNavDestination(icon: Icons.person_outline,  label: 'Profil'),
+    _IronNavDestination(icon: Icons.home_outlined, label: 'Accueil'),
+    _IronNavDestination(icon: Icons.fitness_center, label: 'Entraîner'),
+    _IronNavDestination(icon: Icons.show_chart, label: 'Progrès'),
+    _IronNavDestination(icon: Icons.person_outline, label: 'Profil'),
   ];
 
   @override
@@ -24,12 +24,12 @@ class IronNavBar extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final navBackground = isDark ? IronColors.darkSurface : IronColors.lightSurface;
-    final borderColor   = isDark ? IronColors.darkBorder  : IronColors.lightBorder;
-    final activeColor   = colorScheme.primary;
-    final inactiveColor = isDark
-        ? const Color(0xFF555550)
-        : const Color(0xFFB0AAA2);
+    final navBackground =
+        isDark ? IronColors.darkSurface : IronColors.lightSurface;
+    final borderColor = isDark ? IronColors.darkBorder : IronColors.lightBorder;
+    final activeColor = colorScheme.primary;
+    final inactiveColor =
+        isDark ? const Color(0xFF555550) : const Color(0xFFB0AAA2);
 
     return Semantics(
       label: 'Navigation principale',
@@ -48,9 +48,9 @@ class IronNavBar extends StatelessWidget {
               children: List.generate(_destinations.length, (index) {
                 return Expanded(
                   child: _IronNavItem(
-                    destination:   _destinations[index],
-                    isActive:      index == currentIndex,
-                    activeColor:   activeColor,
+                    destination: _destinations[index],
+                    isActive: index == currentIndex,
+                    activeColor: activeColor,
                     inactiveColor: inactiveColor,
                     onTap: () => onDestinationSelected(index),
                   ),
@@ -74,9 +74,9 @@ class _IronNavItem extends StatelessWidget {
   });
 
   final _IronNavDestination destination;
-  final bool         isActive;
-  final Color        activeColor;
-  final Color        inactiveColor;
+  final bool isActive;
+  final Color activeColor;
+  final Color inactiveColor;
   final VoidCallback onTap;
 
   @override
@@ -84,25 +84,25 @@ class _IronNavItem extends StatelessWidget {
     final itemColor = isActive ? activeColor : inactiveColor;
 
     return Semantics(
-      label:    destination.label,
+      label: destination.label,
       selected: isActive,
-      button:   true,
+      button: true,
       child: GestureDetector(
-        onTap:     onTap,
-        behavior:  HitTestBehavior.opaque,
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
         child: SizedBox(
           height: IronSpacing.minTapTarget + 4,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               AnimatedContainer(
-                duration:  const Duration(milliseconds: 200),
-                curve:     Curves.easeOut,
-                height:    3,
-                width:     isActive ? 28 : 0,
-                margin:    const EdgeInsets.only(bottom: 6),
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                height: 3,
+                width: isActive ? 28 : 0,
+                margin: const EdgeInsets.only(bottom: 6),
                 decoration: BoxDecoration(
-                  color:        isActive ? activeColor : Colors.transparent,
+                  color: isActive ? activeColor : Colors.transparent,
                   borderRadius: BorderRadius.circular(1.5),
                 ),
               ),
@@ -111,9 +111,9 @@ class _IronNavItem extends StatelessWidget {
               AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 200),
                 style: TextStyle(
-                  fontSize:   10,
+                  fontSize: 10,
                   fontWeight: isActive ? FontWeight.w500 : FontWeight.w400,
-                  color:      itemColor,
+                  color: itemColor,
                 ),
                 child: Text(destination.label),
               ),
@@ -129,8 +129,9 @@ class _IronNavItem extends StatelessWidget {
 class _IronNavDestination {
   const _IronNavDestination({required this.icon, required this.label});
   final IconData icon;
-  final String   label;
+  final String label;
 }
+
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.child});
 
@@ -146,9 +147,8 @@ class AppShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
-    final currentIndex = _routes
-        .indexWhere((route) => location.startsWith(route))
-        .clamp(0, 3);
+    final currentIndex =
+        _routes.indexWhere((route) => location.startsWith(route)).clamp(0, 3);
 
     return Scaffold(
       body: child,
