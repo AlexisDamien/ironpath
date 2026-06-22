@@ -103,13 +103,13 @@ ThemeData _buildTheme(Brightness brightness) {
       ),
     ),
 
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: accent,
-        minimumSize:     const Size(IronSpacing.minTapTarget, IronSpacing.minTapTarget),
-        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-      ),
-    ),
+    //textButtonTheme: TextButtonThemeData(
+    //  style: TextButton.styleFrom(
+    //    foregroundColor: accent,
+    //    minimumSize:     const Size(IronSpacing.minTapTarget, IronSpacing.minTapTarget),
+    //    textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+    //  ),
+    //),
 
     inputDecorationTheme: InputDecorationTheme(
       filled:         true,
