@@ -1,4 +1,4 @@
-package com.ironpath.backend.profile.domain.model;
+package com.ironpath.backend.training.domain.model;
 
 import com.ironpath.backend.identity.domain.model.User;
 import jakarta.persistence.*;
@@ -6,47 +6,40 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "profiles")
+@Table(name = "workout_programs")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Profile {
+public class WorkoutProgram {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "first_name")
-    private String firstName;
+    @Column(nullable = false)
+    private String name;
 
-    @Column(name = "last_name")
-    private String lastName;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
-    @Column(name = "birth_date")
-    private LocalDate birthDate;
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive;
 
-    @Column(name = "height_cm")
-    private Double heightCm;
-
-    @Column(name = "objective")
-    private String objective;
-
-    @Column(name = "username", unique = true)
-    private String username;
-
-    @Column(name = "avatar_url")
-    private String avatarUrl;
+    @OneToMany(mappedBy = "program", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("exerciseOrder ASC")
+    @Builder.Default
+    private List<ProgramExercise> exercises = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -58,6 +51,9 @@ public class Profile {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (isActive == null) {
+            isActive = true;
+        }
     }
 
     @PreUpdate

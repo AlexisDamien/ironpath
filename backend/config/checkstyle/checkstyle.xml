@@ -18,7 +18,9 @@
         </module>
 
         <!-- Imports -->
-        <module name="AvoidStarImport"/>
+        <module name="AvoidStarImport">
+            <property name="excludes" value="jakarta.persistence,lombok,org.springframework.web.bind.annotation,org.mockito,org.mockito.Mockito,org.mockito.junit.jupiter,org.junit.jupiter.api,org.junit.jupiter.api.Assertions"/>
+        </module>
         <module name="UnusedImports"/>
 
         <!-- Longueur -->
