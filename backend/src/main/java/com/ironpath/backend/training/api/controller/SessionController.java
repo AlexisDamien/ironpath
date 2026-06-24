@@ -1,12 +1,10 @@
 package com.ironpath.backend.training.api.controller;
 
 import com.ironpath.backend.training.api.dto.AddSetRequest;
+import com.ironpath.backend.training.api.dto.ExerciseStatsResponse;
 import com.ironpath.backend.training.api.dto.SessionResponse;
 import com.ironpath.backend.training.api.dto.StartSessionRequest;
-import com.ironpath.backend.training.application.AddSetUseCase;
-import com.ironpath.backend.training.application.EndSessionUseCase;
-import com.ironpath.backend.training.application.GetSessionsUseCase;
-import com.ironpath.backend.training.application.StartSessionUseCase;
+import com.ironpath.backend.training.application.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +30,7 @@ public class SessionController {
     private final AddSetUseCase addSetUseCase;
     private final EndSessionUseCase endSessionUseCase;
     private final GetSessionsUseCase getSessionsUseCase;
+    private final GetExerciseStatsUseCase getExerciseStatsUseCase;
 
     @PostMapping
     public ResponseEntity<SessionResponse> startSession(
@@ -63,5 +62,13 @@ public class SessionController {
     public ResponseEntity<List<SessionResponse>> getSessions(Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
         return ResponseEntity.ok(getSessionsUseCase.execute(userId));
+    }
+
+    @GetMapping("/exercises/{exerciseId}/stats")
+    public ResponseEntity<ExerciseStatsResponse> getExerciseStats(
+            @PathVariable String exerciseId,
+            Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return ResponseEntity.ok(getExerciseStatsUseCase.execute(userId, exerciseId));
     }
 }
