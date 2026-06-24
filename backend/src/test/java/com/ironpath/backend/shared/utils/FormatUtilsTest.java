@@ -26,7 +26,7 @@ class FormatUtilsTest {
     @Test
     void formatWeight_shouldReturnFormattedString() {
         String result = FormatUtils.formatWeight(80.5);
-        assertEquals("80.5 kg", result, "Got: " + result);
+        assertEquals("80.5 kg", result);
     }
 
     @Test
