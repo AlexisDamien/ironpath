@@ -36,8 +36,11 @@ public class Profile {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @Column(name = "height_cm")
-    private Double heightCm;
+    @Column(name = "height")
+    private Double height;
+
+    @Column(name = "gender")
+    private String gender;
 
     @Column(name = "objective")
     private String objective;

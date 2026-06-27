@@ -8,8 +8,8 @@ public final class FormatUtils {
         return Math.round(weightKg * (1 + reps / 30.0) * 10.0) / 10.0;
     }
 
-    public static double calculateBmi(double weightKg, double heightCm) {
-        double heightM = heightCm / 100.0;
+    public static double calculateBmi(double weightKg, double height) {
+        double heightM = height / 100.0;
         return Math.round((weightKg / (heightM * heightM)) * 10.0) / 10.0;
     }
 
@@ -17,7 +17,7 @@ public final class FormatUtils {
         return String.format(java.util.Locale.US, "%.1f kg", weightKg);
     }
 
-    public static String formatHeight(double heightCm) {
-        return String.format(java.util.Locale.US, "%.0f cm", heightCm);
+    public static String formatHeight(double height) {
+        return String.format(java.util.Locale.US, "%.0f cm", height);
     }
 }

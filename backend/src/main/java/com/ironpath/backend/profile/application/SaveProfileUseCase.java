@@ -41,8 +41,11 @@ public class SaveProfileUseCase  {
         if (request.birthDate() != null) {
             profile.setBirthDate(request.birthDate());
         }
-        if (request.heightCm() != null) {
-            profile.setHeightCm(request.heightCm());
+        if (request.height() != null) {
+            profile.setHeight(request.height());
+        }
+        if (request.gender() != null) {
+            profile.setGender(request.gender());
         }
         if (request.objective() != null) {
             profile.setObjective(request.objective());
@@ -62,7 +65,8 @@ public class SaveProfileUseCase  {
                 profile.getFirstName(),
                 profile.getLastName(),
                 profile.getBirthDate(),
-                profile.getHeightCm(),
+                profile.getHeight(),
+                profile.getGender(),
                 profile.getObjective(),
                 profile.getUsername(),
                 profile.getAvatarUrl()

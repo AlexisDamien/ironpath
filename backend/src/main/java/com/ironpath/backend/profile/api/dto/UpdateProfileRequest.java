@@ -13,7 +13,10 @@ public record UpdateProfileRequest(
 
         LocalDate birthDate,
 
-        Double heightCm,
+        Double height,
+
+        @Size(max = 10, message = "Genre invalide")
+        String gender,
 
         @Size(max = 100, message = "Objectif trop long")
         String objective,

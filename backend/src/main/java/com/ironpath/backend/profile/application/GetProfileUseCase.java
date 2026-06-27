@@ -21,7 +21,8 @@ public class GetProfileUseCase {
                         profile.getFirstName(),
                         profile.getLastName(),
                         profile.getBirthDate(),
-                        profile.getHeightCm(),
+                        profile.getHeight(),
+                        profile.getGender(),
                         profile.getObjective(),
                         profile.getUsername(),
                         profile.getAvatarUrl()

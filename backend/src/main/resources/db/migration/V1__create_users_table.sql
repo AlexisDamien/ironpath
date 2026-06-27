@@ -16,7 +16,7 @@ CREATE TABLE profiles (
     first_name VARCHAR(100),
     last_name VARCHAR(100),
     birth_date DATE,
-    height_cm DECIMAL(5,2),
+    height DECIMAL(5,2),
     objective VARCHAR(255),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()

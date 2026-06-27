@@ -8,7 +8,8 @@ public record ProfileResponse(
         String firstName,
         String lastName,
         LocalDate birthDate,
-        Double heightCm,
+        Double height,
+        String gender,
         String objective,
         String username,
         String avatarUrl
