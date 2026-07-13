@@ -3,15 +3,6 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/token_storage.dart';
 import '../../data/identity_repository.dart';
 import '../../domain/identity_state.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-final tokenStorageProvider = Provider<TokenStorage>((ref) {
-  return TokenStorage(const FlutterSecureStorage());
-});
-
-final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient();
-});
 
 final identityRepositoryProvider = Provider<IdentityRepository>((ref) {
   final apiClient = ref.watch(apiClientProvider);
