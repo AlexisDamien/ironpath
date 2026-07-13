@@ -28,8 +28,8 @@ class TrainingSession {
       startedAt: DateTime.parse(json['startedAt']),
       endedAt: json['endedAt'] != null ? DateTime.parse(json['endedAt']) : null,
       sets: (json['sets'] as List<dynamic>?)
-          ?.map((e) => ExerciseSet.fromJson(e))
-          .toList() ??
+              ?.map((e) => ExerciseSet.fromJson(e))
+              .toList() ??
           [],
     );
   }

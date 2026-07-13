@@ -10,7 +10,9 @@ class TrainingRepository {
 
   Future<List<WorkoutProgram>> getPrograms() async {
     final response = await _apiClient.get('/training/programs');
-    return (response.data as List).map((e) => WorkoutProgram.fromJson(e)).toList();
+    return (response.data as List)
+        .map((e) => WorkoutProgram.fromJson(e))
+        .toList();
   }
 
   Future<WorkoutProgram> createProgram({
@@ -25,16 +27,17 @@ class TrainingRepository {
           .asMap()
           .entries
           .map((entry) => {
-        'exerciseId': entry.value.id,
-        'exerciseOrder': entry.key + 1,
-        'targetSets': 3,
-        'targetReps': 10,
-        'restSeconds': 90,
-      })
+                'exerciseId': entry.value.id,
+                'exerciseOrder': entry.key + 1,
+                'targetSets': 3,
+                'targetReps': 10,
+                'restSeconds': 90,
+              })
           .toList(),
     });
     return WorkoutProgram.fromJson(response.data);
   }
+
   Future<WorkoutProgram> updateProgram({
     required String programId,
     required String name,
@@ -50,17 +53,18 @@ class TrainingRepository {
             .asMap()
             .entries
             .map((entry) => {
-          'exerciseId': entry.value.id,
-          'exerciseOrder': entry.key + 1,
-          'targetSets': 3,
-          'targetReps': 10,
-          'restSeconds': 90,
-        })
+                  'exerciseId': entry.value.id,
+                  'exerciseOrder': entry.key + 1,
+                  'targetSets': 3,
+                  'targetReps': 10,
+                  'restSeconds': 90,
+                })
             .toList(),
       },
     );
     return WorkoutProgram.fromJson(response.data);
   }
+
   Future<void> deleteProgram(String id) async {
     await _apiClient.delete('/training/programs/$id');
   }
@@ -108,10 +112,13 @@ class TrainingRepository {
 
   Future<List<TrainingSession>> getSessionHistory() async {
     final response = await _apiClient.get('/training/sessions');
-    return (response.data as List).map((e) => TrainingSession.fromJson(e)).toList();
+    return (response.data as List)
+        .map((e) => TrainingSession.fromJson(e))
+        .toList();
   }
 
-  Future<List<Exercise>> getExercises({String? search, String? muscleGroup}) async {
+  Future<List<Exercise>> getExercises(
+      {String? search, String? muscleGroup}) async {
     final Map<String, dynamic> queryParameters = {};
     if (search != null) queryParameters['search'] = search;
     if (muscleGroup != null) queryParameters['muscleGroup'] = muscleGroup;

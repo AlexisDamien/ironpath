@@ -16,8 +16,7 @@ class _ProgramsScreenState extends ConsumerState<ProgramsScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() =>
-        ref.read(trainingProvider.notifier).loadPrograms());
+    Future.microtask(() => ref.read(trainingProvider.notifier).loadPrograms());
   }
 
   @override
@@ -100,8 +99,7 @@ class _ProgramsScreenState extends ConsumerState<ProgramsScreen> {
     }
 
     return RefreshIndicator(
-      onRefresh: () =>
-          ref.read(trainingProvider.notifier).loadPrograms(),
+      onRefresh: () => ref.read(trainingProvider.notifier).loadPrograms(),
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: trainingState.programs.length,
@@ -113,15 +111,15 @@ class _ProgramsScreenState extends ConsumerState<ProgramsScreen> {
                 ref.read(trainingProvider.notifier).deleteProgram(program.id),
             onStartSession: () =>
                 ref.read(trainingProvider.notifier).startSession(
-                  programId: program.id,
-                  name: program.name,
-                ),
-              onEdit: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  fullscreenDialog: true,
-                  builder: (context) => CreateProgramModal(program: program),
-                ),
+                      programId: program.id,
+                      name: program.name,
+                    ),
+            onEdit: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                fullscreenDialog: true,
+                builder: (context) => CreateProgramModal(program: program),
               ),
+            ),
           );
         },
       ),

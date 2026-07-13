@@ -20,8 +20,8 @@ class WorkoutProgram {
       description: json['description'],
       isActive: json['isActive'] ?? false,
       exercises: (json['exercises'] as List<dynamic>?)
-          ?.map((e) => ProgramExercise.fromJson(e))
-          .toList() ??
+              ?.map((e) => ProgramExercise.fromJson(e))
+              .toList() ??
           [],
     );
   }

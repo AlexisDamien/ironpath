@@ -92,11 +92,11 @@ class ExerciseDetailScreen extends StatelessWidget {
   }
 
   Widget _buildInfoRow(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required String value,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
     return Row(
       children: [
         Icon(

@@ -30,26 +30,27 @@ class _ActiveSessionScreenState extends ConsumerState<ActiveSessionScreen> {
   Future<void> _addSet(TrainingSession activeSession) async {
     if (_exerciseIdController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('L\'identifiant de l\'exercice est requis')),
+        const SnackBar(
+            content: Text('L\'identifiant de l\'exercice est requis')),
       );
       return;
     }
 
     await ref.read(trainingProvider.notifier).addSet(
-      sessionId: activeSession.id,
-      exerciseId: _exerciseIdController.text.trim(),
-      setOrder: activeSession.sets.length + 1,
-      reps: _repsController.text.isEmpty
-          ? null
-          : int.tryParse(_repsController.text),
-      weightKg: _weightController.text.isEmpty
-          ? null
-          : double.tryParse(_weightController.text),
-      restSeconds: _restController.text.isEmpty
-          ? null
-          : int.tryParse(_restController.text),
-      isWarmup: _isWarmup,
-    );
+          sessionId: activeSession.id,
+          exerciseId: _exerciseIdController.text.trim(),
+          setOrder: activeSession.sets.length + 1,
+          reps: _repsController.text.isEmpty
+              ? null
+              : int.tryParse(_repsController.text),
+          weightKg: _weightController.text.isEmpty
+              ? null
+              : double.tryParse(_weightController.text),
+          restSeconds: _restController.text.isEmpty
+              ? null
+              : int.tryParse(_restController.text),
+          isWarmup: _isWarmup,
+        );
 
     _exerciseIdController.clear();
     _repsController.clear();
@@ -140,62 +141,62 @@ class _ActiveSessionScreenState extends ConsumerState<ActiveSessionScreen> {
           Expanded(
             child: activeSession.sets.isEmpty
                 ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.add_circle_outline,
-                    size: 48,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Aucun set enregistré',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.add_circle_outline,
+                          size: 48,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Aucun set enregistré',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Ajoute ton premier set ci-dessous',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Ajoute ton premier set ci-dessous',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            )
+                  )
                 : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: activeSession.sets.length,
-              itemBuilder: (context, index) {
-                final exerciseSet = activeSession.sets[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor:
-                      Theme.of(context).colorScheme.primary,
-                      child: Text(
-                        '${exerciseSet.setOrder}',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    title: Text(exerciseSet.exerciseId),
-                    subtitle: Text(
-                      '${exerciseSet.reps ?? '-'} reps • ${exerciseSet.weightKg ?? '-'} kg',
-                    ),
-                    trailing: exerciseSet.isWarmup
-                        ? Chip(
-                      label: const Text('Échauffement'),
-                      backgroundColor: Theme.of(context)
-                          .colorScheme
-                          .primaryContainer,
-                    )
-                        : null,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: activeSession.sets.length,
+                    itemBuilder: (context, index) {
+                      final exerciseSet = activeSession.sets[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            child: Text(
+                              '${exerciseSet.setOrder}',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          title: Text(exerciseSet.exerciseId),
+                          subtitle: Text(
+                            '${exerciseSet.reps ?? '-'} reps • ${exerciseSet.weightKg ?? '-'} kg',
+                          ),
+                          trailing: exerciseSet.isWarmup
+                              ? Chip(
+                                  label: const Text('Échauffement'),
+                                  backgroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer,
+                                )
+                              : null,
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
           _buildAddSetPanel(context, activeSession),
         ],
@@ -247,8 +248,8 @@ class _ActiveSessionScreenState extends ConsumerState<ActiveSessionScreen> {
                 child: TextField(
                   controller: _weightController,
                   decoration: const InputDecoration(labelText: 'Poids'),
-                  keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                 ),
               ),
               const SizedBox(width: 8),

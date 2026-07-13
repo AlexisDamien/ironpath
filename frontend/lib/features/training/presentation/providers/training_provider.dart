@@ -10,7 +10,7 @@ final trainingRepositoryProvider = Provider<TrainingRepository>((ref) {
 });
 
 final trainingProvider =
-StateNotifierProvider<TrainingNotifier, TrainingState>((ref) {
+    StateNotifierProvider<TrainingNotifier, TrainingState>((ref) {
   final repository = ref.watch(trainingRepositoryProvider);
   return TrainingNotifier(repository);
 });
@@ -140,6 +140,7 @@ class TrainingNotifier extends StateNotifier<TrainingState> {
       );
     }
   }
+
   Future<void> loadExercises({String? search, String? muscleGroup}) async {
     try {
       final exercises = await _repository.getExercises(
@@ -154,6 +155,7 @@ class TrainingNotifier extends StateNotifier<TrainingState> {
       );
     }
   }
+
   Future<void> updateProgram({
     required String programId,
     required String name,

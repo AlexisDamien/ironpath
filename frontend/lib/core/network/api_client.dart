@@ -46,7 +46,7 @@ class ApiClient {
                 refreshToken: refreshToken,
               );
               error.requestOptions.headers['Authorization'] =
-              'Bearer $newAccessToken';
+                  'Bearer $newAccessToken';
               return handler.resolve(await dio.fetch(error.requestOptions));
             } catch (refreshError) {
               await tokenStorage.clearTokens();

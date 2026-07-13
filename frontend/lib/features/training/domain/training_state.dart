@@ -33,7 +33,8 @@ class TrainingState {
     return TrainingState(
       status: status ?? this.status,
       programs: programs ?? this.programs,
-      activeSession: clearActiveSession ? null : activeSession ?? this.activeSession,
+      activeSession:
+          clearActiveSession ? null : activeSession ?? this.activeSession,
       sessionHistory: sessionHistory ?? this.sessionHistory,
       errorMessage: errorMessage ?? this.errorMessage,
       exercises: exercises ?? this.exercises,
