@@ -15,7 +15,7 @@ class TrainingState {
   const TrainingState({
     this.status = TrainingStatus.idle,
     this.programs = const [],
-    this.activeSession = null,
+    this.activeSession,
     this.sessionHistory = const [],
     this.errorMessage,
     this.exercises = const [],

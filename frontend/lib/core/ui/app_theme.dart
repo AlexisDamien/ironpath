@@ -187,7 +187,7 @@ ThemeData _buildTheme(Brightness brightness) {
     ),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: surface,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(IronRadius.lg),
         ),
