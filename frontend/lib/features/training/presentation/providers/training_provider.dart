@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_client.dart';
 import '../../data/training_repository.dart';
-import '../../domain/models/exercise.dart';
+import '../../domain/models/exercise_config.dart';
 import '../../domain/training_state.dart';
 
 final trainingRepositoryProvider = Provider<TrainingRepository>((ref) {
@@ -39,7 +39,7 @@ class TrainingNotifier extends StateNotifier<TrainingState> {
   Future<void> createProgram({
     required String name,
     String? description,
-    List<Exercise> exercises = const [],
+    List<ExerciseConfig> exercises = const [],
   }) async {
     state = state.copyWith(status: TrainingStatus.loading);
     try {
@@ -160,7 +160,7 @@ class TrainingNotifier extends StateNotifier<TrainingState> {
     required String programId,
     required String name,
     String? description,
-    List<Exercise> exercises = const [],
+    List<ExerciseConfig> exercises = const [],
   }) async {
     state = state.copyWith(status: TrainingStatus.loading);
     try {

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/exercise.dart';
+import '../../domain/models/exercise_config.dart';
 import '../../domain/models/workout_program.dart';
 import '../../domain/training_state.dart';
 import '../providers/training_provider.dart';
 import '../screens/exercise_detail_screen.dart';
+import 'exercise_config_dialog.dart';
 
 class CreateProgramModal extends ConsumerStatefulWidget {
   final WorkoutProgram? program;
@@ -20,7 +22,7 @@ class _CreateProgramModalState extends ConsumerState<CreateProgramModal> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _searchController = TextEditingController();
-  final List<Exercise> _selectedExercises = [];
+  final List<ExerciseConfig> _selectedExercises = [];
   bool _isLoading = false;
 
   @override
@@ -34,15 +36,23 @@ class _CreateProgramModalState extends ConsumerState<CreateProgramModal> {
       await ref.read(trainingProvider.notifier).loadExercises();
       if (widget.program != null && mounted) {
         final exercises = ref.read(trainingProvider).exercises;
-        final programExerciseIds = widget.program!.exercises
-            .map((programExercise) => programExercise.exerciseId)
-            .toSet();
         setState(() {
-          _selectedExercises.addAll(
-            exercises.where(
-              (exercise) => programExerciseIds.contains(exercise.id),
-            ),
-          );
+          for (final programExercise in widget.program!.exercises) {
+            final exercise = exercises.firstWhere(
+              (ex) => ex.id == programExercise.exerciseId,
+              orElse: () => Exercise(
+                id: programExercise.exerciseId,
+                name: programExercise.exerciseId,
+              ),
+            );
+            _selectedExercises.add(ExerciseConfig(
+              exercise: exercise,
+              targetSets: programExercise.targetSets ?? 3,
+              targetReps: programExercise.targetReps ?? 10,
+              targetWeight: programExercise.targetWeight,
+              restSeconds: programExercise.restSeconds ?? 90,
+            ));
+          }
         });
       }
     });
@@ -95,19 +105,27 @@ class _CreateProgramModalState extends ConsumerState<CreateProgramModal> {
     }
   }
 
-  void _toggleExercise(Exercise exercise) {
-    setState(() {
-      if (_selectedExercises.any((selected) => selected.id == exercise.id)) {
-        _selectedExercises
-            .removeWhere((selected) => selected.id == exercise.id);
-      } else {
-        _selectedExercises.add(exercise);
+  void _toggleExercise(Exercise exercise) async {
+    if (_selectedExercises.any((config) => config.exercise.id == exercise.id)) {
+      setState(() {
+        _selectedExercises.removeWhere(
+          (config) => config.exercise.id == exercise.id,
+        );
+      });
+    } else {
+      final config = await showDialog<ExerciseConfig>(
+        context: context,
+        builder: (context) => ExerciseConfigDialog(exercise: exercise),
+      );
+      if (config != null) {
+        setState(() => _selectedExercises.add(config));
       }
-    });
+    }
   }
 
   bool _isSelected(Exercise exercise) {
-    return _selectedExercises.any((selected) => selected.id == exercise.id);
+    return _selectedExercises
+        .any((config) => config.exercise.id == exercise.id);
   }
 
   @override
@@ -210,11 +228,15 @@ class _CreateProgramModalState extends ConsumerState<CreateProgramModal> {
             if (_selectedExercises.isNotEmpty)
               Wrap(
                 spacing: 8,
+                runSpacing: 4,
                 children: _selectedExercises
                     .map(
-                      (exercise) => Chip(
-                        label: Text(exercise.name),
-                        onDeleted: () => _toggleExercise(exercise),
+                      (config) => Chip(
+                        label: Text(
+                          '${config.exercise.name} • ${config.targetSets}x${config.targetReps}',
+                        ),
+                        onDeleted: () =>
+                            setState(() => _selectedExercises.remove(config)),
                         backgroundColor:
                             Theme.of(context).colorScheme.primaryContainer,
                       ),
