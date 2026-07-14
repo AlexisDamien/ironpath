@@ -27,12 +27,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final trainingState = ref.watch(trainingProvider);
-    final bodyMetricsState = ref.watch(bodyMetricsProvider);
 
     final lastSession = trainingState.sessionHistory.isNotEmpty
         ? trainingState.sessionHistory.first
         : null;
-
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
