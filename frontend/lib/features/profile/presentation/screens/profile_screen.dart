@@ -24,6 +24,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ref.read(bodyMetricsProvider.notifier).loadCompositions();
     });
   }
+
   void _showSettingsSheet(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -32,6 +33,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final profileState = ref.watch(profileProvider);
@@ -59,33 +61,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       body: profileState.status == ProfileStatus.loading
           ? const Center(child: CircularProgressIndicator())
           : profileState.status == ProfileStatus.error
-          ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              profileState.errorMessage ?? 'Une erreur est survenue',
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.error),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () =>
-                  ref.read(profileProvider.notifier).loadProfile(),
-              child: const Text('Réessayer'),
-            ),
-          ],
-        ),
-      )
-          : ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildProfileCard(context, profileState.profile),
-          const SizedBox(height: 16),
-          if (lastComposition != null)
-            _buildStatsCard(context, lastComposition),
-        ],
-      ),
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        profileState.errorMessage ?? 'Une erreur est survenue',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.error),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () =>
+                            ref.read(profileProvider.notifier).loadProfile(),
+                        child: const Text('Réessayer'),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _buildProfileCard(context, profileState.profile),
+                    const SizedBox(height: 16),
+                    if (lastComposition != null)
+                      _buildStatsCard(context, lastComposition),
+                  ],
+                ),
     );
   }
 
@@ -101,7 +103,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Center(
                   child: CircleAvatar(
                     radius: 40,
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.primaryContainer,
                     child: Icon(
                       Icons.person,
                       size: 40,
@@ -123,9 +126,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Center(
               child: Text(
                 profile != null
-                    ? '${profile.firstName ?? ''} ${profile.lastName ?? ''}'.trim().isEmpty
-                    ? profile.username ?? 'Utilisateur'
-                    : '${profile.firstName ?? ''} ${profile.lastName ?? ''}'.trim()
+                    ? '${profile.firstName ?? ''} ${profile.lastName ?? ''}'
+                            .trim()
+                            .isEmpty
+                        ? profile.username ?? 'Utilisateur'
+                        : '${profile.firstName ?? ''} ${profile.lastName ?? ''}'
+                            .trim()
                     : 'Utilisateur',
                 style: const TextStyle(
                   fontSize: 22,
@@ -147,11 +153,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               _buildInfoRow(Icons.cake_outlined, 'Date de naissance',
                   profile.birthDate ?? 'Non renseigné'),
               const SizedBox(height: 12),
-              _buildInfoRow(Icons.height, 'Taille',
-                  profile.height != null ? '${profile.height} cm' : 'Non renseigné'),
+              _buildInfoRow(
+                  Icons.height,
+                  'Taille',
+                  profile.height != null
+                      ? '${profile.height} cm'
+                      : 'Non renseigné'),
               const SizedBox(height: 12),
-              _buildInfoRow(Icons.person_outline, 'Genre',
-                  _formatGender(profile.gender)),
+              _buildInfoRow(
+                  Icons.person_outline, 'Genre', _formatGender(profile.gender)),
               const SizedBox(height: 12),
               _buildInfoRow(Icons.flag_outlined, 'Objectif',
                   _formatObjective(profile.objective)),
@@ -389,17 +399,17 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
             onPressed: _isLoading ? null : _submit,
             child: _isLoading
                 ? const SizedBox(
-              height: 16,
-              width: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
+                    height: 16,
+                    width: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
                 : Text(
-              'Sauvegarder',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+                    'Sauvegarder',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
           ),
         ],
       ),
@@ -440,7 +450,8 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
                 labelText: 'Taille (cm)',
                 prefixIcon: Icon(Icons.height),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
             ),
             const SizedBox(height: 16),
             GestureDetector(
@@ -452,16 +463,17 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
                     prefixIcon: const Icon(Icons.cake_outlined),
                     hintText: _selectedBirthDate ?? 'Sélectionner une date',
                   ),
-                  controller: TextEditingController(
-                      text: _selectedBirthDate ?? ''),
+                  controller:
+                      TextEditingController(text: _selectedBirthDate ?? ''),
                 ),
               ),
             ),
             const SizedBox(height: 16),
             DropdownMenu<String>(
-              initialSelection: ['MALE', 'FEMALE', 'OTHER'].contains(_selectedGender)
-                  ? _selectedGender
-                  : null,
+              initialSelection:
+                  ['MALE', 'FEMALE', 'OTHER'].contains(_selectedGender)
+                      ? _selectedGender
+                      : null,
               label: const Text('Genre'),
               leadingIcon: const Icon(Icons.person_outline),
               expandedInsets: EdgeInsets.zero,
@@ -474,8 +486,13 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
             ),
             const SizedBox(height: 16),
             DropdownMenu<String>(
-              initialSelection: ['MUSCLE_GAIN', 'WEIGHT_LOSS', 'MAINTENANCE', 'ENDURANCE', 'STRENGTH']
-                  .contains(_selectedObjective)
+              initialSelection: [
+                'MUSCLE_GAIN',
+                'WEIGHT_LOSS',
+                'MAINTENANCE',
+                'ENDURANCE',
+                'STRENGTH'
+              ].contains(_selectedObjective)
                   ? _selectedObjective
                   : null,
               label: const Text('Objectif'),
@@ -483,8 +500,10 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
               expandedInsets: EdgeInsets.zero,
               onSelected: (value) => setState(() => _selectedObjective = value),
               dropdownMenuEntries: const [
-                DropdownMenuEntry(value: 'MUSCLE_GAIN', label: 'Prise de masse'),
-                DropdownMenuEntry(value: 'WEIGHT_LOSS', label: 'Perte de poids'),
+                DropdownMenuEntry(
+                    value: 'MUSCLE_GAIN', label: 'Prise de masse'),
+                DropdownMenuEntry(
+                    value: 'WEIGHT_LOSS', label: 'Perte de poids'),
                 DropdownMenuEntry(value: 'MAINTENANCE', label: 'Maintien'),
                 DropdownMenuEntry(value: 'ENDURANCE', label: 'Endurance'),
                 DropdownMenuEntry(value: 'STRENGTH', label: 'Force'),
@@ -497,6 +516,7 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
     );
   }
 }
+
 class _SettingsScreen extends ConsumerWidget {
   const _SettingsScreen();
 
@@ -544,8 +564,8 @@ class _SettingsScreen extends ConsumerWidget {
                   ),
                   title: Text(
                     'Supprimer le compte',
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.error),
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.error),
                   ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () => _showDeleteAccountDialog(context, ref),
@@ -717,8 +737,7 @@ class _SettingsScreen extends ConsumerWidget {
               ),
               title: Text(
                 'Se déconnecter',
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.error),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
               onTap: () async {
                 await ref.read(identityProvider.notifier).logout();
@@ -771,44 +790,42 @@ class _SettingsScreen extends ConsumerWidget {
               onPressed: isLoading
                   ? null
                   : () async {
-                setState(() => isLoading = true);
-                try {
-                  await ref
-                      .read(identityProvider.notifier)
-                      .changePassword(
-                    currentPassword:
-                    currentPasswordController.text,
-                    newPassword: newPasswordController.text,
-                  );
-                  if (context.mounted) {
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                            'Mot de passe modifié avec succès'),
-                      ),
-                    );
-                  }
-                } catch (exception) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(exception.toString()),
-                        backgroundColor:
-                        Theme.of(context).colorScheme.error,
-                      ),
-                    );
-                  }
-                } finally {
-                  setState(() => isLoading = false);
-                }
-              },
+                      setState(() => isLoading = true);
+                      try {
+                        await ref
+                            .read(identityProvider.notifier)
+                            .changePassword(
+                              currentPassword: currentPasswordController.text,
+                              newPassword: newPasswordController.text,
+                            );
+                        if (context.mounted) {
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Mot de passe modifié avec succès'),
+                            ),
+                          );
+                        }
+                      } catch (exception) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(exception.toString()),
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.error,
+                            ),
+                          );
+                        }
+                      } finally {
+                        setState(() => isLoading = false);
+                      }
+                    },
               child: isLoading
                   ? const SizedBox(
-                height: 16,
-                width: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : const Text('Confirmer'),
             ),
           ],
@@ -865,39 +882,37 @@ class _SettingsScreen extends ConsumerWidget {
               onPressed: isLoading || !confirmed
                   ? null
                   : () async {
-                setState(() => isLoading = true);
-                try {
-                  await ref
-                      .read(identityProvider.notifier)
-                      .deleteAccount(
-                    password: passwordController.text,
-                  );
-                  if (context.mounted) {
-                    context.go('/login');
-                  }
-                } catch (exception) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(exception.toString()),
-                        backgroundColor:
-                        Theme.of(context).colorScheme.error,
-                      ),
-                    );
-                  }
-                } finally {
-                  setState(() => isLoading = false);
-                }
-              },
+                      setState(() => isLoading = true);
+                      try {
+                        await ref.read(identityProvider.notifier).deleteAccount(
+                              password: passwordController.text,
+                            );
+                        if (context.mounted) {
+                          context.go('/login');
+                        }
+                      } catch (exception) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(exception.toString()),
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.error,
+                            ),
+                          );
+                        }
+                      } finally {
+                        setState(() => isLoading = false);
+                      }
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
               child: isLoading
                   ? const SizedBox(
-                height: 16,
-                width: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : const Text('Supprimer'),
             ),
           ],

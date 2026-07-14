@@ -14,7 +14,7 @@ final identityRepositoryProvider = Provider<IdentityRepository>((ref) {
 });
 
 final identityProvider =
-StateNotifierProvider<IdentityNotifier, IdentityState>((ref) {
+    StateNotifierProvider<IdentityNotifier, IdentityState>((ref) {
   final repository = ref.watch(identityRepositoryProvider);
   return IdentityNotifier(repository);
 });

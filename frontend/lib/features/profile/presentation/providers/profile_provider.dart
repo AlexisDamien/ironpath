@@ -10,7 +10,7 @@ final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
 });
 
 final profileProvider =
-StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
+    StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
   final repository = ref.watch(profileRepositoryProvider);
   return ProfileNotifier(repository);
 });
