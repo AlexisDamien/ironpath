@@ -4,6 +4,33 @@ import 'package:go_router/go_router.dart';
 import '../../../identity/presentation/providers/provider_identity.dart';
 import '../widgets/popup_change_password.dart';
 import '../widgets/popup_delete_account.dart';
+import '../../../../core/templates/legal_texts.dart';
+
+void _showLegalScreen(BuildContext context, String title, String content) {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      fullscreenDialog: true,
+      builder: (context) => Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          title: Text(title),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            content,
+            style: const TextStyle(fontSize: 14, height: 1.8),
+          ),
+        ),
+      ),
+    ),
+  );
+}
 
 class ScreenSettings extends ConsumerWidget {
   const ScreenSettings({super.key});
@@ -195,14 +222,22 @@ class ScreenSettings extends ConsumerWidget {
                   leading: const Icon(Icons.privacy_tip_outlined),
                   title: const Text('Politique de confidentialité'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {},
+                  onTap: () => _showLegalScreen(
+                    context,
+                    'Politique de confidentialité',
+                    LegalTexts.rgpd,
+                  ),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.description_outlined),
                   title: const Text('Conditions d\'utilisation'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {},
+                  onTap: () => _showLegalScreen(
+                    context,
+                    'Conditions d\'utilisation',
+                    LegalTexts.cgu,
+                  ),
                 ),
               ],
             ),
