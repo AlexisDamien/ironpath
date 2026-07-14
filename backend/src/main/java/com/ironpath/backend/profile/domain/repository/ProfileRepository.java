@@ -12,5 +12,5 @@ public interface ProfileRepository extends JpaRepository<Profile, UUID> {
 
     Optional<Profile> findByUserId(UUID userId);
 
-    boolean existsByUsername(String username);
+    boolean existsByUsernameAndUserIdNot(String username, UUID userId);
 }

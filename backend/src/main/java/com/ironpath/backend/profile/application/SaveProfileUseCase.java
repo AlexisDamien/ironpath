@@ -24,11 +24,6 @@ public class SaveProfileUseCase  {
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new UnauthorizedException("Utilisateur introuvable"));
 
-        if (request.username() != null &&
-                profileRepository.existsByUsername(request.username())) {
-            throw new IllegalArgumentException("Ce pseudonyme est déjà utilisé");
-        }
-
         Profile profile = profileRepository.findByUserId(userId)
                 .orElse(Profile.builder().user(user).build());
 
@@ -51,11 +46,14 @@ public class SaveProfileUseCase  {
             profile.setObjective(request.objective());
         }
         if (request.username() != null) {
+            if (profileRepository.existsByUsernameAndUserIdNot(request.username(), userId)) {
+                throw new IllegalArgumentException("Ce pseudonyme est déjà utilisé");
+            }
             profile.setUsername(request.username());
         }
 
         Profile savedProfile = profileRepository.save(profile);
-
+        System.out.println("=== USERNAME SAVED === " + savedProfile.getUsername());
         return toResponse(savedProfile);
     }
 

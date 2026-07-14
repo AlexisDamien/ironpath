@@ -42,4 +42,20 @@ class IdentityRepository {
     await _dio.post('/users/logout');
     await _tokenStorage.clearTokens();
   }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await _dio.put('/users/password', data: {
+      'currentPassword': currentPassword,
+      'newPassword': newPassword,
+    });
+  }
+
+  Future<void> deleteAccount({required String password}) async {
+    await _dio.delete('/users/account', data: {
+      'currentPassword': password,
+    });
+  }
 }

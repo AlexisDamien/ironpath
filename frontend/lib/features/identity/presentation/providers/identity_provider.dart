@@ -14,7 +14,7 @@ final identityRepositoryProvider = Provider<IdentityRepository>((ref) {
 });
 
 final identityProvider =
-    StateNotifierProvider<IdentityNotifier, IdentityState>((ref) {
+StateNotifierProvider<IdentityNotifier, IdentityState>((ref) {
   final repository = ref.watch(identityRepositoryProvider);
   return IdentityNotifier(repository);
 });
@@ -61,6 +61,37 @@ class IdentityNotifier extends StateNotifier<IdentityState> {
       state = state.copyWith(status: AuthStatus.unauthenticated);
     } catch (error) {
       state = state.copyWith(status: AuthStatus.unauthenticated);
+    }
+  }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await _repository.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+    } catch (error) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: _extractErrorMessage(error),
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> deleteAccount({required String password}) async {
+    try {
+      await _repository.deleteAccount(password: password);
+      state = state.copyWith(status: AuthStatus.unauthenticated);
+    } catch (error) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: _extractErrorMessage(error),
+      );
+      rethrow;
     }
   }
 
