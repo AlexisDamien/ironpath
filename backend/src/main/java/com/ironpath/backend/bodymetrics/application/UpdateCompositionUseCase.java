@@ -42,16 +42,16 @@ public class UpdateCompositionUseCase {
                 .map(BodyMeasurement::getWeight)
                 .orElse(null);
 
-        if (request.bodyFat() != null) composition.setBodyFat(request.bodyFat());
-        if (request.skeletalMuscle() != null) composition.setSkeletalMuscle(request.skeletalMuscle());
-        if (request.fatFreeMass() != null) composition.setFatFreeMass(request.fatFreeMass());
-        if (request.subcutaneousFat() != null) composition.setSubcutaneousFat(request.subcutaneousFat());
-        if (request.visceralFat() != null) composition.setVisceralFat(request.visceralFat());
-        if (request.bodyWater() != null) composition.setBodyWater(request.bodyWater());
-        if (request.muscleMass() != null) composition.setMuscleMass(request.muscleMass());
-        if (request.boneMass() != null) composition.setBoneMass(request.boneMass());
-        if (request.protein() != null) composition.setProtein(request.protein());
-        if (request.notes() != null) composition.setNotes(request.notes());
+        if (request.bodyFat() != null) { composition.setBodyFat(request.bodyFat()); }
+        if (request.skeletalMuscle() != null) { composition.setSkeletalMuscle(request.skeletalMuscle()); }
+        if (request.fatFreeMass() != null) { composition.setFatFreeMass(request.fatFreeMass()); }
+        if (request.subcutaneousFat() != null) { composition.setSubcutaneousFat(request.subcutaneousFat()); }
+        if (request.visceralFat() != null) { composition.setVisceralFat(request.visceralFat()); }
+        if (request.bodyWater() != null) { composition.setBodyWater(request.bodyWater()); }
+        if (request.muscleMass() != null) { composition.setMuscleMass(request.muscleMass()); }
+        if (request.boneMass() != null) { composition.setBoneMass(request.boneMass()); }
+        if (request.protein() != null) { composition.setProtein(request.protein()); }
+        if (request.notes() != null) { composition.setNotes(request.notes()); }
 
         Integer bmr = request.bmr();
         if (bmr == null && profile != null && weight != null
@@ -59,7 +59,7 @@ public class UpdateCompositionUseCase {
                 && profile.getGender() != null) {
             int age = Period.between(profile.getBirthDate(), LocalDate.now()).getYears();
             bmr = (int) Math.round(FormatUtils.calculateBmr(weight, profile.getHeight(), age, profile.getGender()));        }
-        if (bmr != null) composition.setBmr(bmr);
+        if (bmr != null) { composition.setBmr(bmr); }
 
         if (profile != null && weight != null && profile.getHeight() != null) {
             composition.setBmi(FormatUtils.calculateBmi(weight, profile.getHeight()));

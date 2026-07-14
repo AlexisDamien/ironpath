@@ -24,17 +24,17 @@ public class UpdateMeasurementUseCase {
             throw new UnauthorizedException("Cette mesure ne vous appartient pas");
         }
 
-        if (request.weight() != null) measurement.setWeight(request.weight());
-        if (request.chest() != null) measurement.setChest(request.chest());
-        if (request.waist() != null) measurement.setWaist(request.waist());
-        if (request.hips() != null) measurement.setHips(request.hips());
-        if (request.leftArm() != null) measurement.setLeftArm(request.leftArm());
-        if (request.rightArm() != null) measurement.setRightArm(request.rightArm());
-        if (request.leftThigh() != null) measurement.setLeftThigh(request.leftThigh());
-        if (request.rightThigh() != null) measurement.setRightThigh(request.rightThigh());
-        if (request.leftCalf() != null) measurement.setLeftCalf(request.leftCalf());
-        if (request.rightCalf() != null) measurement.setRightCalf(request.rightCalf());
-        if (request.notes() != null) measurement.setNotes(request.notes());
+        if (request.weight() != null) { measurement.setWeight(request.weight()); }
+        if (request.chest() != null) { measurement.setChest(request.chest()); }
+        if (request.waist() != null) { measurement.setWaist(request.waist()); }
+        if (request.hips() != null) { measurement.setHips(request.hips()); }
+        if (request.leftArm() != null) { measurement.setLeftArm(request.leftArm()); }
+        if (request.rightArm() != null) { measurement.setRightArm(request.rightArm()); }
+        if (request.leftThigh() != null) { measurement.setLeftThigh(request.leftThigh()); }
+        if (request.rightThigh() != null) { measurement.setRightThigh(request.rightThigh()); }
+        if (request.leftCalf() != null) { measurement.setLeftCalf(request.leftCalf()); }
+        if (request.rightCalf() != null) { measurement.setRightCalf(request.rightCalf()); }
+        if (request.notes() != null) { measurement.setNotes(request.notes()); }
 
         BodyMeasurement saved = measurementRepository.save(measurement);
         return SaveMeasurementUseCase.toResponse(saved);
