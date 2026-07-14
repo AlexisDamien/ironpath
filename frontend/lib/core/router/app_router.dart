@@ -1,23 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
-import '../../features/identity/domain/identity_state.dart';
-import '../../features/identity/presentation/providers/identity_provider.dart';
-import '../../features/identity/presentation/screens/login_screen.dart';
-import '../../features/identity/presentation/screens/register_screen.dart';
-import '../../features/training/presentation/screens/programs_screen.dart';
-import '../../features/training/presentation/screens/active_session_screen.dart';
-import '../../features/bodymetrics/presentation/screens/bodymetrics_screen.dart';
-import '../../features/profile/presentation/screens/profile_screen.dart';
-import '../ui/nav_bar.dart';
+import '../../features/dashboard/presentation/screens/screen_dashboard.dart';
+import '../../features/identity/domain/state_identity.dart';
+import '../../features/identity/presentation/providers/provider_identity.dart';
+import '../../features/identity/presentation/screens/screen_login.dart';
+import '../../features/identity/presentation/screens/screen_register.dart';
+import '../../features/training/presentation/screens/screen_programs.dart';
+import '../../features/training/presentation/screens/screen_active_session.dart';
+import '../../features/bodymetrics/presentation/screens/screen_bodymetrics.dart';
+import '../../features/profile/presentation/screens/screen_profile.dart';
+import '../ui/app_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final identityState = ref.watch(identityProvider);
+  final stateIdentity = ref.watch(providerIdentity);
 
   return GoRouter(
     initialLocation: '/dashboard',
     redirect: (context, routerState) {
-      final isAuthenticated = identityState.status == AuthStatus.authenticated;
+      final isAuthenticated = stateIdentity.status == StatusAuth.authenticated;
       final isAuthRoute = routerState.matchedLocation == '/login' ||
           routerState.matchedLocation == '/register';
 
@@ -28,34 +28,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/login',
-        builder: (context, routerState) => const LoginScreen(),
+        builder: (context, routerState) => const ScreenLogin(),
       ),
       GoRoute(
         path: '/register',
-        builder: (context, routerState) => const RegisterScreen(),
+        builder: (context, routerState) => const ScreenRegister(),
       ),
       GoRoute(
         path: '/session',
-        builder: (context, routerState) => const ActiveSessionScreen(),
+        builder: (context, routerState) => const ScreenActiveSession(),
       ),
       ShellRoute(
         builder: (context, routerState, child) => AppShell(child: child),
         routes: [
           GoRoute(
             path: '/dashboard',
-            builder: (context, routerState) => const DashboardScreen(),
+            builder: (context, routerState) => const ScreenDashboard(),
           ),
           GoRoute(
             path: '/programs',
-            builder: (context, routerState) => const ProgramsScreen(),
+            builder: (context, routerState) => const ScreenPrograms(),
           ),
           GoRoute(
             path: '/bodymetrics',
-            builder: (context, routerState) => const BodyMetricsScreen(),
+            builder: (context, routerState) => const ScreenBodyMetrics(),
           ),
           GoRoute(
             path: '/profile',
-            builder: (context, routerState) => const ProfileScreen(),
+            builder: (context, routerState) => const ScreenProfile(),
           ),
         ],
       ),
