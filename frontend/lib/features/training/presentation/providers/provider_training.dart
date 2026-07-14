@@ -36,6 +36,17 @@ class ProviderTrainingNotifier extends StateNotifier<StateTraining> {
     }
   }
 
+  Future<void> loadActiveSession() async {
+    try {
+      final session = await _repository.getActiveSession();
+      if (session != null) {
+        state = state.copyWith(activeSession: session);
+      }
+    } catch (exception) {
+      // Pas de session active
+    }
+  }
+
   Future<void> createProgram({
     required String name,
     String? description,

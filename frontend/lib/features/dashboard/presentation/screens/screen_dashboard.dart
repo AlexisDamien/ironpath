@@ -21,6 +21,7 @@ class _ScreenDashboardState extends ConsumerState<ScreenDashboard> {
     Future.microtask(() async {
       ref.read(providerTraining.notifier).loadPrograms();
       ref.read(providerTraining.notifier).loadSessionHistory();
+      ref.read(providerTraining.notifier).loadActiveSession();
       ref.read(providerBodyMetrics.notifier).loadMeasurements();
       ref.read(providerBodyMetrics.notifier).loadCompositions();
     });

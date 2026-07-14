@@ -11,12 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -50,7 +46,7 @@ public class SessionController {
         return ResponseEntity.ok(addSetUseCase.execute(userId, sessionId, request));
     }
 
-    @PostMapping("/{sessionId}/end")
+    @PutMapping("/{sessionId}/end")
     public ResponseEntity<SessionResponse> endSession(
             @PathVariable UUID sessionId,
             Authentication authentication) {
@@ -70,5 +66,13 @@ public class SessionController {
             Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
         return ResponseEntity.ok(getExerciseStatsUseCase.execute(userId, exerciseId));
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<SessionResponse> getActiveSession(Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return getSessionsUseCase.getActiveSession(userId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
     }
 }

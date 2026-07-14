@@ -83,6 +83,16 @@ class RepositoryTraining {
     return TrainingSession.fromJson(response.data);
   }
 
+  Future<TrainingSession?> getActiveSession() async {
+    try {
+      final response = await _apiClient.get('/training/sessions/active');
+      if (response.statusCode == 204) return null;
+      return TrainingSession.fromJson(response.data);
+    } catch (exception) {
+      return null;
+    }
+  }
+
   Future<TrainingSession> addSet({
     required String sessionId,
     required String exerciseId,

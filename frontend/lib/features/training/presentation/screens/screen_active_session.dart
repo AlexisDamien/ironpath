@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/provider_training.dart';
 import '../../domain/models/training_session.dart';
+import '../../domain/models/workout_program.dart';
 import '../widgets/sheet_add_set.dart';
 
 class ScreenActiveSession extends ConsumerWidget {
@@ -44,6 +45,12 @@ class ScreenActiveSession extends ConsumerWidget {
       );
     }
 
+    final linkedProgram = activeSession.programId != null
+        ? trainingState.programs
+            .where((program) => program.id == activeSession.programId)
+            .firstOrNull
+        : null;
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
@@ -62,6 +69,8 @@ class ScreenActiveSession extends ConsumerWidget {
       ),
       body: Column(
         children: [
+          if (linkedProgram != null)
+            _buildProgramOverview(context, linkedProgram),
           Expanded(
             child: activeSession.sets.isEmpty
                 ? Center(
@@ -107,7 +116,7 @@ class ScreenActiveSession extends ConsumerWidget {
                           ),
                           title: Text(exerciseSet.exerciseId),
                           subtitle: Text(
-                            '${exerciseSet.reps ?? '-'} reps • ${exerciseSet.weightKg ?? '-'} kg',
+                            '${exerciseSet.reps ?? '-'} reps • ${exerciseSet.weightKg ?? '-'} kg • ${exerciseSet.restSeconds ?? '-'}s repos',
                           ),
                           trailing: exerciseSet.isWarmup
                               ? Chip(
@@ -123,6 +132,45 @@ class ScreenActiveSession extends ConsumerWidget {
                   ),
           ),
           SheetAddSet(activeSession: activeSession),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgramOverview(BuildContext context, WorkoutProgram program) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            program.name,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: program.exercises.map((exercise) {
+              return Chip(
+                label: Text(
+                  '${exercise.exerciseId} • ${exercise.targetSets}x${exercise.targetReps}',
+                  style: const TextStyle(fontSize: 12),
+                ),
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                padding: EdgeInsets.zero,
+              );
+            }).toList(),
+          ),
         ],
       ),
     );

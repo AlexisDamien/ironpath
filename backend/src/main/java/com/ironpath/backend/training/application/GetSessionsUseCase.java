@@ -5,7 +5,9 @@ import com.ironpath.backend.training.domain.repository.TrainingSessionRepository
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -21,5 +23,12 @@ public class GetSessionsUseCase {
                 .stream()
                 .map(sessionMapper::toResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<SessionResponse> getActiveSession(UUID userId) {
+        return sessionRepository
+                .findByUserIdAndStatus(userId, "IN_PROGRESS")
+                .map(sessionMapper::toResponse);
     }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../domain/models/exercise.dart';
 import '../../domain/models/training_session.dart';
 import '../providers/provider_training.dart';
+import 'popup_select_exercise.dart';
 
 class SheetAddSet extends ConsumerStatefulWidget {
   final TrainingSession activeSession;
@@ -13,7 +15,7 @@ class SheetAddSet extends ConsumerStatefulWidget {
 }
 
 class _SheetAddSetState extends ConsumerState<SheetAddSet> {
-  final _exerciseIdController = TextEditingController();
+  Exercise? _selectedExercise;
   final _repsController = TextEditingController();
   final _weightController = TextEditingController();
   final _restController = TextEditingController();
@@ -21,25 +23,35 @@ class _SheetAddSetState extends ConsumerState<SheetAddSet> {
 
   @override
   void dispose() {
-    _exerciseIdController.dispose();
     _repsController.dispose();
     _weightController.dispose();
     _restController.dispose();
     super.dispose();
   }
 
+  Future<void> _pickExercise() async {
+    final exercise = await Navigator.of(context).push<Exercise>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) => const PopupSelectExercise(),
+      ),
+    );
+    if (exercise != null) {
+      setState(() => _selectedExercise = exercise);
+    }
+  }
+
   Future<void> _addSet() async {
-    if (_exerciseIdController.text.trim().isEmpty) {
+    if (_selectedExercise == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('L\'identifiant de l\'exercice est requis')),
+        const SnackBar(content: Text('Sélectionne un exercice')),
       );
       return;
     }
 
     await ref.read(providerTraining.notifier).addSet(
           sessionId: widget.activeSession.id,
-          exerciseId: _exerciseIdController.text.trim(),
+          exerciseId: _selectedExercise!.id,
           setOrder: widget.activeSession.sets.length + 1,
           reps: _repsController.text.isEmpty
               ? null
@@ -53,7 +65,7 @@ class _SheetAddSetState extends ConsumerState<SheetAddSet> {
           isWarmup: _isWarmup,
         );
 
-    _exerciseIdController.clear();
+    setState(() => _selectedExercise = null);
     _repsController.clear();
     _weightController.clear();
     _restController.clear();
@@ -81,12 +93,33 @@ class _SheetAddSetState extends ConsumerState<SheetAddSet> {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _exerciseIdController,
-            decoration: const InputDecoration(
-              labelText: 'Exercice',
-              hintText: 'ID ou nom de l\'exercice',
-              prefixIcon: Icon(Icons.fitness_center),
+          GestureDetector(
+            onTap: _pickExercise,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              decoration: BoxDecoration(
+                border:
+                    Border.all(color: Theme.of(context).colorScheme.outline),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.fitness_center, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _selectedExercise?.name ?? 'Choisir un exercice',
+                      style: TextStyle(
+                        color: _selectedExercise != null
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Colors.grey,
+                      ),
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios, size: 16),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 8),

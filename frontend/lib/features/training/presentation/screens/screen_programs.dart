@@ -4,6 +4,7 @@ import '../providers/provider_training.dart';
 import '../widgets/card_program.dart';
 import '../widgets/popup_create_program.dart';
 import '../../domain/state_training.dart';
+import '../widgets/sheet_start_session.dart';
 
 class ScreenPrograms extends ConsumerStatefulWidget {
   const ScreenPrograms({super.key});
@@ -107,11 +108,12 @@ class _ProgramsScreenState extends ConsumerState<ScreenPrograms> {
           final program = trainingState.programs[index];
           return CardProgram(
             program: program,
-            onStartSession: () =>
-                ref.read(providerTraining.notifier).startSession(
-                      programId: program.id,
-                      name: program.name,
-                    ),
+            onStartSession: () => showModalBottomSheet(
+              context: context,
+              backgroundColor: Colors.transparent,
+              useRootNavigator: true,
+              builder: (context) => const SheetStartSession(),
+            ),
             onEdit: () => Navigator.of(context).push(
               MaterialPageRoute(
                 fullscreenDialog: true,

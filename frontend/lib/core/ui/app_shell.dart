@@ -25,22 +25,15 @@ class AppShell extends ConsumerWidget {
     };
 
     return Scaffold(
-      body: Stack(
-        children: [
-          child,
-          if (hasActiveSession)
-            Positioned(
-              bottom: 80,
-              right: 16,
-              child: FloatingActionButton.extended(
-                onPressed: () => context.push('/session'),
-                icon: const Icon(Icons.fitness_center),
-                label: const Text('Session active'),
-                backgroundColor: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-        ],
-      ),
+      body: child,
+      floatingActionButton: hasActiveSession
+          ? FloatingActionButton.extended(
+              onPressed: () => context.push('/session'),
+              icon: const Icon(Icons.fitness_center),
+              label: const Text('Session active'),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            )
+          : null,
       bottomNavigationBar: NavBar(
         currentIndex: currentIndex,
         onTap: (index) {
@@ -65,6 +58,7 @@ class AppShell extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      useRootNavigator: true,
       builder: (context) => const SheetStartSession(),
     );
   }

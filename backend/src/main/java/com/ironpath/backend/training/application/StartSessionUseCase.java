@@ -25,7 +25,11 @@ public class StartSessionUseCase {
     public SessionResponse execute(UUID userId, StartSessionRequest request) {
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new UnauthorizedException("Utilisateur introuvable"));
-
+        boolean hasActiveSession = sessionRepository
+                .existsByUserIdAndStatus(userId, "IN_PROGRESS");
+        if (hasActiveSession) {
+            throw new IllegalArgumentException("Une session est déjà en cours");
+        }
         TrainingSession.TrainingSessionBuilder sessionBuilder = TrainingSession.builder()
                 .user(user)
                 .name(request.name());
