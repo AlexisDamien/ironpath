@@ -16,5 +16,6 @@ public record MeasurementResponse(
         Double leftCalf,
         Double rightCalf,
         String notes,
-        LocalDateTime recordedAt
+        LocalDateTime recordedAt,
+        Boolean archived
 ) {}

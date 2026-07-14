@@ -8,8 +8,10 @@ import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.identity.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -19,9 +21,17 @@ public class SaveMeasurementUseCase {
     private final BodyMeasurementRepository measurementRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public MeasurementResponse execute(UUID userId, SaveMeasurementRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
+
+        List<BodyMeasurement> existing = measurementRepository
+                .findByUserIdOrderByRecordedAtDesc(userId);
+        for (BodyMeasurement old : existing) {
+            old.setArchived(true);
+        }
+        measurementRepository.saveAll(existing);
 
         BodyMeasurement measurement = BodyMeasurement.builder()
                 .user(user)
@@ -36,6 +46,7 @@ public class SaveMeasurementUseCase {
                 .leftCalf(request.leftCalf())
                 .rightCalf(request.rightCalf())
                 .notes(request.notes())
+                .archived(false)
                 .recordedAt(request.recordedAt() != null ? request.recordedAt() : LocalDateTime.now())
                 .build();
 
@@ -57,7 +68,8 @@ public class SaveMeasurementUseCase {
                 measurement.getLeftCalf(),
                 measurement.getRightCalf(),
                 measurement.getNotes(),
-                measurement.getRecordedAt()
+                measurement.getRecordedAt(),
+                measurement.getArchived()
         );
     }
 }

@@ -18,5 +18,7 @@ public record CompositionResponse(
         Double bmi,
         Integer metabolicAge,
         String notes,
-        LocalDateTime recordedAt
+        LocalDateTime recordedAt,
+        String source,
+        Boolean archived
 ) {}

@@ -51,6 +51,9 @@ public class BodyMeasurement {
     @Column(name = "recorded_at", nullable = false)
     private LocalDateTime recordedAt;
 
+    @Column(name = "archived")
+    private Boolean archived = false;
+
     @PrePersist
     protected void onCreate() {
         if (recordedAt == null) {

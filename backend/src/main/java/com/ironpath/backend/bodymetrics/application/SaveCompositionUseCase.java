@@ -13,10 +13,12 @@ import com.ironpath.backend.profile.domain.repository.ProfileRepository;
 import com.ironpath.backend.shared.utils.FormatUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -28,9 +30,17 @@ public class SaveCompositionUseCase {
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
 
+    @Transactional
     public CompositionResponse execute(UUID userId, SaveCompositionRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
+
+        List<BodyComposition> existing = compositionRepository
+                .findByUserIdOrderByRecordedAtDesc(userId);
+        for (BodyComposition old : existing) {
+            old.setArchived(true);
+        }
+        compositionRepository.saveAll(existing);
 
         Profile profile = profileRepository.findByUserId(userId).orElse(null);
 
@@ -77,6 +87,8 @@ public class SaveCompositionUseCase {
                 .metabolicAge(metabolicAge)
                 .notes(request.notes())
                 .recordedAt(request.recordedAt() != null ? request.recordedAt() : LocalDateTime.now())
+                .archived(false)
+                .source(request.source() != null ? request.source() : "MANUAL")
                 .build();
 
         BodyComposition saved = compositionRepository.save(composition);
@@ -99,7 +111,9 @@ public class SaveCompositionUseCase {
                 composition.getBmi(),
                 composition.getMetabolicAge(),
                 composition.getNotes(),
-                composition.getRecordedAt()
+                composition.getRecordedAt(),
+                composition.getSource(),
+                composition.getArchived()
         );
     }
 }

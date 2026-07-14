@@ -59,6 +59,12 @@ public class BodyComposition {
     @Column(name = "recorded_at", nullable = false)
     private LocalDateTime recordedAt;
 
+    @Column(name = "source")
+    private String source = "MANUAL";
+
+    @Column(name = "archived")
+    private Boolean archived = false;
+
     @PrePersist
     protected void onCreate() {
         if (recordedAt == null) {

@@ -14,5 +14,6 @@ public record SaveCompositionRequest(
         Double protein,
         Integer bmr,
         String notes,
-        LocalDateTime recordedAt
+        LocalDateTime recordedAt,
+        String source
 ) {}
