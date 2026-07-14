@@ -65,7 +65,7 @@ class SaveCompositionUseCaseTest {
         SaveCompositionRequest request = new SaveCompositionRequest(
                 18.5, 44.2, 63.9, 14.2, 7,
                 58.3, 61.0, 3.2, 17.8, null,
-                "Test", null
+                "Test", null, "MANUAL"
         );
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
@@ -98,7 +98,7 @@ class SaveCompositionUseCaseTest {
         SaveCompositionRequest request = new SaveCompositionRequest(
                 18.5, 44.2, 63.9, 14.2, 7,
                 58.3, 61.0, 3.2, 17.8, null,
-                "Test", null
+                "Test", null, "MANUAL"
         );
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
@@ -120,7 +120,7 @@ class SaveCompositionUseCaseTest {
         SaveCompositionRequest request = new SaveCompositionRequest(
                 null, null, null, null, null,
                 null, null, null, null, null,
-                null, null
+                null, null, null
         );
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
