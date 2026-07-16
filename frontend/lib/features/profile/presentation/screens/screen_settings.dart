@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ironpath/features/profile/presentation/screens/screen_change_password.dart';
 import '../../../identity/presentation/providers/provider_identity.dart';
-import '../widgets/popup_change_password.dart';
 import '../widgets/popup_delete_account.dart';
 import '../../../../core/templates/legal_texts.dart';
 
@@ -69,7 +69,12 @@ class ScreenSettings extends ConsumerWidget {
                   leading: const Icon(Icons.lock_outlined),
                   title: const Text('Modifier le mot de passe'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () => showChangePasswordDialog(context, ref),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      fullscreenDialog: true,
+                      builder: (context) => const ScreenChangePassword(),
+                    ),
+                  ),
                 ),
                 const Divider(height: 1),
                 ListTile(

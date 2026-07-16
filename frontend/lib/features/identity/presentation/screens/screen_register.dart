@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/widgets/form_password.dart';
 import '../providers/provider_identity.dart';
 import '../../domain/state_identity.dart';
 import '../../../../core/templates/legal_texts.dart';
@@ -16,6 +17,7 @@ class ScreenRegister extends ConsumerStatefulWidget {
 class _ScreenRegisterState extends ConsumerState<ScreenRegister> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _acceptCGU = false;
   bool _acceptRGPD = false;
@@ -24,6 +26,7 @@ class _ScreenRegisterState extends ConsumerState<ScreenRegister> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -105,24 +108,11 @@ class _ScreenRegisterState extends ConsumerState<ScreenRegister> {
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
+              FormPassword(
                 controller: _passwordController,
-                decoration: const InputDecoration(
-                  labelText: 'Mot de passe',
-                  prefixIcon: Icon(Icons.lock_outlined),
-                ),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Mot de passe obligatoire';
-                  }
-                  if (value.length < 8) {
-                    return 'Minimum 8 caractères';
-                  }
-                  return null;
-                },
+                confirmController: _confirmPasswordController,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
               CheckboxListTile(
                 value: _acceptCGU,
                 onChanged: (value) =>
