@@ -108,10 +108,10 @@ class _ScreenRegisterState extends ConsumerState<ScreenRegister> {
                 },
               ),
               const SizedBox(height: 16),
-            FormPassword(
-              controller: _passwordController,
-              confirmController: _confirmPasswordController,
-            ),
+              FormPassword(
+                controller: _passwordController,
+                confirmController: _confirmPasswordController,
+              ),
               const SizedBox(height: 8),
               CheckboxListTile(
                 value: _acceptCGU,

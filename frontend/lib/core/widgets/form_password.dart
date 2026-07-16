@@ -29,8 +29,7 @@ class _FormPasswordState extends State<FormPassword> {
   bool get _hasUppercase => _password.contains(RegExp(r'[A-Z]'));
   bool get _hasLowercase => _password.contains(RegExp(r'[a-z]'));
   bool get _hasDigit => _password.contains(RegExp(r'[0-9]'));
-  bool get _hasSpecial =>
-      _password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+  bool get _hasSpecial => _password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
 
   int get _strength {
     int score = 0;
@@ -75,8 +74,9 @@ class _FormPasswordState extends State<FormPassword> {
             labelText: widget.label,
             prefixIcon: const Icon(Icons.lock_outlined),
             suffixIcon: IconButton(
-              icon: Icon(
-                  _obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+              icon: Icon(_obscure
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined),
               onPressed: () => setState(() => _obscure = !_obscure),
             ),
           ),

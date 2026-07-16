@@ -77,6 +77,7 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
       rethrow;
     }
   }
+
   Future<void> deleteAccount({required String password}) async {
     try {
       await _repository.deleteAccount(password: password);
