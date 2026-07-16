@@ -32,8 +32,7 @@ class _ScreenChangeEmailState extends ConsumerState<ScreenChangeEmail> {
       );
       return;
     }
-    if (_newEmailController.text.isEmpty ||
-        !_newEmailController.text.contains('@')) {
+    if (_newEmailController.text.isEmpty || !_newEmailController.text.contains('@')) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Email invalide')),
       );
@@ -41,8 +40,7 @@ class _ScreenChangeEmailState extends ConsumerState<ScreenChangeEmail> {
     }
     if (_newEmailController.text != _confirmEmailController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Les adresses email ne correspondent pas')),
+        const SnackBar(content: Text('Les adresses email ne correspondent pas')),
       );
       return;
     }
@@ -50,9 +48,9 @@ class _ScreenChangeEmailState extends ConsumerState<ScreenChangeEmail> {
     setState(() => _isLoading = true);
     try {
       await ref.read(providerIdentity.notifier).updateEmail(
-            currentPassword: _currentPasswordController.text,
-            newEmail: _newEmailController.text,
-          );
+        currentPassword: _currentPasswordController.text,
+        newEmail: _newEmailController.text,
+      );
       if (mounted) {
         await ref.read(providerIdentity.notifier).logout();
         if (mounted) {
@@ -169,17 +167,17 @@ class _ScreenChangeEmailState extends ConsumerState<ScreenChangeEmail> {
                 onPressed: _isLoading ? null : _submit,
                 child: _isLoading
                     ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
                     : const Text(
-                        'Confirmer le changement',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  'Confirmer le changement',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],

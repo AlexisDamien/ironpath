@@ -49,9 +49,9 @@ class _ScreenChangePasswordState extends ConsumerState<ScreenChangePassword> {
     setState(() => _isLoading = true);
     try {
       await ref.read(providerIdentity.notifier).changePassword(
-            currentPassword: _currentPasswordController.text,
-            newPassword: _newPasswordController.text,
-          );
+        currentPassword: _currentPasswordController.text,
+        newPassword: _newPasswordController.text,
+      );
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -121,17 +121,17 @@ class _ScreenChangePasswordState extends ConsumerState<ScreenChangePassword> {
                 onPressed: _isLoading ? null : _submit,
                 child: _isLoading
                     ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
                     : const Text(
-                        'Sauvegarder',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  'Sauvegarder',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],

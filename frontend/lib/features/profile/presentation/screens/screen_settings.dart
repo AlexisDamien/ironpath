@@ -87,8 +87,7 @@ class ScreenSettings extends ConsumerWidget {
                       fullscreenDialog: true,
                       builder: (context) => const ScreenChangePassword(),
                     ),
-                  ),
-                ),
+                  ),                ),
                 const Divider(height: 1),
                 ListTile(
                   leading: Icon(
