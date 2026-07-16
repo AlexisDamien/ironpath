@@ -17,8 +17,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/dashboard',
     redirect: (context, routerState) {
-      final isAuthenticated = stateIdentity.status == StatusAuth.authenticated ||
-          stateIdentity.status == StatusAuth.error;
+      final isAuthenticated = stateIdentity.status == StatusAuth.authenticated;
       final isAuthRoute = routerState.matchedLocation == '/login' ||
           routerState.matchedLocation == '/register';
 

@@ -1,8 +1,8 @@
 package com.ironpath.backend.identity.application;
 
-import com.ironpath.backend.identity.domain.model.EmailChangeRequest;
+import com.ironpath.backend.identity.domain.model.EmailVerificationToken;
 import com.ironpath.backend.identity.domain.model.User;
-import com.ironpath.backend.identity.domain.repository.EmailChangeRequestRepository;
+import com.ironpath.backend.identity.domain.repository.EmailVerificationTokenRepository;
 import com.ironpath.backend.identity.domain.repository.UserRepository;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -18,10 +17,11 @@ import java.util.UUID;
 public class UpdateEmailUseCase {
 
     private final UserRepository userRepository;
-    private final EmailChangeRequestRepository emailChangeRequestRepository;
+    private final EmailVerificationTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
+    @Transactional
     public void execute(UUID userId, String currentPassword, String newEmail) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UnauthorizedException("Utilisateur introuvable"));
@@ -34,33 +34,17 @@ public class UpdateEmailUseCase {
             throw new IllegalArgumentException("Cet email est déjà utilisé");
         }
 
-        String confirmationToken = UUID.randomUUID().toString();
-        String cancelToken = UUID.randomUUID().toString();
+        user.setEmail(newEmail.toLowerCase().trim());
+        user.setEmailVerifiedAt(null);
+        userRepository.save(user);
 
-        EmailChangeRequest request = EmailChangeRequest.builder()
+        String token = UUID.randomUUID().toString();
+        EmailVerificationToken verificationToken = EmailVerificationToken.builder()
                 .user(user)
-                .oldEmail(user.getEmail())
-                .newEmail(newEmail.toLowerCase().trim())
-                .confirmationToken(confirmationToken)
-                .cancelToken(cancelToken)
-                .expiresAt(LocalDateTime.now().plusHours(24))
-                .confirmed(false)
-                .cancelled(false)
+                .token(token)
                 .build();
+        tokenRepository.save(verificationToken);
 
-        saveRequest(request);
-
-        emailService.sendEmailChangeConfirmation(newEmail, confirmationToken);
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        emailService.sendEmailChangeCancellation(user.getEmail(), cancelToken, newEmail);
-    }
-
-    @Transactional
-    protected void saveRequest(EmailChangeRequest request) {
-        emailChangeRequestRepository.save(request);
+        emailService.sendVerificationEmail(newEmail, token);
     }
 }

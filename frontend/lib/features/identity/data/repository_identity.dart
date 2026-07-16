@@ -58,14 +58,4 @@ class RepositoryIdentity {
       'currentPassword': password,
     });
   }
-
-  Future<void> updateEmail({
-    required String currentPassword,
-    required String newEmail,
-  }) async {
-    await _dio.put('/users/email', data: {
-      'currentPassword': currentPassword,
-      'newEmail': newEmail,
-    });
-  }
 }

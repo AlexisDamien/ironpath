@@ -3,8 +3,6 @@ package com.ironpath.backend.identity.api.controller;
 import com.ironpath.backend.identity.api.dto.DeleteAccountRequest;
 import com.ironpath.backend.identity.api.dto.UpdateEmailRequest;
 import com.ironpath.backend.identity.api.dto.UpdatePasswordRequest;
-import com.ironpath.backend.identity.application.CancelEmailChangeUseCase;
-import com.ironpath.backend.identity.application.ConfirmEmailChangeUseCase;
 import com.ironpath.backend.identity.application.DeleteAccountUseCase;
 import com.ironpath.backend.identity.application.LogoutUserUseCase;
 import com.ironpath.backend.identity.application.UpdateEmailUseCase;
@@ -28,8 +26,6 @@ public class UserController {
     private final UpdateEmailUseCase updateEmailUseCase;
     private final UpdatePasswordUseCase updatePasswordUseCase;
     private final DeleteAccountUseCase deleteAccountUseCase;
-    private final ConfirmEmailChangeUseCase confirmEmailChangeUseCase;
-    private final CancelEmailChangeUseCase cancelEmailChangeUseCase;
 
     @GetMapping("/me")
     public ResponseEntity<String> me(Authentication authentication) {
@@ -67,18 +63,6 @@ public class UserController {
             Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
         deleteAccountUseCase.execute(userId, request.currentPassword());
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/email/confirm/{token}")
-    public ResponseEntity<Void> confirmEmailChange(@PathVariable String token) {
-        confirmEmailChangeUseCase.execute(token);
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/email/cancel/{token}")
-    public ResponseEntity<Void> cancelEmailChange(@PathVariable String token) {
-        cancelEmailChangeUseCase.execute(token);
         return ResponseEntity.ok().build();
     }
 }

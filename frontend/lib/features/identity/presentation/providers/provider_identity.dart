@@ -74,14 +74,23 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
         newPassword: newPassword,
       );
     } catch (error) {
+      state = state.copyWith(
+        status: StatusAuth.error,
+        errorMessage: _extractErrorMessage(error),
+      );
       rethrow;
     }
   }
+
   Future<void> deleteAccount({required String password}) async {
     try {
       await _repository.deleteAccount(password: password);
       state = state.copyWith(status: StatusAuth.unauthenticated);
     } catch (error) {
+      state = state.copyWith(
+        status: StatusAuth.error,
+        errorMessage: _extractErrorMessage(error),
+      );
       rethrow;
     }
   }
@@ -91,19 +100,5 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
       return error.toString().replaceAll('Exception: ', '');
     }
     return 'Une erreur est survenue';
-  }
-
-  Future<void> updateEmail({
-    required String currentPassword,
-    required String newEmail,
-  }) async {
-    try {
-      await _repository.updateEmail(
-        currentPassword: currentPassword,
-        newEmail: newEmail,
-      );
-    } catch (error) {
-      rethrow;
-    }
   }
 }
