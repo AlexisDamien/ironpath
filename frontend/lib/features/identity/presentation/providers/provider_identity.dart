@@ -3,6 +3,7 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/token_storage.dart';
 import '../../data/repository_identity.dart';
 import '../../domain/state_identity.dart';
+import 'package:dio/dio.dart';
 
 final providerIdentityRepository = Provider<RepositoryIdentity>((ref) {
   final apiClient = ref.watch(apiClientProvider);
@@ -74,11 +75,7 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
         newPassword: newPassword,
       );
     } catch (error) {
-      state = state.copyWith(
-        status: StatusAuth.error,
-        errorMessage: _extractErrorMessage(error),
-      );
-      rethrow;
+      throw Exception(_extractErrorMessage(error));
     }
   }
 
@@ -95,10 +92,31 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
     }
   }
 
-  String _extractErrorMessage(dynamic error) {
-    if (error is Exception) {
-      return error.toString().replaceAll('Exception: ', '');
+  String _extractErrorMessage(Object error) {
+    if (error is DioException) {
+      final data = error.response?.data;
+
+      if (data is Map<String, dynamic>) {
+        final errorMessage = data['error'];
+
+        if (errorMessage is String && errorMessage.isNotEmpty) {
+          return errorMessage;
+        }
+
+        final message = data['message'];
+
+        if (message is String && message.isNotEmpty) {
+          return message;
+        }
+      }
+
+      if (error.type == DioExceptionType.connectionTimeout ||
+          error.type == DioExceptionType.receiveTimeout ||
+          error.type == DioExceptionType.connectionError) {
+        return 'Impossible de contacter le serveur';
+      }
     }
+
     return 'Une erreur est survenue';
   }
 }

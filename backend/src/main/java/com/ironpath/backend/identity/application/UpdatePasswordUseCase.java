@@ -20,15 +20,29 @@ public class UpdatePasswordUseCase {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
-    public void execute(UUID userId, String currentPassword, String newPassword) {
+    public void execute(
+            UUID userId,
+            String currentPassword,
+            String newPassword
+    ) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UnauthorizedException("Utilisateur introuvable"));
+                .orElseThrow(() ->
+                        new UnauthorizedException("Utilisateur introuvable")
+                );
 
-        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
-            throw new UnauthorizedException("Mot de passe actuel incorrect");
+        if (!passwordEncoder.matches(
+                currentPassword,
+                user.getPasswordHash()
+        )) {
+            throw new IllegalArgumentException(
+                    "Mot de passe actuel incorrect"
+            );
         }
 
-        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setPasswordHash(
+                passwordEncoder.encode(newPassword)
+        );
+
         userRepository.save(user);
 
         refreshTokenRepository.revokeAllByUserId(userId);

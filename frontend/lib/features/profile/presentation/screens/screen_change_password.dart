@@ -27,6 +27,9 @@ class _ScreenChangePasswordState extends ConsumerState<ScreenChangePassword> {
   }
 
   Future<void> _submit() async {
+    if (_isLoading) {
+      return;
+    }
     if (_currentPasswordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Mot de passe actuel obligatoire')),
@@ -59,14 +62,16 @@ class _ScreenChangePasswordState extends ConsumerState<ScreenChangePassword> {
         );
       }
     } catch (exception) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(exception.toString()),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
+      if (!mounted) return;
+
+      final message = exception.toString().replaceFirst('Exception: ', '');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
