@@ -10,6 +10,7 @@ import '../widgets/sheet_add_metrics.dart';
 import '../widgets/popup_delete_measurement.dart';
 import '../widgets/popup_delete_composition.dart';
 import '../widgets/popup_connected_device.dart';
+import '../../../identity/presentation/providers/provider_identity.dart';
 
 class ScreenBodyMetrics extends ConsumerStatefulWidget {
   const ScreenBodyMetrics({super.key});
@@ -41,6 +42,7 @@ class _BodyMetricsScreenState extends ConsumerState<ScreenBodyMetrics>
   @override
   Widget build(BuildContext context) {
     final bodyMetricsState = ref.watch(providerBodyMetrics);
+    final canWrite = ref.watch(providerIdentity).isEmailVerified;
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -60,7 +62,9 @@ class _BodyMetricsScreenState extends ConsumerState<ScreenBodyMetrics>
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => _showAddSheet(context),
+            onPressed: canWrite ? () => _showAddSheet(context) : null,
+            tooltip:
+                canWrite ? null : 'Vérifie ton email pour ajouter une mesure',
           ),
         ],
       ),
@@ -70,15 +74,17 @@ class _BodyMetricsScreenState extends ConsumerState<ScreenBodyMetrics>
           : TabBarView(
               controller: _tabController,
               children: [
-                _buildMeasurementsList(context, bodyMetricsState.measurements),
-                _buildCompositionsList(context, bodyMetricsState.compositions),
+                _buildMeasurementsList(
+                    context, bodyMetricsState.measurements, canWrite),
+                _buildCompositionsList(
+                    context, bodyMetricsState.compositions, canWrite),
               ],
             ),
     );
   }
 
   Widget _buildMeasurementsList(
-      BuildContext context, List<BodyMeasurement> measurements) {
+      BuildContext context, List<BodyMeasurement> measurements, bool canWrite) {
     if (measurements.isEmpty) {
       return Center(
         child: Column(
@@ -115,7 +121,7 @@ class _BodyMetricsScreenState extends ConsumerState<ScreenBodyMetrics>
           return CardMeasurement(
             key: ValueKey(measurement.id),
             measurement: measurement,
-            isEditable: measurement.isEditable,
+            isEditable: measurement.isEditable && canWrite,
             onEdit: () => _showEditMeasurementSheet(context, measurement),
             onDelete: () =>
                 showPopupDeleteMeasurement(context, ref, measurement),
@@ -126,7 +132,7 @@ class _BodyMetricsScreenState extends ConsumerState<ScreenBodyMetrics>
   }
 
   Widget _buildCompositionsList(
-      BuildContext context, List<BodyComposition> compositions) {
+      BuildContext context, List<BodyComposition> compositions, bool canWrite) {
     if (compositions.isEmpty) {
       return Center(
         child: Column(
@@ -163,7 +169,7 @@ class _BodyMetricsScreenState extends ConsumerState<ScreenBodyMetrics>
           return CardComposition(
             key: ValueKey(composition.id),
             composition: composition,
-            isEditable: composition.isEditable,
+            isEditable: composition.isEditable && canWrite,
             onEdit: () => _showEditCompositionSheet(context, composition),
             onDelete: () =>
                 showPopupDeleteComposition(context, ref, composition),

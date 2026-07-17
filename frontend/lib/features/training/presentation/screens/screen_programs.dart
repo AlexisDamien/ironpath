@@ -5,6 +5,7 @@ import '../widgets/card_program.dart';
 import '../widgets/popup_create_program.dart';
 import '../../domain/state_training.dart';
 import '../widgets/sheet_start_session.dart';
+import '../../../identity/presentation/providers/provider_identity.dart';
 
 class ScreenPrograms extends ConsumerStatefulWidget {
   const ScreenPrograms({super.key});
@@ -23,6 +24,7 @@ class _ProgramsScreenState extends ConsumerState<ScreenPrograms> {
   @override
   Widget build(BuildContext context) {
     final trainingState = ref.watch(providerTraining);
+    final canWrite = ref.watch(providerIdentity).isEmailVerified;
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -35,15 +37,18 @@ class _ProgramsScreenState extends ConsumerState<ScreenPrograms> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => _showCreateProgramModal(context),
+            onPressed: canWrite ? () => _showCreateProgramModal(context) : null,
+            tooltip:
+                canWrite ? null : 'Vérifie ton email pour créer un programme',
           ),
         ],
       ),
-      body: _buildBody(context, trainingState),
+      body: _buildBody(context, trainingState, canWrite),
     );
   }
 
-  Widget _buildBody(BuildContext context, StateTraining trainingState) {
+  Widget _buildBody(
+      BuildContext context, StateTraining trainingState, bool canWrite) {
     if (trainingState.status == StatusTraining.loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -90,7 +95,8 @@ class _ProgramsScreenState extends ConsumerState<ScreenPrograms> {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => _showCreateProgramModal(context),
+              onPressed:
+                  canWrite ? () => _showCreateProgramModal(context) : null,
               icon: const Icon(Icons.add),
               label: const Text('Créer un programme'),
             ),
@@ -108,6 +114,7 @@ class _ProgramsScreenState extends ConsumerState<ScreenPrograms> {
           final program = trainingState.programs[index];
           return CardProgram(
             program: program,
+            canWrite: canWrite,
             onStartSession: () => showModalBottomSheet(
               context: context,
               backgroundColor: Colors.transparent,

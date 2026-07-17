@@ -5,6 +5,7 @@ import com.ironpath.backend.training.api.dto.SetResponse;
 import com.ironpath.backend.training.domain.model.ExerciseSet;
 import com.ironpath.backend.training.domain.model.TrainingSession;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 @Component
@@ -20,7 +21,9 @@ public class SessionMapper {
                 session.getId(),
                 session.getName(),
                 session.getStatus(),
-                session.getProgram() != null ? session.getProgram().getId() : null,
+                session.getProgram() != null
+                        ? session.getProgram().getId()
+                        : null,
                 setResponses,
                 session.getStartedAt(),
                 session.getEndedAt()

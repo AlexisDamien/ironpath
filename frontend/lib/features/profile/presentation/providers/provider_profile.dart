@@ -31,7 +31,7 @@ class ProviderProfileNotifier extends StateNotifier<StateProfile> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusProfile.success,
-        profile: null,
+        clearProfile: true,
       );
     }
   }
@@ -52,7 +52,7 @@ class ProviderProfileNotifier extends StateNotifier<StateProfile> {
     }
   }
 
-  Future<void> logout() async {
+  void reset() {
     state = const StateProfile();
   }
 }

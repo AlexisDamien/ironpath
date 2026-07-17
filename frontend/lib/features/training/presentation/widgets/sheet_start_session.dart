@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/provider_training.dart';
+import '../../../identity/presentation/providers/provider_identity.dart';
 
 class SheetStartSession extends ConsumerWidget {
   const SheetStartSession({super.key});
@@ -10,6 +11,7 @@ class SheetStartSession extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final trainingState = ref.watch(providerTraining);
     final hasActiveSession = trainingState.activeSession != null;
+    final canWrite = ref.watch(providerIdentity).isEmailVerified;
 
     return Container(
       decoration: BoxDecoration(
@@ -63,17 +65,29 @@ class SheetStartSession extends ConsumerWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-                      await ref.read(providerTraining.notifier).startSession(
-                            name: 'Session libre',
-                          );
-                      if (context.mounted) context.push('/session');
-                    },
+                    onPressed: canWrite
+                        ? () async {
+                            Navigator.of(context).pop();
+                            await ref
+                                .read(providerTraining.notifier)
+                                .startSession(name: 'Session libre');
+                            if (context.mounted) context.push('/session');
+                          }
+                        : null,
                     icon: const Icon(Icons.play_arrow),
                     label: const Text('Session libre'),
                   ),
                 ),
+                if (!canWrite) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Vérifie ton email pour démarrer une session',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 if (trainingState.programs.isNotEmpty) ...[
                   const Text(
@@ -92,17 +106,30 @@ class SheetStartSession extends ConsumerWidget {
                         subtitle: Text(
                           '${program.exercises.length} exercice${program.exercises.length > 1 ? 's' : ''}',
                         ),
-                        trailing: const Icon(Icons.play_arrow),
-                        onTap: () async {
-                          Navigator.of(context).pop();
-                          await ref
-                              .read(providerTraining.notifier)
-                              .startSession(
-                                programId: program.id,
-                                name: program.name,
-                              );
-                          if (context.mounted) context.push('/session');
-                        },
+                        trailing: Icon(
+                          Icons.play_arrow,
+                          color: canWrite ? null : Colors.grey,
+                        ),
+                        onTap: canWrite
+                            ? () async {
+                                Navigator.of(context).pop();
+                                await ref
+                                    .read(providerTraining.notifier)
+                                    .startSession(
+                                      programId: program.id,
+                                      name: program.name,
+                                    );
+                                if (context.mounted) context.push('/session');
+                              }
+                            : () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Vérifie ton email pour démarrer une session',
+                                    ),
+                                  ),
+                                );
+                              },
                       ),
                     ),
                   ),

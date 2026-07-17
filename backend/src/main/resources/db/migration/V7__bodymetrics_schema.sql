@@ -1,4 +1,4 @@
-CREATE TABLE body_measurements (
+CREATE TABLE IF NOT EXISTS body_measurements (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     weight DECIMAL(5,2),
@@ -15,7 +15,7 @@ CREATE TABLE body_measurements (
     recorded_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE body_compositions (
+CREATE TABLE IF NOT EXISTS body_compositions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     body_fat DECIMAL(5,2),

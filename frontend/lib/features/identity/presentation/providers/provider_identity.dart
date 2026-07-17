@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/token_storage.dart';
+import '../../../profile/presentation/providers/provider_profile.dart';
 import '../../data/repository_identity.dart';
 import '../../domain/state_identity.dart';
 import 'package:dio/dio.dart';
@@ -17,15 +18,18 @@ final providerIdentityRepository = Provider<RepositoryIdentity>((ref) {
 final providerIdentity =
     StateNotifierProvider<ProviderIdentityNotifier, IdentityState>((ref) {
   final repository = ref.watch(providerIdentityRepository);
-  return ProviderIdentityNotifier(repository);
+  return ProviderIdentityNotifier(repository, ref);
 });
 
 class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
   final RepositoryIdentity _repository;
+  final Ref _ref;
 
-  ProviderIdentityNotifier(this._repository) : super(const IdentityState());
+  ProviderIdentityNotifier(this._repository, this._ref)
+      : super(const IdentityState());
 
   Future<void> login(String email, String password) async {
+    _ref.read(providerProfile.notifier).reset();
     state = state.copyWith(status: StatusAuth.loading);
     try {
       final isEmailVerified =
@@ -43,6 +47,7 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
   }
 
   Future<void> register(String email, String password) async {
+    _ref.read(providerProfile.notifier).reset();
     state = state.copyWith(status: StatusAuth.loading);
     try {
       final isEmailVerified = await _repository.register(
@@ -66,8 +71,10 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
     state = state.copyWith(status: StatusAuth.loading);
     try {
       await _repository.logout();
+      _ref.read(providerProfile.notifier).reset();
       state = state.copyWith(status: StatusAuth.unauthenticated);
     } catch (error) {
+      _ref.read(providerProfile.notifier).reset();
       state = state.copyWith(status: StatusAuth.unauthenticated);
     }
   }
@@ -89,6 +96,7 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
   Future<void> deleteAccount({required String password}) async {
     try {
       await _repository.deleteAccount(password: password);
+      _ref.read(providerProfile.notifier).reset();
       state = state.copyWith(status: StatusAuth.unauthenticated);
     } catch (error) {
       state = state.copyWith(

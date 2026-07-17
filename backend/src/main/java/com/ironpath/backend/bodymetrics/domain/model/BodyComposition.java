@@ -1,6 +1,8 @@
 package com.ironpath.backend.bodymetrics.domain.model;
 
 import com.ironpath.backend.identity.domain.model.User;
+import com.ironpath.backend.shared.infrastructure.EncryptedDoubleConverter;
+import com.ironpath.backend.shared.infrastructure.EncryptedIntegerConverter;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -22,35 +24,52 @@ public class BodyComposition {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "body_fat")
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(name = "body_fat", columnDefinition = "TEXT")
     private Double bodyFat;
 
-    @Column(name = "skeletal_muscle")
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(name = "skeletal_muscle", columnDefinition = "TEXT")
     private Double skeletalMuscle;
 
-    @Column(name = "fat_free_mass")
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(name = "fat_free_mass", columnDefinition = "TEXT")
     private Double fatFreeMass;
 
-    @Column(name = "subcutaneous_fat")
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(name = "subcutaneous_fat", columnDefinition = "TEXT")
     private Double subcutaneousFat;
 
-    @Column(name = "visceral_fat")
+    @Convert(converter = EncryptedIntegerConverter.class)
+    @Column(name = "visceral_fat", columnDefinition = "TEXT")
     private Integer visceralFat;
 
-    @Column(name = "body_water")
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(name = "body_water", columnDefinition = "TEXT")
     private Double bodyWater;
 
-    @Column(name = "muscle_mass")
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(name = "muscle_mass", columnDefinition = "TEXT")
     private Double muscleMass;
 
-    @Column(name = "bone_mass")
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(name = "bone_mass", columnDefinition = "TEXT")
     private Double boneMass;
 
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(columnDefinition = "TEXT")
     private Double protein;
+
+    @Convert(converter = EncryptedIntegerConverter.class)
+    @Column(columnDefinition = "TEXT")
     private Integer bmr;
+
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(columnDefinition = "TEXT")
     private Double bmi;
 
-    @Column(name = "metabolic_age")
+    @Convert(converter = EncryptedIntegerConverter.class)
+    @Column(name = "metabolic_age", columnDefinition = "TEXT")
     private Integer metabolicAge;
 
     @Column(columnDefinition = "TEXT")

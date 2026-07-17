@@ -16,11 +16,12 @@ class StateProfile {
   StateProfile copyWith({
     StatusProfile? status,
     Profile? profile,
+    bool clearProfile = false,
     String? errorMessage,
   }) {
     return StateProfile(
       status: status ?? this.status,
-      profile: profile ?? this.profile,
+      profile: clearProfile ? null : profile ?? this.profile,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }

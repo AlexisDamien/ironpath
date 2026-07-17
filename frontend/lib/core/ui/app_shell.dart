@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +18,7 @@ class AppShell extends ConsumerWidget {
     final trainingState = ref.watch(providerTraining);
     final hasActiveSession = trainingState.activeSession != null;
     final stateIdentity = ref.watch(providerIdentity);
+    final canWrite = stateIdentity.isEmailVerified;
 
     final location = GoRouterState.of(context).matchedLocation;
     final currentIndex = switch (location) {
@@ -50,7 +53,17 @@ class AppShell extends ConsumerWidget {
             case 1:
               context.go('/programs');
             case 2:
-              _startSession(context);
+              if (canWrite) {
+                _startSession(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Vérifie ton email pour démarrer une session',
+                    ),
+                  ),
+                );
+              }
             case 3:
               context.go('/bodymetrics');
             case 4:
@@ -83,6 +96,31 @@ class _EmailVerificationBannerState
     extends ConsumerState<_EmailVerificationBanner> {
   bool _isChecking = false;
   bool _isResending = false;
+  Timer? _cooldownTimer;
+  int _cooldownSeconds = 0;
+
+  @override
+  void dispose() {
+    _cooldownTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startCooldown() {
+    setState(() => _cooldownSeconds = 60);
+    _cooldownTimer?.cancel();
+    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (_cooldownSeconds <= 1) {
+        timer.cancel();
+        setState(() => _cooldownSeconds = 0);
+      } else {
+        setState(() => _cooldownSeconds -= 1);
+      }
+    });
+  }
 
   Future<void> _checkStatus() async {
     setState(() => _isChecking = true);
@@ -107,6 +145,7 @@ class _EmailVerificationBannerState
     try {
       await ref.read(providerIdentity.notifier).resendVerificationEmail();
       if (!mounted) return;
+      _startCooldown();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Email de vérification renvoyé')),
       );
@@ -145,22 +184,39 @@ class _EmailVerificationBannerState
             ),
           ),
           TextButton(
-            onPressed: _isResending ? null : _resend,
+            onPressed: (_isResending || _cooldownSeconds > 0) ? null : _resend,
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+            ),
             child: _isResending
-                ? const SizedBox(
+                ? SizedBox(
                     height: 14,
                     width: 14,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                    ),
                   )
-                : const Text('Renvoyer', style: TextStyle(fontSize: 12)),
+                : Text(
+                    _cooldownSeconds > 0
+                        ? 'Renvoyer (${_cooldownSeconds}s)'
+                        : 'Renvoyer',
+                    style: const TextStyle(fontSize: 12),
+                  ),
           ),
           TextButton(
             onPressed: _isChecking ? null : _checkStatus,
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+            ),
             child: _isChecking
-                ? const SizedBox(
+                ? SizedBox(
                     height: 14,
                     width: 14,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                    ),
                   )
                 : const Text("J'ai vérifié", style: TextStyle(fontSize: 12)),
           ),

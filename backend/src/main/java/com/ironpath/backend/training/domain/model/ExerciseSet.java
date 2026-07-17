@@ -2,6 +2,7 @@ package com.ironpath.backend.training.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -45,6 +46,7 @@ public class ExerciseSet {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+
         if (isWarmup == null) {
             isWarmup = false;
         }

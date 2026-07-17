@@ -6,6 +6,7 @@ import com.ironpath.backend.bodymetrics.domain.model.BodyMeasurement;
 import com.ironpath.backend.bodymetrics.domain.repository.BodyMeasurementRepository;
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ public class UpdateMeasurementUseCase {
     private final BodyMeasurementRepository measurementRepository;
     private final EmailVerificationGuard emailVerificationGuard;
 
+    @Transactional
     public MeasurementResponse execute(UUID userId, UUID measurementId, SaveMeasurementRequest request) {
         BodyMeasurement measurement = measurementRepository.findById(measurementId)
                 .orElseThrow(() -> new IllegalArgumentException("Mesure introuvable"));

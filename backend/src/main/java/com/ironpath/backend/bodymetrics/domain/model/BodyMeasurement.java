@@ -1,6 +1,7 @@
 package com.ironpath.backend.bodymetrics.domain.model;
 
 import com.ironpath.backend.identity.domain.model.User;
+import com.ironpath.backend.shared.infrastructure.EncryptedDoubleConverter;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -22,27 +23,44 @@ public class BodyMeasurement {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(columnDefinition = "TEXT")
     private Double weight;
+
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(columnDefinition = "TEXT")
     private Double chest;
+
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(columnDefinition = "TEXT")
     private Double waist;
+
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(columnDefinition = "TEXT")
     private Double hips;
 
-    @Column(name = "left_arm")
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(name = "left_arm", columnDefinition = "TEXT")
     private Double leftArm;
 
-    @Column(name = "right_arm")
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(name = "right_arm", columnDefinition = "TEXT")
     private Double rightArm;
 
-    @Column(name = "left_thigh")
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(name = "left_thigh", columnDefinition = "TEXT")
     private Double leftThigh;
 
-    @Column(name = "right_thigh")
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(name = "right_thigh", columnDefinition = "TEXT")
     private Double rightThigh;
 
-    @Column(name = "left_calf")
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(name = "left_calf", columnDefinition = "TEXT")
     private Double leftCalf;
 
-    @Column(name = "right_calf")
+    @Convert(converter = EncryptedDoubleConverter.class)
+    @Column(name = "right_calf", columnDefinition = "TEXT")
     private Double rightCalf;
 
     @Column(columnDefinition = "TEXT")

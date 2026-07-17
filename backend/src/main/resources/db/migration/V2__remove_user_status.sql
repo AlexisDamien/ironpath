@@ -1,2 +1,2 @@
-ALTER TABLE users DROP COLUMN status;
-DROP TYPE user_status;
+ALTER TABLE users DROP COLUMN IF EXISTS status;
+DROP TYPE IF EXISTS user_status;

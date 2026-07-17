@@ -7,12 +7,14 @@ class CardProgram extends ConsumerWidget {
   final WorkoutProgram program;
   final VoidCallback onStartSession;
   final VoidCallback onEdit;
+  final bool canWrite;
 
   const CardProgram({
     super.key,
     required this.program,
     required this.onStartSession,
     required this.onEdit,
+    required this.canWrite,
   });
 
   @override
@@ -40,13 +42,16 @@ class CardProgram extends ConsumerWidget {
                 IconButton(
                   icon: const Icon(Icons.edit_outlined),
                   color: Theme.of(context).colorScheme.primary,
-                  onPressed: onEdit,
+                  onPressed: canWrite ? onEdit : null,
+                  tooltip: canWrite ? null : 'Vérifie ton email pour modifier',
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
                   color: Theme.of(context).colorScheme.error,
-                  onPressed: () =>
-                      showPopupDeleteProgram(context, ref, program),
+                  onPressed: canWrite
+                      ? () => showPopupDeleteProgram(context, ref, program)
+                      : null,
+                  tooltip: canWrite ? null : 'Vérifie ton email pour supprimer',
                 ),
               ],
             ),
@@ -75,12 +80,15 @@ class CardProgram extends ConsumerWidget {
                   ),
                 ),
                 const Spacer(),
-                SizedBox(
-                  width: 130,
-                  child: ElevatedButton.icon(
-                    onPressed: onStartSession,
-                    icon: const Icon(Icons.play_arrow, size: 18),
-                    label: const Text('Démarrer'),
+                Tooltip(
+                  message: canWrite ? '' : 'Vérifie ton email pour démarrer',
+                  child: SizedBox(
+                    width: 130,
+                    child: ElevatedButton.icon(
+                      onPressed: canWrite ? onStartSession : null,
+                      icon: const Icon(Icons.play_arrow, size: 18),
+                      label: const Text('Démarrer'),
+                    ),
                   ),
                 ),
               ],

@@ -10,6 +10,7 @@ import com.ironpath.backend.training.domain.repository.TrainingSessionRepository
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.UUID;
 
 @Service
@@ -21,17 +22,28 @@ public class AddSetUseCase {
     private final EmailVerificationGuard emailVerificationGuard;
 
     @Transactional
-    public SessionResponse execute(UUID userId, UUID sessionId, AddSetRequest request) {
+    public SessionResponse execute(
+            UUID userId,
+            UUID sessionId,
+            AddSetRequest request
+    ) {
         TrainingSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("Session introuvable"));
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Session introuvable")
+                );
 
         if (!session.getUser().getId().equals(userId)) {
-            throw new UnauthorizedException("Cette session ne vous appartient pas");
+            throw new UnauthorizedException(
+                    "Cette session ne vous appartient pas"
+            );
         }
+
         emailVerificationGuard.check(session.getUser());
 
         if (!"IN_PROGRESS".equals(session.getStatus())) {
-            throw new IllegalArgumentException("La session est déjà terminée");
+            throw new IllegalArgumentException(
+                    "La session est déjà terminée"
+            );
         }
 
         ExerciseSet set = ExerciseSet.builder()
@@ -41,11 +53,16 @@ public class AddSetUseCase {
                 .reps(request.reps())
                 .weightKg(request.weightKg())
                 .restSeconds(request.restSeconds())
-                .isWarmup(request.isWarmup() != null && request.isWarmup())
+                .isWarmup(
+                        request.isWarmup() != null
+                                && request.isWarmup()
+                )
                 .build();
 
         session.getSets().add(set);
+
         TrainingSession savedSession = sessionRepository.save(session);
+
         return sessionMapper.toResponse(savedSession);
     }
 }

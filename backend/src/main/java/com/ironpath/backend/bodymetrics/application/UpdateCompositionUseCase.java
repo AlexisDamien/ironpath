@@ -11,6 +11,7 @@ import com.ironpath.backend.profile.domain.repository.ProfileRepository;
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import com.ironpath.backend.shared.utils.FormatUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ public class UpdateCompositionUseCase {
     private final ProfileRepository profileRepository;
     private final EmailVerificationGuard emailVerificationGuard;
 
+    @Transactional
     public CompositionResponse execute(UUID userId, UUID compositionId, SaveCompositionRequest request) {
         BodyComposition composition = compositionRepository.findById(compositionId)
                 .orElseThrow(() -> new IllegalArgumentException("Composition introuvable"));
