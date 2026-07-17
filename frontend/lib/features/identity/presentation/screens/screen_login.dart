@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../profile/presentation/providers/provider_profile.dart';
 import '../providers/provider_identity.dart';
 import '../../domain/state_identity.dart';
 
@@ -29,6 +30,7 @@ class _LoginScreenState extends ConsumerState<ScreenLogin> {
 
     ref.listen(providerIdentity, (previous, next) {
       if (next.status == StatusAuth.authenticated) {
+        ref.read(providerProfile.notifier).loadProfile();
         context.go('/dashboard');
       }
       if (next.status == StatusAuth.error && next.errorMessage != null) {

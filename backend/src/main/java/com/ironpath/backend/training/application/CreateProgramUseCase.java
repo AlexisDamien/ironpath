@@ -1,6 +1,7 @@
 package com.ironpath.backend.training.application;
 
 import com.ironpath.backend.identity.domain.repository.UserRepository;
+import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import com.ironpath.backend.training.api.dto.CreateProgramRequest;
 import com.ironpath.backend.training.api.dto.ProgramExerciseRequest;
@@ -22,12 +23,13 @@ public class CreateProgramUseCase {
     private final WorkoutProgramRepository programRepository;
     private final UserRepository userRepository;
     private final ProgramMapper programMapper;
+    private final EmailVerificationGuard emailVerificationGuard;
 
     @Transactional
     public ProgramResponse execute(UUID userId, CreateProgramRequest request) {
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new UnauthorizedException("Utilisateur introuvable"));
-
+        emailVerificationGuard.check(user);
         WorkoutProgram program = WorkoutProgram.builder()
                 .user(user)
                 .name(request.name())

@@ -6,6 +6,7 @@ import com.ironpath.backend.bodymetrics.domain.model.BodyMeasurement;
 import com.ironpath.backend.bodymetrics.domain.repository.BodyMeasurementRepository;
 import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.identity.domain.repository.UserRepository;
+import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +21,13 @@ public class SaveMeasurementUseCase {
 
     private final BodyMeasurementRepository measurementRepository;
     private final UserRepository userRepository;
+    private final EmailVerificationGuard emailVerificationGuard;
 
     @Transactional
     public MeasurementResponse execute(UUID userId, SaveMeasurementRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
+        emailVerificationGuard.check(user);
 
         List<BodyMeasurement> existing = measurementRepository
                 .findByUserIdOrderByRecordedAtDesc(userId);

@@ -28,8 +28,12 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
   Future<void> login(String email, String password) async {
     state = state.copyWith(status: StatusAuth.loading);
     try {
-      await _repository.login(email: email, password: password);
-      state = state.copyWith(status: StatusAuth.authenticated);
+      final isEmailVerified =
+          await _repository.login(email: email, password: password);
+      state = state.copyWith(
+        status: StatusAuth.authenticated,
+        isEmailVerified: isEmailVerified,
+      );
     } catch (error) {
       state = state.copyWith(
         status: StatusAuth.error,
@@ -41,12 +45,15 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
   Future<void> register(String email, String password) async {
     state = state.copyWith(status: StatusAuth.loading);
     try {
-      await _repository.register(
+      final isEmailVerified = await _repository.register(
         email: email,
         password: password,
         rgpdConsent: true,
       );
-      state = state.copyWith(status: StatusAuth.unauthenticated);
+      state = state.copyWith(
+        status: StatusAuth.authenticated,
+        isEmailVerified: isEmailVerified,
+      );
     } catch (error) {
       state = state.copyWith(
         status: StatusAuth.error,
@@ -89,6 +96,23 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
         errorMessage: _extractErrorMessage(error),
       );
       rethrow;
+    }
+  }
+
+  Future<void> refreshEmailVerificationStatus() async {
+    try {
+      final isEmailVerified = await _repository.checkEmailVerificationStatus();
+      state = state.copyWith(isEmailVerified: isEmailVerified);
+    } catch (error) {
+      // silencieux — on retentera plus tard
+    }
+  }
+
+  Future<void> resendVerificationEmail() async {
+    try {
+      await _repository.resendVerificationEmail();
+    } catch (error) {
+      throw Exception(_extractErrorMessage(error));
     }
   }
 

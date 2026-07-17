@@ -1,5 +1,6 @@
 package com.ironpath.backend.identity.application;
 
+import com.ironpath.backend.identity.api.dto.LoginResponse;
 import com.ironpath.backend.identity.domain.model.RefreshToken;
 import com.ironpath.backend.identity.domain.repository.RefreshTokenRepository;
 import com.ironpath.backend.shared.infrastructure.JwtService;
@@ -16,7 +17,7 @@ public class RefreshTokenUseCase {
     private final JwtService jwtService;
 
     @Transactional
-    public String execute(String refreshToken) {
+    public LoginResponse execute(String refreshToken) {
         RefreshToken token = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new UnauthorizedException("Refresh token invalide"));
 
@@ -24,9 +25,15 @@ public class RefreshTokenUseCase {
             throw new UnauthorizedException("Refresh token expiré ou révoqué");
         }
 
-        return jwtService.generateToken(
+        String newAccessToken = jwtService.generateToken(
                 token.getUser().getId(),
                 token.getUser().getEmail()
+        );
+
+        return new LoginResponse(
+                newAccessToken,
+                refreshToken,
+                token.getUser().getEmailVerifiedAt() != null
         );
     }
 }

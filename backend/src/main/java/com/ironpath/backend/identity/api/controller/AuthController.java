@@ -1,13 +1,7 @@
 package com.ironpath.backend.identity.api.controller;
 
-import com.ironpath.backend.identity.api.dto.LoginRequest;
-import com.ironpath.backend.identity.api.dto.LoginResponse;
-import com.ironpath.backend.identity.api.dto.RefreshRequest;
-import com.ironpath.backend.identity.api.dto.RegisterRequest;
-import com.ironpath.backend.identity.application.LoginUserUseCase;
-import com.ironpath.backend.identity.application.RefreshTokenUseCase;
-import com.ironpath.backend.identity.application.RegisterUserUseCase;
-import com.ironpath.backend.identity.application.VerifyEmailUseCase;
+import com.ironpath.backend.identity.api.dto.*;
+import com.ironpath.backend.identity.application.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -25,14 +21,16 @@ public class AuthController {
     private final VerifyEmailUseCase verifyEmailUseCase;
     private final LoginUserUseCase loginUserUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
+    private final GetEmailVerificationStatusUseCase getEmailVerificationStatusUseCase;
+    private final ResendVerificationEmailUseCase resendVerificationEmailUseCase;
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(
+    public ResponseEntity<LoginResponse> register(
             @Valid @RequestBody RegisterRequest request,
             HttpServletRequest httpRequest) {
         String ipAddress = httpRequest.getRemoteAddr();
-        registerUserUseCase.execute(request, ipAddress);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        LoginResponse response = registerUserUseCase.execute(request, ipAddress);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/verify-email")
@@ -57,7 +55,20 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshRequest request) {
-        String newAccessToken = refreshTokenUseCase.execute(request.refreshToken());
-        return ResponseEntity.ok(new LoginResponse(newAccessToken, request.refreshToken()));
+        LoginResponse response = refreshTokenUseCase.execute(request.refreshToken());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/email-verification-status")
+    public ResponseEntity<EmailVerificationStatusResponse> emailVerificationStatus(Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return ResponseEntity.ok(getEmailVerificationStatusUseCase.execute(userId));
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<Void> resendVerification(Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        resendVerificationEmailUseCase.execute(userId);
+        return ResponseEntity.noContent().build();
     }
 }

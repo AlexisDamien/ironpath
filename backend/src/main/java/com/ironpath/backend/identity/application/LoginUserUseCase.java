@@ -31,11 +31,6 @@ public class LoginUserUseCase {
         if (!passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new UnauthorizedException("Email ou mot de passe incorrect");
         }
-
-        if (user.getEmailVerifiedAt() == null) {
-            throw new UnauthorizedException("Veuillez confirmer votre email avant de vous connecter");
-        }
-
         String token = jwtService.generateToken(user.getId(), user.getEmail());
 
         refreshTokenRepository.revokeAllByUserId(user.getId());
@@ -47,6 +42,5 @@ public class LoginUserUseCase {
 
         refreshTokenRepository.save(refreshToken);
 
-        return new LoginResponse(token, refreshToken.getToken());
-    }
+        return new LoginResponse(token, refreshToken.getToken(), user.getEmailVerifiedAt() != null);    }
 }

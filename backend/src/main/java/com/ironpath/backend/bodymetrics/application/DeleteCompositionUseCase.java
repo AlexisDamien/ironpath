@@ -1,6 +1,7 @@
 package com.ironpath.backend.bodymetrics.application;
 
 import com.ironpath.backend.bodymetrics.domain.repository.BodyCompositionRepository;
+import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import java.util.UUID;
 public class DeleteCompositionUseCase {
 
     private final BodyCompositionRepository compositionRepository;
+    private final EmailVerificationGuard emailVerificationGuard;
 
     public void execute(UUID userId, UUID compositionId) {
         var composition = compositionRepository.findById(compositionId)
@@ -20,6 +22,7 @@ public class DeleteCompositionUseCase {
         if (!composition.getUser().getId().equals(userId)) {
             throw new UnauthorizedException("Cette composition ne vous appartient pas");
         }
+        emailVerificationGuard.check(composition.getUser());
 
         compositionRepository.delete(composition);
     }

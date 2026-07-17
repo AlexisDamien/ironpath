@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:ironpath/features/profile/presentation/screens/screen_change_password.dart';
 import '../../../identity/presentation/providers/provider_identity.dart';
 import '../widgets/popup_delete_account.dart';
-import '../../../../core/templates/legal_texts.dart';
+import '../../../../core/constants/legal_texts.dart';
+import '../../../../core/constants/enums.dart';
+import '../../../../core/providers/provider_enums.dart';
 
 void _showLegalScreen(BuildContext context, String title, String content) {
   Navigator.of(context).push(
@@ -103,33 +105,47 @@ class ScreenSettings extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const Card(
+          Card(
             child: Column(
               children: [
-                ListTile(
+                const ListTile(
                   leading: Icon(Icons.notifications_outlined),
                   title: Text('Notifications'),
-                  trailing: Text(
-                    'WIP',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
+                  trailing: Text('WIP',
+                      style: TextStyle(color: Colors.grey, fontSize: 12)),
                 ),
-                Divider(height: 1),
-                ListTile(
+                const Divider(height: 1),
+                const ListTile(
                   leading: Icon(Icons.dark_mode_outlined),
                   title: Text('Thème'),
-                  trailing: Text(
-                    'WIP',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
+                  trailing: Text('WIP',
+                      style: TextStyle(color: Colors.grey, fontSize: 12)),
                 ),
-                Divider(height: 1),
-                ListTile(
+                const Divider(height: 1),
+                const ListTile(
                   leading: Icon(Icons.language_outlined),
                   title: Text('Langue'),
-                  trailing: Text(
-                    'WIP',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  trailing: Text('WIP',
+                      style: TextStyle(color: Colors.grey, fontSize: 12)),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.straighten_outlined),
+                  title: const Text('Unité de mesure'),
+                  trailing: DropdownButton<UnitSystem>(
+                    value: ref.watch(providerUnitSystem),
+                    underline: const SizedBox(),
+                    items: const [
+                      DropdownMenuItem(
+                          value: UnitSystem.metric, child: Text('cm / kg')),
+                      DropdownMenuItem(
+                          value: UnitSystem.imperial, child: Text('in / lbs')),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        ref.read(providerUnitSystem.notifier).state = value;
+                      }
+                    },
                   ),
                 ),
               ],

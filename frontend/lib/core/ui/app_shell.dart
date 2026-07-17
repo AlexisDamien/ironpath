@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/identity/presentation/providers/provider_identity.dart';
 import '../../features/training/presentation/providers/provider_training.dart';
 import '../../features/training/presentation/widgets/sheet_start_session.dart';
 import 'nav_bar.dart';
@@ -14,6 +15,7 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final trainingState = ref.watch(providerTraining);
     final hasActiveSession = trainingState.activeSession != null;
+    final stateIdentity = ref.watch(providerIdentity);
 
     final location = GoRouterState.of(context).matchedLocation;
     final currentIndex = switch (location) {
@@ -25,7 +27,12 @@ class AppShell extends ConsumerWidget {
     };
 
     return Scaffold(
-      body: child,
+      body: Column(
+        children: [
+          if (!stateIdentity.isEmailVerified) const _EmailVerificationBanner(),
+          Expanded(child: child),
+        ],
+      ),
       floatingActionButton: hasActiveSession
           ? FloatingActionButton.extended(
               onPressed: () => context.push('/session'),
@@ -60,6 +67,105 @@ class AppShell extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       useRootNavigator: true,
       builder: (context) => const SheetStartSession(),
+    );
+  }
+}
+
+class _EmailVerificationBanner extends ConsumerStatefulWidget {
+  const _EmailVerificationBanner();
+
+  @override
+  ConsumerState<_EmailVerificationBanner> createState() =>
+      _EmailVerificationBannerState();
+}
+
+class _EmailVerificationBannerState
+    extends ConsumerState<_EmailVerificationBanner> {
+  bool _isChecking = false;
+  bool _isResending = false;
+
+  Future<void> _checkStatus() async {
+    setState(() => _isChecking = true);
+    await ref.read(providerIdentity.notifier).refreshEmailVerificationStatus();
+    if (!mounted) return;
+    setState(() => _isChecking = false);
+
+    final isVerified = ref.read(providerIdentity).isEmailVerified;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isVerified
+              ? 'Email vérifié !'
+              : 'Email pas encore vérifié — vérifie ta boîte mail',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _resend() async {
+    setState(() => _isResending = true);
+    try {
+      await ref.read(providerIdentity.notifier).resendVerificationEmail();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email de vérification renvoyé')),
+      );
+    } catch (exception) {
+      if (!mounted) return;
+      final message = exception.toString().replaceFirst('Exception: ', '');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } finally {
+      if (mounted) setState(() => _isResending = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: Theme.of(context).colorScheme.errorContainer,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Icon(
+            Icons.warning_amber_outlined,
+            color: Theme.of(context).colorScheme.onErrorContainer,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Vérifie ton email pour débloquer toutes les fonctionnalités',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onErrorContainer,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: _isResending ? null : _resend,
+            child: _isResending
+                ? const SizedBox(
+                    height: 14,
+                    width: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Renvoyer', style: TextStyle(fontSize: 12)),
+          ),
+          TextButton(
+            onPressed: _isChecking ? null : _checkStatus,
+            child: _isChecking
+                ? const SizedBox(
+                    height: 14,
+                    width: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text("J'ai vérifié", style: TextStyle(fontSize: 12)),
+          ),
+        ],
+      ),
     );
   }
 }

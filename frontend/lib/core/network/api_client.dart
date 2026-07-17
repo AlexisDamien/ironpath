@@ -53,10 +53,6 @@ class ApiClient {
 
         final alreadyRetried = request.extra['retriedAfterRefresh'] == true;
 
-        // Aucun refresh si :
-        // - l'erreur n'est pas un 401 ;
-        // - la requête est déjà celle du refresh ;
-        // - la requête a déjà été rejouée une fois.
         if (statusCode != 401 || isRefreshRequest || alreadyRetried) {
           return handler.next(error);
         }
@@ -68,7 +64,6 @@ class ApiClient {
           return handler.next(error);
         }
 
-        // Empêche une seconde tentative pour cette requête.
         request.extra['retriedAfterRefresh'] = true;
 
         late final String newAccessToken;
@@ -105,7 +100,6 @@ class ApiClient {
             refreshToken: newRefreshToken,
           );
         } catch (_) {
-          // On supprime les tokens uniquement si le refresh échoue.
           await tokenStorage.clearTokens();
           return handler.next(error);
         }
@@ -116,8 +110,6 @@ class ApiClient {
           final retryResponse = await dio.fetch(request);
           return handler.resolve(retryResponse);
         } on DioException catch (retryError) {
-          // La requête a déjà été rejouée :
-          // on transmet désormais son erreur à l'application.
           return handler.next(retryError);
         }
       },

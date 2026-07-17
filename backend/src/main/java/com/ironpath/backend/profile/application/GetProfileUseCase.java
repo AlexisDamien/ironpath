@@ -1,6 +1,7 @@
 package com.ironpath.backend.profile.application;
 
 import com.ironpath.backend.profile.api.dto.ProfileResponse;
+import com.ironpath.backend.profile.domain.model.Profile;
 import com.ironpath.backend.profile.domain.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,16 @@ public class GetProfileUseCase {
                         profile.getGender(),
                         profile.getObjective(),
                         profile.getUsername(),
-                        profile.getAvatarUrl()
+                        profile.getAvatarUrl(),
+                        isComplete(profile)
                 ));
+    }
+
+    public static boolean isComplete(Profile profile) {
+        return profile.getFirstName() != null
+                && profile.getUsername() != null
+                && profile.getHeight() != null
+                && profile.getBirthDate() != null
+                && profile.getGender() != null;
     }
 }

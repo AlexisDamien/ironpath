@@ -4,6 +4,7 @@ import com.ironpath.backend.bodymetrics.api.dto.MeasurementResponse;
 import com.ironpath.backend.bodymetrics.api.dto.SaveMeasurementRequest;
 import com.ironpath.backend.bodymetrics.domain.model.BodyMeasurement;
 import com.ironpath.backend.bodymetrics.domain.repository.BodyMeasurementRepository;
+import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.UUID;
 public class UpdateMeasurementUseCase {
 
     private final BodyMeasurementRepository measurementRepository;
+    private final EmailVerificationGuard emailVerificationGuard;
 
     public MeasurementResponse execute(UUID userId, UUID measurementId, SaveMeasurementRequest request) {
         BodyMeasurement measurement = measurementRepository.findById(measurementId)
@@ -23,6 +25,7 @@ public class UpdateMeasurementUseCase {
         if (!measurement.getUser().getId().equals(userId)) {
             throw new UnauthorizedException("Cette mesure ne vous appartient pas");
         }
+        emailVerificationGuard.check(measurement.getUser());
 
         if (request.weight() != null) { measurement.setWeight(request.weight()); }
         if (request.chest() != null) { measurement.setChest(request.chest()); }

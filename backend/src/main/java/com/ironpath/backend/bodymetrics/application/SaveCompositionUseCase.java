@@ -10,6 +10,7 @@ import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.identity.domain.repository.UserRepository;
 import com.ironpath.backend.profile.domain.model.Profile;
 import com.ironpath.backend.profile.domain.repository.ProfileRepository;
+import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import com.ironpath.backend.shared.utils.FormatUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,11 +30,13 @@ public class SaveCompositionUseCase {
     private final BodyMeasurementRepository measurementRepository;
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
+    private final EmailVerificationGuard emailVerificationGuard;
 
     @Transactional
     public CompositionResponse execute(UUID userId, SaveCompositionRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
+        emailVerificationGuard.check(user);
 
         List<BodyComposition> existing = compositionRepository
                 .findByUserIdOrderByRecordedAtDesc(userId);

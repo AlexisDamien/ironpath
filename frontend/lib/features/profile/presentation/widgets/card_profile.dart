@@ -13,6 +13,7 @@ class CardProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentProfile = profile;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -46,51 +47,77 @@ class CardProfile extends StatelessWidget {
             const SizedBox(height: 16),
             Center(
               child: Text(
-                profile != null
-                    ? '${profile!.firstName ?? ''} ${profile!.lastName ?? ''}'
-                            .trim()
-                            .isEmpty
-                        ? profile!.username ?? 'Utilisateur'
-                        : '${profile!.firstName ?? ''} ${profile!.lastName ?? ''}'
-                            .trim()
-                    : 'Utilisateur',
+                _getDisplayName(currentProfile),
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            if (profile?.username != null) ...[
+            if (currentProfile?.username != null) ...[
               const SizedBox(height: 4),
               Center(
                 child: Text(
-                  '@${profile!.username}',
+                  '@${currentProfile!.username}',
                   style: const TextStyle(color: Colors.grey),
                 ),
               ),
             ],
             const Divider(height: 32),
-            if (profile != null) ...[
-              _buildInfoRow(Icons.cake_outlined, 'Date de naissance',
-                  profile!.birthDate ?? 'Non renseigné'),
+            if (currentProfile != null) ...[
+              _buildInfoRow(
+                Icons.cake_outlined,
+                'Date de naissance',
+                currentProfile.birthDate ?? 'Non renseigné',
+              ),
               const SizedBox(height: 12),
               _buildInfoRow(
-                  Icons.height,
-                  'Taille',
-                  profile!.height != null
-                      ? '${profile!.height} cm'
-                      : 'Non renseigné'),
+                Icons.height,
+                'Taille',
+                currentProfile.height != null
+                    ? '${currentProfile.height} cm'
+                    : 'Non renseigné',
+              ),
               const SizedBox(height: 12),
-              _buildInfoRow(Icons.person_outline, 'Genre',
-                  _formatGender(profile!.gender)),
+              _buildInfoRow(
+                Icons.person_outline,
+                'Genre',
+                _formatGender(currentProfile.gender),
+              ),
               const SizedBox(height: 12),
-              _buildInfoRow(Icons.flag_outlined, 'Objectif',
-                  _formatObjective(profile!.objective)),
+              _buildInfoRow(
+                Icons.flag_outlined,
+                'Objectif',
+                _formatObjective(currentProfile.objective),
+              ),
             ],
           ],
         ),
       ),
     );
+  }
+
+  String _getDisplayName(Profile? profile) {
+    if (profile == null) {
+      return 'Utilisateur';
+    }
+
+    final fullName = [
+      profile.firstName,
+      profile.lastName,
+    ].whereType<String>().where((value) => value.trim().isNotEmpty).join(' ');
+
+    if (fullName.isNotEmpty) {
+      return fullName;
+    }
+
+    final username = profile.username?.trim();
+
+    if (username != null && username.isNotEmpty) {
+      return username;
+    }
+
+    return 'Utilisateur';
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {

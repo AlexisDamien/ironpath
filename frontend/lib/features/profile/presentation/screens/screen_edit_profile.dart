@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../domain/models/profile.dart';
 import '../providers/provider_profile.dart';
 
 class ScreenEditProfile extends ConsumerStatefulWidget {
-  final Profile profile;
+  final Profile? profile;
 
-  const ScreenEditProfile({super.key, required this.profile});
+  const ScreenEditProfile({
+    super.key,
+    this.profile,
+  });
 
   @override
   ConsumerState<ScreenEditProfile> createState() => _EditProfileScreenState();
@@ -17,21 +21,36 @@ class _EditProfileScreenState extends ConsumerState<ScreenEditProfile> {
   final _lastNameController = TextEditingController();
   final _usernameController = TextEditingController();
   final _heightController = TextEditingController();
+  final _birthDateController = TextEditingController();
+
   String? _selectedGender;
   String? _selectedObjective;
   String? _selectedBirthDate;
+
   bool _isLoading = false;
+
+  bool get _isCreating => widget.profile == null;
 
   @override
   void initState() {
     super.initState();
-    _firstNameController.text = widget.profile.firstName ?? '';
-    _lastNameController.text = widget.profile.lastName ?? '';
-    _usernameController.text = widget.profile.username ?? '';
-    _heightController.text = widget.profile.height?.toString() ?? '';
-    _selectedGender = widget.profile.gender;
-    _selectedObjective = widget.profile.objective;
-    _selectedBirthDate = widget.profile.birthDate;
+
+    final profile = widget.profile;
+
+    if (profile == null) {
+      return;
+    }
+
+    _firstNameController.text = profile.firstName ?? '';
+    _lastNameController.text = profile.lastName ?? '';
+    _usernameController.text = profile.username ?? '';
+    _heightController.text = profile.height?.toString() ?? '';
+
+    _selectedGender = profile.gender;
+    _selectedObjective = profile.objective;
+    _selectedBirthDate = profile.birthDate;
+
+    _birthDateController.text = profile.birthDate ?? '';
   }
 
   @override
@@ -40,58 +59,93 @@ class _EditProfileScreenState extends ConsumerState<ScreenEditProfile> {
     _lastNameController.dispose();
     _usernameController.dispose();
     _heightController.dispose();
+    _birthDateController.dispose();
+
     super.dispose();
   }
 
   Future<void> _submit() async {
-    setState(() => _isLoading = true);
+    if (_isLoading) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
-      final updatedProfile = Profile(
-        id: widget.profile.id,
-        firstName: _firstNameController.text.trim().isEmpty
-            ? null
-            : _firstNameController.text.trim(),
-        lastName: _lastNameController.text.trim().isEmpty
-            ? null
-            : _lastNameController.text.trim(),
-        username: _usernameController.text.trim().isEmpty
-            ? null
-            : _usernameController.text.trim(),
-        height: double.tryParse(_heightController.text),
+      final profile = Profile(
+        // null lorsqu'il s'agit d'une création.
+        id: widget.profile?.id,
+        firstName: _nullableText(_firstNameController.text),
+        lastName: _nullableText(_lastNameController.text),
+        username: _nullableText(_usernameController.text),
+        height: double.tryParse(
+          _heightController.text.trim().replaceAll(',', '.'),
+        ),
         gender: _selectedGender,
         objective: _selectedObjective,
         birthDate: _selectedBirthDate,
       );
-      await ref.read(providerProfile.notifier).updateProfile(updatedProfile);
-      if (mounted) Navigator.of(context).pop();
-    } catch (exception) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(exception.toString()),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+
+      await ref.read(providerProfile.notifier).updateProfile(profile);
+
+      if (!mounted) {
+        return;
       }
+
+      // true indique à ScreenProfile qu'il faut recharger.
+      Navigator.of(context).pop(true);
+    } catch (exception) {
+      if (!mounted) {
+        return;
+      }
+
+      final message = exception.toString().replaceFirst('Exception: ', '');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _pickBirthDate() async {
+    final parsedDate = _selectedBirthDate == null
+        ? null
+        : DateTime.tryParse(_selectedBirthDate!);
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: _selectedBirthDate != null
-          ? DateTime.parse(_selectedBirthDate!)
-          : DateTime(1990),
+      initialDate: parsedDate ?? DateTime(1990),
       firstDate: DateTime(1920),
       lastDate: DateTime.now(),
     );
-    if (picked != null) {
-      setState(() {
-        _selectedBirthDate = picked.toIso8601String().split('T').first;
-      });
+
+    if (picked == null || !mounted) {
+      return;
     }
+
+    final formattedDate = picked.toIso8601String().split('T').first;
+
+    setState(() {
+      _selectedBirthDate = formattedDate;
+      _birthDateController.text = formattedDate;
+    });
+  }
+
+  String? _nullableText(String value) {
+    final trimmedValue = value.trim();
+
+    return trimmedValue.isEmpty ? null : trimmedValue;
   }
 
   @override
@@ -100,9 +154,11 @@ class _EditProfileScreenState extends ConsumerState<ScreenEditProfile> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        title: const Text(
-          'Modifier le profil',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          _isCreating ? 'Créer le profil' : 'Modifier le profil',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.close),
@@ -115,7 +171,9 @@ class _EditProfileScreenState extends ConsumerState<ScreenEditProfile> {
                 ? const SizedBox(
                     height: 16,
                     width: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
                   )
                 : Text(
                     'Sauvegarder',
@@ -164,38 +222,54 @@ class _EditProfileScreenState extends ConsumerState<ScreenEditProfile> {
                 labelText: 'Taille (cm)',
                 prefixIcon: Icon(Icons.height),
               ),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
             const SizedBox(height: 16),
             GestureDetector(
               onTap: _pickBirthDate,
               child: AbsorbPointer(
                 child: TextField(
-                  decoration: InputDecoration(
+                  controller: _birthDateController,
+                  decoration: const InputDecoration(
                     labelText: 'Date de naissance',
-                    prefixIcon: const Icon(Icons.cake_outlined),
-                    hintText: _selectedBirthDate ?? 'Sélectionner une date',
+                    prefixIcon: Icon(Icons.cake_outlined),
+                    hintText: 'Sélectionner une date',
                   ),
-                  controller:
-                      TextEditingController(text: _selectedBirthDate ?? ''),
                 ),
               ),
             ),
             const SizedBox(height: 16),
             DropdownMenu<String>(
-              initialSelection:
-                  ['MALE', 'FEMALE', 'OTHER'].contains(_selectedGender)
-                      ? _selectedGender
-                      : null,
+              initialSelection: [
+                'MALE',
+                'FEMALE',
+                'OTHER',
+              ].contains(_selectedGender)
+                  ? _selectedGender
+                  : null,
               label: const Text('Genre'),
               leadingIcon: const Icon(Icons.person_outline),
               expandedInsets: EdgeInsets.zero,
-              onSelected: (value) => setState(() => _selectedGender = value),
+              onSelected: (value) {
+                setState(() {
+                  _selectedGender = value;
+                });
+              },
               dropdownMenuEntries: const [
-                DropdownMenuEntry(value: 'MALE', label: 'Homme'),
-                DropdownMenuEntry(value: 'FEMALE', label: 'Femme'),
-                DropdownMenuEntry(value: 'OTHER', label: 'Autre'),
+                DropdownMenuEntry(
+                  value: 'MALE',
+                  label: 'Homme',
+                ),
+                DropdownMenuEntry(
+                  value: 'FEMALE',
+                  label: 'Femme',
+                ),
+                DropdownMenuEntry(
+                  value: 'OTHER',
+                  label: 'Autre',
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -205,22 +279,39 @@ class _EditProfileScreenState extends ConsumerState<ScreenEditProfile> {
                 'WEIGHT_LOSS',
                 'MAINTENANCE',
                 'ENDURANCE',
-                'STRENGTH'
+                'STRENGTH',
               ].contains(_selectedObjective)
                   ? _selectedObjective
                   : null,
               label: const Text('Objectif'),
               leadingIcon: const Icon(Icons.flag_outlined),
               expandedInsets: EdgeInsets.zero,
-              onSelected: (value) => setState(() => _selectedObjective = value),
+              onSelected: (value) {
+                setState(() {
+                  _selectedObjective = value;
+                });
+              },
               dropdownMenuEntries: const [
                 DropdownMenuEntry(
-                    value: 'MUSCLE_GAIN', label: 'Prise de masse'),
+                  value: 'MUSCLE_GAIN',
+                  label: 'Prise de masse',
+                ),
                 DropdownMenuEntry(
-                    value: 'WEIGHT_LOSS', label: 'Perte de poids'),
-                DropdownMenuEntry(value: 'MAINTENANCE', label: 'Maintien'),
-                DropdownMenuEntry(value: 'ENDURANCE', label: 'Endurance'),
-                DropdownMenuEntry(value: 'STRENGTH', label: 'Force'),
+                  value: 'WEIGHT_LOSS',
+                  label: 'Perte de poids',
+                ),
+                DropdownMenuEntry(
+                  value: 'MAINTENANCE',
+                  label: 'Maintien',
+                ),
+                DropdownMenuEntry(
+                  value: 'ENDURANCE',
+                  label: 'Endurance',
+                ),
+                DropdownMenuEntry(
+                  value: 'STRENGTH',
+                  label: 'Force',
+                ),
               ],
             ),
             const SizedBox(height: 32),

@@ -1,5 +1,6 @@
 package com.ironpath.backend.training.application;
 
+import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import com.ironpath.backend.training.api.dto.CreateProgramRequest;
 import com.ironpath.backend.training.api.dto.ProgramExerciseRequest;
@@ -20,6 +21,7 @@ public class UpdateProgramUseCase {
 
     private final WorkoutProgramRepository programRepository;
     private final ProgramMapper programMapper;
+    private final EmailVerificationGuard emailVerificationGuard;
 
     @Transactional
     public ProgramResponse execute(UUID userId, UUID programId, CreateProgramRequest request) {
@@ -29,6 +31,7 @@ public class UpdateProgramUseCase {
         if (!program.getUser().getId().equals(userId)) {
             throw new UnauthorizedException("Ce programme ne vous appartient pas");
         }
+        emailVerificationGuard.check(program.getUser());
 
         if (request.name() != null) {
             program.setName(request.name());

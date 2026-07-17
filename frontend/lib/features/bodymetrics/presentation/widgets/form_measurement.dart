@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/provider_enums.dart';
 import '../../domain/models/body_measurement.dart';
 import '../providers/provider_bodymetrics.dart';
+import '../../../profile/presentation/providers/provider_profile.dart';
 
 class FormMeasurement extends ConsumerStatefulWidget {
   final BodyMeasurement? measurementToEdit;
@@ -14,6 +16,7 @@ class FormMeasurement extends ConsumerStatefulWidget {
 
 class _FormMeasurementState extends ConsumerState<FormMeasurement> {
   final _weightController = TextEditingController();
+  final _heightController = TextEditingController();
   final _chestController = TextEditingController();
   final _waistController = TextEditingController();
   final _hipsController = TextEditingController();
@@ -43,11 +46,19 @@ class _FormMeasurementState extends ConsumerState<FormMeasurement> {
       _rightCalfController.text = measurement.rightCalf?.toString() ?? '';
       _notesController.text = measurement.notes ?? '';
     }
+
+    Future.microtask(() {
+      final profile = ref.read(providerProfile).profile;
+      if (profile?.height != null && widget.measurementToEdit == null) {
+        _heightController.text = profile!.height.toString();
+      }
+    });
   }
 
   @override
   void dispose() {
     _weightController.dispose();
+    _heightController.dispose();
     _chestController.dispose();
     _waistController.dispose();
     _hipsController.dispose();
@@ -116,10 +127,18 @@ class _FormMeasurementState extends ConsumerState<FormMeasurement> {
     String label, {
     bool decimal = false,
     int maxLines = 1,
+    bool readOnly = false,
   }) {
     return TextField(
       controller: controller,
-      decoration: InputDecoration(labelText: label),
+      readOnly: readOnly,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: readOnly,
+        fillColor: readOnly
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : null,
+      ),
       keyboardType: decimal
           ? const TextInputType.numberWithOptions(decimal: true)
           : maxLines > 1
@@ -131,17 +150,36 @@ class _FormMeasurementState extends ConsumerState<FormMeasurement> {
 
   @override
   Widget build(BuildContext context) {
+    final unitSystem = ref.watch(providerUnitSystem);
+
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
           24, 16, 24, 24 + MediaQuery.of(context).viewInsets.bottom),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTextField(_weightController, 'Poids (kg)', decimal: true),
+          _buildTextField(_weightController, 'Poids (${unitSystem.weightUnit})',
+              decimal: true),
+          const SizedBox(height: 12),
+          _buildTextField(
+            _heightController,
+            'Taille (${unitSystem.lengthUnit})',
+            decimal: true,
+            readOnly: true,
+          ),
           const SizedBox(height: 16),
-          const Text(
-            'Mensurations',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          Row(
+            children: [
+              const Text(
+                'Mensurations',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '(${unitSystem.lengthUnit})',
+                style: const TextStyle(color: Colors.grey, fontSize: 13),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Row(

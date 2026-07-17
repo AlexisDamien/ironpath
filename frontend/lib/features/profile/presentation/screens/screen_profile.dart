@@ -30,6 +30,7 @@ class _ProfileScreenState extends ConsumerState<ScreenProfile> {
   Widget build(BuildContext context) {
     final stateProfile = ref.watch(providerProfile);
     final bodyMetricsState = ref.watch(providerBodyMetrics);
+    final profile = stateProfile.profile;
 
     final lastComposition = bodyMetricsState.compositions.isNotEmpty
         ? bodyMetricsState.compositions.first
@@ -80,15 +81,23 @@ class _ProfileScreenState extends ConsumerState<ScreenProfile> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     CardProfile(
-                      profile: stateProfile.profile,
-                      onEdit: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          fullscreenDialog: true,
-                          builder: (context) => ScreenEditProfile(
-                            profile: stateProfile.profile!,
+                      profile: profile,
+                      onEdit: () async {
+                        final saved = await Navigator.of(context).push<bool>(
+                          MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => ScreenEditProfile(
+                              profile: profile,
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+
+                        if (saved == true && context.mounted) {
+                          await ref
+                              .read(providerProfile.notifier)
+                              .loadProfile();
+                        }
+                      },
                     ),
                     const SizedBox(height: 16),
                     if (lastComposition != null)

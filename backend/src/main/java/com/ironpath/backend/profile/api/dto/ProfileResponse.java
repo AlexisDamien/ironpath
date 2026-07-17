@@ -12,5 +12,6 @@ public record ProfileResponse(
         String gender,
         String objective,
         String username,
-        String avatarUrl
+        String avatarUrl,
+        boolean profileComplete
 ) {}

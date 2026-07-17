@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/widgets/form_password.dart';
+import '../../../profile/presentation/providers/provider_profile.dart';
 import '../providers/provider_identity.dart';
 import '../../domain/state_identity.dart';
-import '../../../../core/templates/legal_texts.dart';
+import '../../../../core/constants/legal_texts.dart';
 
 class ScreenRegister extends ConsumerStatefulWidget {
   const ScreenRegister({super.key});
@@ -61,14 +62,10 @@ class _ScreenRegisterState extends ConsumerState<ScreenRegister> {
     final authState = ref.watch(providerIdentity);
 
     ref.listen(providerIdentity, (previous, next) {
-      if (next.status == StatusAuth.unauthenticated &&
+      if (next.status == StatusAuth.authenticated &&
           previous?.status == StatusAuth.loading) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Compte créé ! Vérifiez votre email.'),
-          ),
-        );
-        context.go('/login');
+        ref.read(providerProfile.notifier).loadProfile();
+        context.go('/onboarding');
       }
       if (next.status == StatusAuth.error && next.errorMessage != null) {
         ScaffoldMessenger.of(context).showSnackBar(

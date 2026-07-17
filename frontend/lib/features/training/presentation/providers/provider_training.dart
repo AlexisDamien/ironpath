@@ -43,7 +43,7 @@ class ProviderTrainingNotifier extends StateNotifier<StateTraining> {
         state = state.copyWith(activeSession: session);
       }
     } catch (exception) {
-      // Pas de session active
+      // Pas de session active — c'est un cas normal, pas une erreur à afficher
     }
   }
 

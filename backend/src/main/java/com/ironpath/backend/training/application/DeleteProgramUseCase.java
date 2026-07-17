@@ -1,5 +1,6 @@
 package com.ironpath.backend.training.application;
 
+import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import com.ironpath.backend.training.domain.repository.WorkoutProgramRepository;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import java.util.UUID;
 public class DeleteProgramUseCase {
 
     private final WorkoutProgramRepository programRepository;
+    private final EmailVerificationGuard emailVerificationGuard;
 
     @Transactional
     public void execute(UUID userId, UUID programId) {
@@ -21,6 +23,7 @@ public class DeleteProgramUseCase {
         if (!program.getUser().getId().equals(userId)) {
             throw new UnauthorizedException("Ce programme ne vous appartient pas");
         }
+        emailVerificationGuard.check(program.getUser());
 
         programRepository.delete(program);
     }

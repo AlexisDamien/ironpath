@@ -67,7 +67,7 @@ public class SaveProfileUseCase  {
                 profile.getGender(),
                 profile.getObjective(),
                 profile.getUsername(),
-                profile.getAvatarUrl()
+                profile.getAvatarUrl(),
+                GetProfileUseCase.isComplete(profile)
         );
-    }
-}
+    }}

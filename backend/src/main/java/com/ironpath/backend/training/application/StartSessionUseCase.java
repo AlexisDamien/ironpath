@@ -1,6 +1,7 @@
 package com.ironpath.backend.training.application;
 
 import com.ironpath.backend.identity.domain.repository.UserRepository;
+import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import com.ironpath.backend.training.api.dto.SessionResponse;
 import com.ironpath.backend.training.api.dto.StartSessionRequest;
@@ -20,11 +21,13 @@ public class StartSessionUseCase {
     private final UserRepository userRepository;
     private final WorkoutProgramRepository programRepository;
     private final SessionMapper sessionMapper;
+    private final EmailVerificationGuard emailVerificationGuard;
 
     @Transactional
     public SessionResponse execute(UUID userId, StartSessionRequest request) {
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new UnauthorizedException("Utilisateur introuvable"));
+        emailVerificationGuard.check(user);
         boolean hasActiveSession = sessionRepository
                 .existsByUserIdAndStatus(userId, "IN_PROGRESS");
         if (hasActiveSession) {

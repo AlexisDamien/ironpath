@@ -8,6 +8,7 @@ import com.ironpath.backend.bodymetrics.domain.repository.BodyCompositionReposit
 import com.ironpath.backend.bodymetrics.domain.repository.BodyMeasurementRepository;
 import com.ironpath.backend.profile.domain.model.Profile;
 import com.ironpath.backend.profile.domain.repository.ProfileRepository;
+import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import com.ironpath.backend.shared.utils.FormatUtils;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class UpdateCompositionUseCase {
     private final BodyCompositionRepository compositionRepository;
     private final BodyMeasurementRepository measurementRepository;
     private final ProfileRepository profileRepository;
+    private final EmailVerificationGuard emailVerificationGuard;
 
     public CompositionResponse execute(UUID userId, UUID compositionId, SaveCompositionRequest request) {
         BodyComposition composition = compositionRepository.findById(compositionId)
@@ -32,6 +34,7 @@ public class UpdateCompositionUseCase {
         if (!composition.getUser().getId().equals(userId)) {
             throw new UnauthorizedException("Cette composition ne vous appartient pas");
         }
+        emailVerificationGuard.check(composition.getUser());
 
         Profile profile = profileRepository.findByUserId(userId).orElse(null);
 

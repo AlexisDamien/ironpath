@@ -11,19 +11,26 @@ class RepositoryIdentity {
   })  : _dio = dio,
         _tokenStorage = tokenStorage;
 
-  Future<void> register({
+  Future<bool> register({
     required String email,
     required String password,
     required bool rgpdConsent,
   }) async {
-    await _dio.post('/auth/register', data: {
+    final response = await _dio.post('/auth/register', data: {
       'email': email,
       'password': password,
       'rgpdConsent': rgpdConsent,
     });
+
+    await _tokenStorage.saveTokens(
+      accessToken: response.data['token'],
+      refreshToken: response.data['refreshToken'],
+    );
+
+    return response.data['emailVerified'] ?? false;
   }
 
-  Future<void> login({
+  Future<bool> login({
     required String email,
     required String password,
   }) async {
@@ -36,6 +43,8 @@ class RepositoryIdentity {
       accessToken: response.data['token'],
       refreshToken: response.data['refreshToken'],
     );
+
+    return response.data['emailVerified'] ?? false;
   }
 
   Future<void> logout() async {
@@ -57,5 +66,14 @@ class RepositoryIdentity {
     await _dio.delete('/users/account', data: {
       'currentPassword': password,
     });
+  }
+
+  Future<bool> checkEmailVerificationStatus() async {
+    final response = await _dio.get('/auth/email-verification-status');
+    return response.data['emailVerified'] ?? false;
+  }
+
+  Future<void> resendVerificationEmail() async {
+    await _dio.post('/auth/resend-verification');
   }
 }

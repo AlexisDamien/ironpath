@@ -107,7 +107,7 @@ class _FormPasswordState extends State<FormPassword> {
                 ),
               ),
               Text(
-                '${_strength}/5',
+                '$_strength/5',
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               ),
             ],

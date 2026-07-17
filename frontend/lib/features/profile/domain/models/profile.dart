@@ -1,5 +1,5 @@
 class Profile {
-  final String id;
+  final String? id;
   final String? firstName;
   final String? lastName;
   final String? username;
@@ -7,6 +7,7 @@ class Profile {
   final double? height;
   final String? gender;
   final String? objective;
+  final bool isProfileComplete;
 
   Profile({
     required this.id,
@@ -17,6 +18,7 @@ class Profile {
     this.height,
     this.gender,
     this.objective,
+    this.isProfileComplete = false,
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class Profile {
       height: json['height']?.toDouble(),
       gender: json['gender'],
       objective: json['objective'],
+      isProfileComplete: json['profileComplete'] ?? false,
     );
   }
 
