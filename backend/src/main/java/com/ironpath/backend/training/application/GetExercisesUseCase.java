@@ -14,26 +14,16 @@ public class GetExercisesUseCase {
     private final ExerciseRepository exerciseRepository;
 
     public List<ExerciseResponse> execute(String search, String muscleGroup) {
-        if (search != null && !search.isBlank()) {
-            return exerciseRepository.findByNameContainingIgnoreCase(search)
-                    .stream()
-                    .map(this::toResponse)
-                    .toList();
-        }
-        if (muscleGroup != null && !muscleGroup.isBlank()) {
-            return exerciseRepository.findByMuscleGroupIgnoreCase(muscleGroup)
-                    .stream()
-                    .map(this::toResponse)
-                    .toList();
-        }
-        return exerciseRepository.findAll()
+        String normalizedSearch = (search != null && !search.isBlank()) ? search : null;
+        String normalizedMuscleGroup = (muscleGroup != null && !muscleGroup.isBlank()) ? muscleGroup : null;
+
+        return exerciseRepository.search(normalizedSearch, normalizedMuscleGroup)
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    private ExerciseResponse toResponse(
-            com.ironpath.backend.training.domain.model.Exercise exercise) {
+    private ExerciseResponse toResponse(com.ironpath.backend.training.domain.model.Exercise exercise) {
         return new ExerciseResponse(
                 exercise.getId(),
                 exercise.getName(),

@@ -1,8 +1,10 @@
 package com.ironpath.backend.training.application;
 
 import com.ironpath.backend.training.api.dto.ProgramExerciseResponse;
+import com.ironpath.backend.training.api.dto.ProgramExerciseSetResponse;
 import com.ironpath.backend.training.api.dto.ProgramResponse;
 import com.ironpath.backend.training.domain.model.ProgramExercise;
+import com.ironpath.backend.training.domain.model.ProgramExerciseSet;
 import com.ironpath.backend.training.domain.model.WorkoutProgram;
 import org.springframework.stereotype.Component;
 import java.util.List;
@@ -27,14 +29,27 @@ public class ProgramMapper {
     }
 
     private ProgramExerciseResponse toExerciseResponse(ProgramExercise exercise) {
+        List<ProgramExerciseSetResponse> setResponses = exercise.getSets()
+                .stream()
+                .map(this::toSetResponse)
+                .toList();
+
         return new ProgramExerciseResponse(
                 exercise.getId(),
                 exercise.getExerciseId(),
                 exercise.getExerciseOrder(),
-                exercise.getTargetSets(),
-                exercise.getTargetReps(),
-                exercise.getTargetWeightKg(),
-                exercise.getRestSeconds()
+                exercise.getSameConfigForAllSets(),
+                setResponses
+        );
+    }
+
+    private ProgramExerciseSetResponse toSetResponse(ProgramExerciseSet set) {
+        return new ProgramExerciseSetResponse(
+                set.getId(),
+                set.getSetOrder(),
+                set.getTargetReps(),
+                set.getTargetWeightKg(),
+                set.getRestSeconds()
         );
     }
 }

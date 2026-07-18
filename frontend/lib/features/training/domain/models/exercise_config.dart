@@ -1,17 +1,16 @@
 import 'exercise.dart';
+import 'exercise_set_config.dart';
 
 class ExerciseConfig {
   final Exercise exercise;
-  final int targetSets;
-  final int targetReps;
-  final double? targetWeight;
-  final int restSeconds;
+  final bool sameConfigForAllSets;
+  final List<ExerciseSetConfig> sets;
 
   ExerciseConfig({
     required this.exercise,
-    required this.targetSets,
-    required this.targetReps,
-    this.targetWeight,
-    required this.restSeconds,
+    this.sameConfigForAllSets = true,
+    required this.sets,
   });
+
+  int get setsCount => sets.length;
 }

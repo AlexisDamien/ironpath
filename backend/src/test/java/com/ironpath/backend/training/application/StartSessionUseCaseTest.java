@@ -2,6 +2,7 @@ package com.ironpath.backend.training.application;
 
 import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.identity.domain.repository.UserRepository;
+import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import com.ironpath.backend.training.api.dto.SessionResponse;
 import com.ironpath.backend.training.api.dto.StartSessionRequest;
@@ -37,6 +38,9 @@ class StartSessionUseCaseTest {
 
     @Mock
     private SessionMapper sessionMapper;
+
+    @Mock
+    private EmailVerificationGuard emailVerificationGuard;
 
     @InjectMocks
     private StartSessionUseCase startSessionUseCase;

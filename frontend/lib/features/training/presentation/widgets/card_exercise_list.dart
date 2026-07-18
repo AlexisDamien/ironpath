@@ -43,13 +43,33 @@ class CardExerciseList extends ConsumerWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.info_outline),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    fullscreenDialog: true,
-                    builder: (context) =>
-                        ScreenExerciseDetail(exercise: exercise),
-                  ),
-                ),
+                onPressed: () async {
+                  final result = await Navigator.of(context).push<String>(
+                    MaterialPageRoute(
+                      fullscreenDialog: true,
+                      builder: (context) => ScreenExerciseDetail(
+                        exercise: exercise,
+                        showAddButton: true,
+                        isSelected: isSelected,
+                      ),
+                    ),
+                  );
+                  if (!context.mounted) return;
+                  if (result == 'add_to_program') {
+                    final config = await showDialog<ExerciseConfig>(
+                      context: context,
+                      builder: (context) =>
+                          PopupExerciseConfig(exercise: exercise),
+                    );
+                    if (config != null) onToggle(config);
+                  } else if (result == 'remove_from_program' && isSelected) {
+                    onToggle(
+                      selectedExercises.firstWhere(
+                        (config) => config.exercise.id == exercise.id,
+                      ),
+                    );
+                  }
+                },
               ),
               isSelected
                   ? Icon(

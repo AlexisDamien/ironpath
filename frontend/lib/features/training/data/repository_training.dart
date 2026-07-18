@@ -24,18 +24,7 @@ class RepositoryTraining {
     final response = await _apiClient.post('/training/programs', data: {
       'name': name,
       'description': description,
-      'exercises': exercises
-          .asMap()
-          .entries
-          .map((entry) => {
-                'exerciseId': entry.value.exercise.id,
-                'exerciseOrder': entry.key + 1,
-                'targetSets': entry.value.targetSets,
-                'targetReps': entry.value.targetReps,
-                'targetWeightKg': entry.value.targetWeight,
-                'restSeconds': entry.value.restSeconds,
-              })
-          .toList(),
+      'exercises': _serializeExercises(exercises),
     });
     return WorkoutProgram.fromJson(response.data);
   }
@@ -51,21 +40,31 @@ class RepositoryTraining {
       data: {
         'name': name,
         'description': description,
-        'exercises': exercises
-            .asMap()
-            .entries
-            .map((entry) => {
-                  'exerciseId': entry.value.exercise.id,
-                  'exerciseOrder': entry.key + 1,
-                  'targetSets': entry.value.targetSets,
-                  'targetReps': entry.value.targetReps,
-                  'targetWeightKg': entry.value.targetWeight,
-                  'restSeconds': entry.value.restSeconds,
-                })
-            .toList(),
+        'exercises': _serializeExercises(exercises),
       },
     );
     return WorkoutProgram.fromJson(response.data);
+  }
+
+  List<Map<String, dynamic>> _serializeExercises(
+      List<ExerciseConfig> exercises) {
+    return exercises
+        .asMap()
+        .entries
+        .map((entry) => {
+              'exerciseId': entry.value.exercise.id,
+              'exerciseOrder': entry.key + 1,
+              'sameConfigForAllSets': entry.value.sameConfigForAllSets,
+              'sets': entry.value.sets
+                  .map((set) => {
+                        'setOrder': set.setOrder,
+                        'targetReps': set.targetReps,
+                        'targetWeightKg': set.targetWeight,
+                        'restSeconds': set.restSeconds,
+                      })
+                  .toList(),
+            })
+        .toList();
   }
 
   Future<void> deleteProgram(String programId) async {

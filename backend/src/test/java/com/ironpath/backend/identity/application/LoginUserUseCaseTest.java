@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -88,7 +89,7 @@ class LoginUserUseCaseTest {
     }
 
     @Test
-    void execute_shouldThrowUnauthorizedException_whenEmailNotVerified() {
+    void execute_shouldAllowLogin_whenEmailNotVerified() {
         User user = User.builder()
                 .id(UUID.randomUUID())
                 .email("test@ironpath.com")
@@ -98,9 +99,12 @@ class LoginUserUseCaseTest {
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+        when(jwtService.generateToken(any(UUID.class), anyString())).thenReturn("accessToken");
+        when(refreshTokenRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        assertThrows(UnauthorizedException.class, () ->
-                loginUserUseCase.execute("test@ironpath.com", "password123")
-        );
+        LoginResponse response = loginUserUseCase.execute("test@ironpath.com", "password123");
+
+        assertNotNull(response.token());
+        assertFalse(response.emailVerified());
     }
 }

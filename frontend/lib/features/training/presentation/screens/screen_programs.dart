@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/provider_training.dart';
 import '../widgets/card_program.dart';
-import '../widgets/popup_create_program.dart';
+import 'screen_edit_program.dart';
 import '../../domain/state_training.dart';
 import '../widgets/sheet_start_session.dart';
 import '../../../identity/presentation/providers/provider_identity.dart';
@@ -37,7 +37,7 @@ class _ProgramsScreenState extends ConsumerState<ScreenPrograms> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: canWrite ? () => _showCreateProgramModal(context) : null,
+            onPressed: canWrite ? () => _openCreateProgram(context) : null,
             tooltip:
                 canWrite ? null : 'Vérifie ton email pour créer un programme',
           ),
@@ -95,8 +95,7 @@ class _ProgramsScreenState extends ConsumerState<ScreenPrograms> {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed:
-                  canWrite ? () => _showCreateProgramModal(context) : null,
+              onPressed: canWrite ? () => _openCreateProgram(context) : null,
               icon: const Icon(Icons.add),
               label: const Text('Créer un programme'),
             ),
@@ -124,7 +123,7 @@ class _ProgramsScreenState extends ConsumerState<ScreenPrograms> {
             onEdit: () => Navigator.of(context).push(
               MaterialPageRoute(
                 fullscreenDialog: true,
-                builder: (context) => PopupCreateProgram(program: program),
+                builder: (context) => ScreenEditProgram(program: program),
               ),
             ),
           );
@@ -133,11 +132,11 @@ class _ProgramsScreenState extends ConsumerState<ScreenPrograms> {
     );
   }
 
-  void _showCreateProgramModal(BuildContext context) {
+  void _openCreateProgram(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (context) => const PopupCreateProgram(),
+        builder: (context) => const ScreenEditProgram(),
       ),
     );
   }

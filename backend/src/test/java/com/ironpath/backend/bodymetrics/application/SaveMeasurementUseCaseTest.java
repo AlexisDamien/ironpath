@@ -6,6 +6,7 @@ import com.ironpath.backend.bodymetrics.domain.model.BodyMeasurement;
 import com.ironpath.backend.bodymetrics.domain.repository.BodyMeasurementRepository;
 import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.identity.domain.repository.UserRepository;
+import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,6 +30,9 @@ class SaveMeasurementUseCaseTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private EmailVerificationGuard emailVerificationGuard;
 
     @InjectMocks
     private SaveMeasurementUseCase saveMeasurementUseCase;

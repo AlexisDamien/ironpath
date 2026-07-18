@@ -3,8 +3,15 @@ import '../../domain/models/exercise.dart';
 
 class ScreenExerciseDetail extends StatelessWidget {
   final Exercise exercise;
+  final bool showAddButton;
+  final bool isSelected;
 
-  const ScreenExerciseDetail({super.key, required this.exercise});
+  const ScreenExerciseDetail({
+    super.key,
+    required this.exercise,
+    this.showAddButton = false,
+    this.isSelected = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +95,29 @@ class ScreenExerciseDetail extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: showAddButton
+          ? Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => Navigator.of(context).pop(
+                    isSelected ? 'remove_from_program' : 'add_to_program',
+                  ),
+                  icon: Icon(
+                    isSelected
+                        ? Icons.remove_circle_outline
+                        : Icons.add_circle_outline,
+                  ),
+                  label: Text(
+                    isSelected
+                        ? 'Retirer du programme'
+                        : 'Ajouter au programme',
+                  ),
+                ),
+              ),
+            )
+          : null,
     );
   }
 

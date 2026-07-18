@@ -1,11 +1,15 @@
 package com.ironpath.backend.identity.application;
 
+import com.ironpath.backend.identity.api.dto.LoginResponse;
 import com.ironpath.backend.identity.api.dto.RegisterRequest;
 import com.ironpath.backend.identity.domain.model.EmailVerificationToken;
+import com.ironpath.backend.identity.domain.model.RefreshToken;
 import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.identity.domain.repository.ConsentRecordRepository;
 import com.ironpath.backend.identity.domain.repository.EmailVerificationTokenRepository;
+import com.ironpath.backend.identity.domain.repository.RefreshTokenRepository;
 import com.ironpath.backend.identity.domain.repository.UserRepository;
+import com.ironpath.backend.shared.infrastructure.JwtService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,6 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -36,6 +43,12 @@ class RegisterUserUseCaseTest {
     @Mock
     private ConsentRecordRepository consentRecordRepository;
 
+    @Mock
+    private JwtService jwtService;
+
+    @Mock
+    private RefreshTokenRepository refreshTokenRepository;
+
     @InjectMocks
     private RegisterUserUseCase registerUserUseCase;
 
@@ -45,11 +58,22 @@ class RegisterUserUseCaseTest {
 
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("hashedPassword");
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(tokenRepository.save(any(EmailVerificationToken.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User savedUser = invocation.getArgument(0);
+            savedUser.setId(UUID.randomUUID());
+            return savedUser;
+        });
+        when(tokenRepository.save(any(EmailVerificationToken.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(jwtService.generateToken(any(UUID.class), anyString())).thenReturn("accessToken");
+        when(refreshTokenRepository.save(any(RefreshToken.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        registerUserUseCase.execute(request, "127.0.0.1");
+        LoginResponse response = registerUserUseCase.execute(request, "127.0.0.1");
 
+        assertNotNull(response);
+        assertNotNull(response.token());
+        assertNotNull(response.refreshToken());
         verify(userRepository).save(any(User.class));
         verify(tokenRepository).save(any(EmailVerificationToken.class));
         verify(emailService).sendVerificationEmail(anyString(), anyString());

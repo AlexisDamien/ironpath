@@ -3,6 +3,8 @@ package com.ironpath.backend.training.domain.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -27,17 +29,13 @@ public class ProgramExercise {
     @Column(name = "exercise_order", nullable = false)
     private Integer exerciseOrder;
 
-    @Column(name = "target_sets")
-    private Integer targetSets;
+    @Column(name = "same_config_for_all_sets", nullable = false)
+    private Boolean sameConfigForAllSets;
 
-    @Column(name = "target_reps")
-    private Integer targetReps;
-
-    @Column(name = "target_weight_kg")
-    private Double targetWeightKg;
-
-    @Column(name = "rest_seconds")
-    private Integer restSeconds;
+    @OneToMany(mappedBy = "programExercise", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("setOrder ASC")
+    @Builder.Default
+    private List<ProgramExerciseSet> sets = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -45,5 +43,8 @@ public class ProgramExercise {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        if (sameConfigForAllSets == null) {
+            sameConfigForAllSets = true;
+        }
     }
 }

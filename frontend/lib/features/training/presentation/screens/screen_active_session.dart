@@ -161,9 +161,12 @@ class ScreenActiveSession extends ConsumerWidget {
             spacing: 8,
             runSpacing: 4,
             children: program.exercises.map((exercise) {
+              final setsCount = exercise.sets.length;
+              final firstSet =
+                  exercise.sets.isNotEmpty ? exercise.sets.first : null;
               return Chip(
                 label: Text(
-                  '${exercise.exerciseId} • ${exercise.targetSets}x${exercise.targetReps}',
+                  '${exercise.exerciseId} • ${setsCount}x${firstSet?.targetReps ?? '-'}',
                   style: const TextStyle(fontSize: 12),
                 ),
                 backgroundColor: Theme.of(context).colorScheme.surface,

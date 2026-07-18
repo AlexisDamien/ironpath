@@ -1,0 +1,1 @@
+ALTER TABLE program_exercise_sets ALTER COLUMN target_weight_kg TYPE DOUBLE PRECISION;

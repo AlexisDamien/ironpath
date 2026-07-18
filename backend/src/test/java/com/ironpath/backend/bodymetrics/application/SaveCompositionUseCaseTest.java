@@ -10,6 +10,7 @@ import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.identity.domain.repository.UserRepository;
 import com.ironpath.backend.profile.domain.model.Profile;
 import com.ironpath.backend.profile.domain.repository.ProfileRepository;
+import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,6 +42,9 @@ class SaveCompositionUseCaseTest {
 
     @Mock
     private ProfileRepository profileRepository;
+
+    @Mock
+    private EmailVerificationGuard emailVerificationGuard;
 
     @InjectMocks
     private SaveCompositionUseCase saveCompositionUseCase;

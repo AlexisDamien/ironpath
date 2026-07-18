@@ -14,53 +14,125 @@ import java.util.Base64;
 public class AesGcmCipherService {
 
     private static final String ALGORITHM = "AES/GCM/NoPadding";
+    private static final String KEY_ALGORITHM = "AES";
+
     private static final int GCM_TAG_LENGTH_BITS = 128;
     private static final int GCM_IV_LENGTH_BYTES = 12;
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @Value("${app.encryption.key}")
     private String base64Key;
 
     public String encrypt(String plainText) {
-        if (plainText == null) return null;
+        if (plainText == null) {
+            return null;
+        }
+
         try {
             byte[] iv = new byte[GCM_IV_LENGTH_BYTES];
-            new SecureRandom().nextBytes(iv);
+            SECURE_RANDOM.nextBytes(iv);
 
             Cipher cipher = Cipher.getInstance(ALGORITHM);
-            SecretKeySpec keySpec = new SecretKeySpec(Base64.getDecoder().decode(base64Key), "AES");
-            cipher.init(Cipher.ENCRYPT_MODE, keySpec, new GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv));
+            SecretKeySpec keySpec = createKeySpec();
 
-            byte[] cipherText = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
+            cipher.init(
+                    Cipher.ENCRYPT_MODE,
+                    keySpec,
+                    new GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv)
+            );
+
+            byte[] cipherText = cipher.doFinal(
+                    plainText.getBytes(StandardCharsets.UTF_8)
+            );
 
             byte[] combined = new byte[iv.length + cipherText.length];
-            System.arraycopy(iv, 0, combined, 0, iv.length);
-            System.arraycopy(cipherText, 0, combined, iv.length, cipherText.length);
+
+            System.arraycopy(
+                    iv,
+                    0,
+                    combined,
+                    0,
+                    iv.length
+            );
+
+            System.arraycopy(
+                    cipherText,
+                    0,
+                    combined,
+                    iv.length,
+                    cipherText.length
+            );
 
             return Base64.getEncoder().encodeToString(combined);
-        } catch (Exception e) {
-            throw new IllegalStateException("Erreur de chiffrement", e);
+        } catch (Exception exception) {
+            throw new IllegalStateException(
+                    "Erreur de chiffrement",
+                    exception
+            );
         }
     }
 
     public String decrypt(String encoded) {
-        if (encoded == null) return null;
+        if (encoded == null) {
+            return null;
+        }
+
         try {
             byte[] combined = Base64.getDecoder().decode(encoded);
 
-            byte[] iv = new byte[GCM_IV_LENGTH_BYTES];
-            System.arraycopy(combined, 0, iv, 0, iv.length);
+            if (combined.length <= GCM_IV_LENGTH_BYTES) {
+                throw new IllegalArgumentException(
+                        "La valeur chiffrée est invalide"
+                );
+            }
 
-            byte[] cipherText = new byte[combined.length - iv.length];
-            System.arraycopy(combined, iv.length, cipherText, 0, cipherText.length);
+            byte[] iv = new byte[GCM_IV_LENGTH_BYTES];
+
+            System.arraycopy(
+                    combined,
+                    0,
+                    iv,
+                    0,
+                    iv.length
+            );
+
+            byte[] cipherText =
+                    new byte[combined.length - GCM_IV_LENGTH_BYTES];
+
+            System.arraycopy(
+                    combined,
+                    GCM_IV_LENGTH_BYTES,
+                    cipherText,
+                    0,
+                    cipherText.length
+            );
 
             Cipher cipher = Cipher.getInstance(ALGORITHM);
-            SecretKeySpec keySpec = new SecretKeySpec(Base64.getDecoder().decode(base64Key), "AES");
-            cipher.init(Cipher.DECRYPT_MODE, keySpec, new GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv));
+            SecretKeySpec keySpec = createKeySpec();
+
+            cipher.init(
+                    Cipher.DECRYPT_MODE,
+                    keySpec,
+                    new GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv)
+            );
 
             byte[] plainText = cipher.doFinal(cipherText);
-            return new String(plainText, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            throw new IllegalStateException("Erreur de déchiffrement", e);
+
+            return new String(
+                    plainText,
+                    StandardCharsets.UTF_8
+            );
+        } catch (Exception exception) {
+            throw new IllegalStateException(
+                    "Erreur de déchiffrement",
+                    exception
+            );
         }
+    }
+
+    private SecretKeySpec createKeySpec() {
+        byte[] decodedKey = Base64.getDecoder().decode(base64Key);
+        return new SecretKeySpec(decodedKey, KEY_ALGORITHM);
     }
 }

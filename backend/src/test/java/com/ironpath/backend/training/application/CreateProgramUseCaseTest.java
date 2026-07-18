@@ -2,9 +2,11 @@ package com.ironpath.backend.training.application;
 
 import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.identity.domain.repository.UserRepository;
+import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import com.ironpath.backend.training.api.dto.CreateProgramRequest;
 import com.ironpath.backend.training.api.dto.ProgramExerciseRequest;
+import com.ironpath.backend.training.api.dto.ProgramExerciseSetRequest;
 import com.ironpath.backend.training.api.dto.ProgramResponse;
 import com.ironpath.backend.training.domain.model.WorkoutProgram;
 import com.ironpath.backend.training.domain.repository.WorkoutProgramRepository;
@@ -36,6 +38,9 @@ class CreateProgramUseCaseTest {
     @Mock
     private ProgramMapper programMapper;
 
+    @Mock
+    private EmailVerificationGuard emailVerificationGuard;
+
     @InjectMocks
     private CreateProgramUseCase createProgramUseCase;
 
@@ -51,7 +56,17 @@ class CreateProgramUseCaseTest {
         CreateProgramRequest request = new CreateProgramRequest(
                 "PPL - Push Pull Legs",
                 "Programme 6 jours",
-                List.of(new ProgramExerciseRequest("0001", 1, 4, 8, 80.0, 120))
+                List.of(new ProgramExerciseRequest(
+                        "0001",
+                        1,
+                        true,
+                        List.of(
+                                new ProgramExerciseSetRequest(1, 8, 80.0, 120),
+                                new ProgramExerciseSetRequest(2, 8, 80.0, 120),
+                                new ProgramExerciseSetRequest(3, 8, 80.0, 120),
+                                new ProgramExerciseSetRequest(4, 8, 80.0, 120)
+                        )
+                ))
         );
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
@@ -79,7 +94,7 @@ class CreateProgramUseCaseTest {
     }
 
     @Test
-    void execute_shouldCreateProgramWithoutExercises_whenExercisesNull() {
+    void execute_shouldThrowIllegalArgumentException_whenExercisesNull() {
         UUID userId = UUID.randomUUID();
         User user = User.builder()
                 .id(userId)
@@ -90,14 +105,9 @@ class CreateProgramUseCaseTest {
         CreateProgramRequest request = new CreateProgramRequest("PPL", null, null);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(programRepository.save(any(WorkoutProgram.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-        when(programMapper.toResponse(any(WorkoutProgram.class)))
-                .thenReturn(new ProgramResponse(UUID.randomUUID(), "PPL", null, true, List.of(), null));
 
-        ProgramResponse response = createProgramUseCase.execute(userId, request);
-
-        assertNotNull(response);
-        verify(programRepository).save(any(WorkoutProgram.class));
+        assertThrows(IllegalArgumentException.class, () ->
+                createProgramUseCase.execute(userId, request)
+        );
     }
 }

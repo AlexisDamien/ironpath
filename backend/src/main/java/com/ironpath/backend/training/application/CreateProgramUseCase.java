@@ -5,8 +5,10 @@ import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import com.ironpath.backend.training.api.dto.CreateProgramRequest;
 import com.ironpath.backend.training.api.dto.ProgramExerciseRequest;
+import com.ironpath.backend.training.api.dto.ProgramExerciseSetRequest;
 import com.ironpath.backend.training.api.dto.ProgramResponse;
 import com.ironpath.backend.training.domain.model.ProgramExercise;
+import com.ironpath.backend.training.domain.model.ProgramExerciseSet;
 import com.ironpath.backend.training.domain.model.WorkoutProgram;
 import com.ironpath.backend.training.domain.repository.WorkoutProgramRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,30 +32,48 @@ public class CreateProgramUseCase {
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new UnauthorizedException("Utilisateur introuvable"));
         emailVerificationGuard.check(user);
+
+        if (request.exercises() == null || request.exercises().isEmpty()) {
+            throw new IllegalArgumentException("Au moins un exercice est requis");
+        }
+
         WorkoutProgram program = WorkoutProgram.builder()
                 .user(user)
                 .name(request.name())
                 .description(request.description())
                 .build();
 
-        if (request.exercises() != null) {
-            List<ProgramExercise> exercises = new ArrayList<>();
-            for (ProgramExerciseRequest exerciseRequest : request.exercises()) {
-                ProgramExercise exercise = ProgramExercise.builder()
-                        .program(program)
-                        .exerciseId(exerciseRequest.exerciseId())
-                        .exerciseOrder(exerciseRequest.exerciseOrder())
-                        .targetSets(exerciseRequest.targetSets())
-                        .targetReps(exerciseRequest.targetReps())
-                        .targetWeightKg(exerciseRequest.targetWeightKg())
-                        .restSeconds(exerciseRequest.restSeconds())
-                        .build();
-                exercises.add(exercise);
+        List<ProgramExercise> exercises = new ArrayList<>();
+        for (ProgramExerciseRequest exerciseRequest : request.exercises()) {
+            if (exerciseRequest.sets() == null || exerciseRequest.sets().isEmpty()) {
+                throw new IllegalArgumentException("Au moins une série est requise par exercice");
             }
-            program.setExercises(exercises);
+            ProgramExercise exercise = ProgramExercise.builder()
+                    .program(program)
+                    .exerciseId(exerciseRequest.exerciseId())
+                    .exerciseOrder(exerciseRequest.exerciseOrder())
+                    .sameConfigForAllSets(exerciseRequest.sameConfigForAllSets())
+                    .build();
+            exercise.setSets(toSets(exerciseRequest.sets(), exercise));
+            exercises.add(exercise);
         }
+        program.setExercises(exercises);
 
         WorkoutProgram savedProgram = programRepository.save(program);
         return programMapper.toResponse(savedProgram);
+    }
+
+    private List<ProgramExerciseSet> toSets(List<ProgramExerciseSetRequest> requests, ProgramExercise exercise) {
+        List<ProgramExerciseSet> sets = new ArrayList<>();
+        for (ProgramExerciseSetRequest setRequest : requests) {
+            sets.add(ProgramExerciseSet.builder()
+                    .programExercise(exercise)
+                    .setOrder(setRequest.setOrder())
+                    .targetReps(setRequest.targetReps())
+                    .targetWeightKg(setRequest.targetWeightKg())
+                    .restSeconds(setRequest.restSeconds())
+                    .build());
+        }
+        return sets;
     }
 }
