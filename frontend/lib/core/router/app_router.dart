@@ -10,9 +10,9 @@ import '../../features/profile/domain/state_profile.dart';
 import '../../features/profile/presentation/providers/provider_profile.dart';
 import '../../features/profile/presentation/screens/screen_onboarding.dart';
 import '../../features/training/presentation/screens/screen_programs.dart';
-import '../../features/training/presentation/screens/screen_active_session.dart';
 import '../../features/bodymetrics/presentation/screens/screen_bodymetrics.dart';
 import '../../features/profile/presentation/screens/screen_profile.dart';
+import '../../features/training/presentation/screens/screen_sessions.dart';
 import '../ui/app_shell.dart';
 
 class _RouterRefreshNotifier extends ChangeNotifier {
@@ -69,10 +69,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/onboarding',
         builder: (context, routerState) => const ScreenOnboarding(),
       ),
-      GoRoute(
-        path: '/session',
-        builder: (context, routerState) => const ScreenActiveSession(),
-      ),
       ShellRoute(
         builder: (context, routerState, child) => AppShell(child: child),
         routes: [
@@ -83,6 +79,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/programs',
             builder: (context, routerState) => const ScreenPrograms(),
+          ),
+          GoRoute(
+            path: '/session',
+            builder: (context, routerState) => const ScreenSessions(),
           ),
           GoRoute(
             path: '/bodymetrics',

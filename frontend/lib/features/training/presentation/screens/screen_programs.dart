@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ironpath/features/training/presentation/screens/screen_sessions.dart';
 import '../providers/provider_training.dart';
 import '../widgets/card_program.dart';
 import 'screen_edit_program.dart';
 import '../../domain/state_training.dart';
-import '../widgets/sheet_start_session.dart';
 import '../../../identity/presentation/providers/provider_identity.dart';
 
 class ScreenPrograms extends ConsumerStatefulWidget {
@@ -118,7 +118,7 @@ class _ProgramsScreenState extends ConsumerState<ScreenPrograms> {
               context: context,
               backgroundColor: Colors.transparent,
               useRootNavigator: true,
-              builder: (context) => const SheetStartSession(),
+              builder: (context) => const ScreenSessions(),
             ),
             onEdit: () => Navigator.of(context).push(
               MaterialPageRoute(

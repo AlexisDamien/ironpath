@@ -82,7 +82,7 @@ class _ScreenDashboardState extends ConsumerState<ScreenDashboard> {
 
   Widget _buildActiveSessionBanner(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push('/session'),
+      onTap: () => context.go('/session'),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(

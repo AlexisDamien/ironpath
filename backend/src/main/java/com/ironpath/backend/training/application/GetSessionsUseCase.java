@@ -19,7 +19,7 @@ public class GetSessionsUseCase {
 
     @Transactional(readOnly = true)
     public List<SessionResponse> execute(UUID userId) {
-        return sessionRepository.findByUserIdOrderByStartedAtDesc(userId)
+        return sessionRepository.findByUserIdAndStatusNotOrderByStartedAtDesc(userId, "IN_PROGRESS")
                 .stream()
                 .map(sessionMapper::toResponse)
                 .toList();

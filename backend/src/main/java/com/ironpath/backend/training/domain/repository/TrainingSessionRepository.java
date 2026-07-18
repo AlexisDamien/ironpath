@@ -11,6 +11,7 @@ import java.util.UUID;
 public interface TrainingSessionRepository extends JpaRepository<TrainingSession, UUID> {
 
     List<TrainingSession> findByUserIdOrderByStartedAtDesc(UUID userId);
+    List<TrainingSession> findByUserIdAndStatusNotOrderByStartedAtDesc(UUID userId, String status);
     Optional<TrainingSession> findByUserIdAndStatus(UUID userId, String status);
 
     boolean existsByUserIdAndStatus(UUID userId, String status);

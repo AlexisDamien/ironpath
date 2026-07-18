@@ -1,11 +1,11 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/identity/presentation/providers/provider_identity.dart';
 import '../../features/training/presentation/providers/provider_training.dart';
-import '../../features/training/presentation/widgets/sheet_start_session.dart';
+import '../../features/training/presentation/providers/provider_rest_timer.dart';
+import '../../features/training/presentation/screens/screen_rest_timer.dart';
+import '../widgets/component_email_verification_banner.dart';
 import 'nav_bar.dart';
 
 class AppShell extends ConsumerWidget {
@@ -13,34 +13,67 @@ class AppShell extends ConsumerWidget {
 
   const AppShell({super.key, required this.child});
 
+  String _formatSeconds(int totalSeconds) {
+    final minutes = totalSeconds ~/ 60;
+    final seconds = totalSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final trainingState = ref.watch(providerTraining);
     final hasActiveSession = trainingState.activeSession != null;
     final stateIdentity = ref.watch(providerIdentity);
-    final canWrite = stateIdentity.isEmailVerified;
+    final restTimerState = ref.watch(providerRestTimer);
 
     final location = GoRouterState.of(context).matchedLocation;
+    final isOnSessionScreen = location == '/session';
     final currentIndex = switch (location) {
       '/dashboard' => 0,
       '/programs' => 1,
+      '/session' => 2,
       '/bodymetrics' => 3,
       '/profile' => 4,
       _ => 0,
     };
 
+    final showFab =
+        hasActiveSession && (!isOnSessionScreen || restTimerState.isActive);
+
+    String fabLabel;
+    if (!restTimerState.isActive) {
+      fabLabel = 'Session active';
+    } else if (restTimerState.isOvertime) {
+      fabLabel = 'Repos +${_formatSeconds(restTimerState.overtimeSeconds)}';
+    } else {
+      fabLabel = 'Repos ${_formatSeconds(restTimerState.remainingSeconds)}';
+    }
+
     return Scaffold(
       body: Column(
         children: [
-          if (!stateIdentity.isEmailVerified) const _EmailVerificationBanner(),
+          if (!stateIdentity.isEmailVerified)
+            const ComponentEmailVerificationBanner(),
           Expanded(child: child),
         ],
       ),
-      floatingActionButton: hasActiveSession
+      floatingActionButton: showFab
           ? FloatingActionButton.extended(
-              onPressed: () => context.push('/session'),
-              icon: const Icon(Icons.fitness_center),
-              label: const Text('Session active'),
+              onPressed: () {
+                if (isOnSessionScreen && restTimerState.isActive) {
+                  Navigator.of(context, rootNavigator: true).push(
+                    MaterialPageRoute(
+                      fullscreenDialog: true,
+                      builder: (context) => const ScreenRestTimer(),
+                    ),
+                  );
+                } else {
+                  context.go('/session');
+                }
+              },
+              icon: Icon(
+                  restTimerState.isActive ? Icons.timer : Icons.fitness_center),
+              label: Text(fabLabel),
               backgroundColor: Theme.of(context).colorScheme.primary,
             )
           : null,
@@ -53,174 +86,13 @@ class AppShell extends ConsumerWidget {
             case 1:
               context.go('/programs');
             case 2:
-              if (canWrite) {
-                _startSession(context);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Vérifie ton email pour démarrer une session',
-                    ),
-                  ),
-                );
-              }
+              context.go('/session');
             case 3:
               context.go('/bodymetrics');
             case 4:
               context.go('/profile');
           }
         },
-      ),
-    );
-  }
-
-  void _startSession(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      useRootNavigator: true,
-      builder: (context) => const SheetStartSession(),
-    );
-  }
-}
-
-class _EmailVerificationBanner extends ConsumerStatefulWidget {
-  const _EmailVerificationBanner();
-
-  @override
-  ConsumerState<_EmailVerificationBanner> createState() =>
-      _EmailVerificationBannerState();
-}
-
-class _EmailVerificationBannerState
-    extends ConsumerState<_EmailVerificationBanner> {
-  bool _isChecking = false;
-  bool _isResending = false;
-  Timer? _cooldownTimer;
-  int _cooldownSeconds = 0;
-
-  @override
-  void dispose() {
-    _cooldownTimer?.cancel();
-    super.dispose();
-  }
-
-  void _startCooldown() {
-    setState(() => _cooldownSeconds = 60);
-    _cooldownTimer?.cancel();
-    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      if (_cooldownSeconds <= 1) {
-        timer.cancel();
-        setState(() => _cooldownSeconds = 0);
-      } else {
-        setState(() => _cooldownSeconds -= 1);
-      }
-    });
-  }
-
-  Future<void> _checkStatus() async {
-    setState(() => _isChecking = true);
-    await ref.read(providerIdentity.notifier).refreshEmailVerificationStatus();
-    if (!mounted) return;
-    setState(() => _isChecking = false);
-
-    final isVerified = ref.read(providerIdentity).isEmailVerified;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          isVerified
-              ? 'Email vérifié !'
-              : 'Email pas encore vérifié — vérifie ta boîte mail',
-        ),
-      ),
-    );
-  }
-
-  Future<void> _resend() async {
-    setState(() => _isResending = true);
-    try {
-      await ref.read(providerIdentity.notifier).resendVerificationEmail();
-      if (!mounted) return;
-      _startCooldown();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email de vérification renvoyé')),
-      );
-    } catch (exception) {
-      if (!mounted) return;
-      final message = exception.toString().replaceFirst('Exception: ', '');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
-    } finally {
-      if (mounted) setState(() => _isResending = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: Theme.of(context).colorScheme.errorContainer,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Icon(
-            Icons.warning_amber_outlined,
-            color: Theme.of(context).colorScheme.onErrorContainer,
-            size: 20,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'Vérifie ton email pour débloquer toutes les fonctionnalités',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onErrorContainer,
-                fontSize: 12,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: (_isResending || _cooldownSeconds > 0) ? null : _resend,
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
-            ),
-            child: _isResending
-                ? SizedBox(
-                    height: 14,
-                    width: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Theme.of(context).colorScheme.onErrorContainer,
-                    ),
-                  )
-                : Text(
-                    _cooldownSeconds > 0
-                        ? 'Renvoyer (${_cooldownSeconds}s)'
-                        : 'Renvoyer',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-          ),
-          TextButton(
-            onPressed: _isChecking ? null : _checkStatus,
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
-            ),
-            child: _isChecking
-                ? SizedBox(
-                    height: 14,
-                    width: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Theme.of(context).colorScheme.onErrorContainer,
-                    ),
-                  )
-                : const Text("J'ai vérifié", style: TextStyle(fontSize: 12)),
-          ),
-        ],
       ),
     );
   }
