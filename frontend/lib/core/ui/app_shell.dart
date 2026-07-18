@@ -9,9 +9,9 @@ import '../widgets/component_email_verification_banner.dart';
 import 'nav_bar.dart';
 
 class AppShell extends ConsumerWidget {
-  final Widget child;
+  final StatefulNavigationShell navigationShell;
 
-  const AppShell({super.key, required this.child});
+  const AppShell({super.key, required this.navigationShell});
 
   String _formatSeconds(int totalSeconds) {
     final minutes = totalSeconds ~/ 60;
@@ -26,16 +26,7 @@ class AppShell extends ConsumerWidget {
     final stateIdentity = ref.watch(providerIdentity);
     final restTimerState = ref.watch(providerRestTimer);
 
-    final location = GoRouterState.of(context).matchedLocation;
-    final isOnSessionScreen = location == '/session';
-    final currentIndex = switch (location) {
-      '/dashboard' => 0,
-      '/programs' => 1,
-      '/session' => 2,
-      '/bodymetrics' => 3,
-      '/profile' => 4,
-      _ => 0,
-    };
+    final isOnSessionScreen = navigationShell.currentIndex == 2;
 
     final showFab =
         hasActiveSession && (!isOnSessionScreen || restTimerState.isActive);
@@ -54,7 +45,7 @@ class AppShell extends ConsumerWidget {
         children: [
           if (!stateIdentity.isEmailVerified)
             const ComponentEmailVerificationBanner(),
-          Expanded(child: child),
+          Expanded(child: navigationShell),
         ],
       ),
       floatingActionButton: showFab
@@ -68,7 +59,7 @@ class AppShell extends ConsumerWidget {
                     ),
                   );
                 } else {
-                  context.go('/session');
+                  navigationShell.goBranch(2);
                 }
               },
               icon: Icon(
@@ -78,20 +69,12 @@ class AppShell extends ConsumerWidget {
             )
           : null,
       bottomNavigationBar: NavBar(
-        currentIndex: currentIndex,
+        currentIndex: navigationShell.currentIndex,
         onTap: (index) {
-          switch (index) {
-            case 0:
-              context.go('/dashboard');
-            case 1:
-              context.go('/programs');
-            case 2:
-              context.go('/session');
-            case 3:
-              context.go('/bodymetrics');
-            case 4:
-              context.go('/profile');
-          }
+          navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          );
         },
       ),
     );
