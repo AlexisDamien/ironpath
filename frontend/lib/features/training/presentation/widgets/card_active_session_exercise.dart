@@ -1,19 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/models/workout_program.dart';
 import '../../domain/models/training_session.dart';
-import '../../../../core/widgets/component_rest_timer.dart';
+import '../../domain/models/set_target.dart';
 import '../providers/provider_rest_timer.dart';
-
-String formatRestDuration(int? totalSeconds) {
-  if (totalSeconds == null) return '-';
-  final minutes = totalSeconds ~/ 60;
-  final seconds = totalSeconds % 60;
-  if (minutes > 0) {
-    return '${minutes}min${seconds.toString().padLeft(2, '0')}s';
-  }
-  return '${seconds}s';
-}
+import '../../../../core/widgets/component_rest_timer.dart';
+import '../../../../core/utils/format_duration.dart';
 
 typedef LogSetCallback = void Function({
   required int setOrder,
@@ -24,17 +15,19 @@ typedef LogSetCallback = void Function({
 });
 
 class CardActiveSessionExercise extends StatelessWidget {
+  final String exerciseKey;
   final String exerciseName;
   final String? muscleGroup;
-  final ProgramExercise programExercise;
+  final List<SetTarget> plannedSets;
   final List<ExerciseSet> loggedSets;
   final LogSetCallback onLogSet;
 
   const CardActiveSessionExercise({
     super.key,
+    required this.exerciseKey,
     required this.exerciseName,
     this.muscleGroup,
-    required this.programExercise,
+    required this.plannedSets,
     required this.loggedSets,
     required this.onLogSet,
   });
@@ -48,7 +41,7 @@ class CardActiveSessionExercise extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalSets = programExercise.sets.length;
+    final totalSets = plannedSets.length;
     final doneCount = loggedSets.length;
 
     return Card(
@@ -65,13 +58,14 @@ class CardActiveSessionExercise extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Column(
-              children: programExercise.sets.map((plannedSet) {
+              children: plannedSets.map((plannedSet) {
                 return _SetRow(
-                  setId: '${programExercise.id}-${plannedSet.setOrder}',
+                  setId: '$exerciseKey-${plannedSet.setOrder}',
                   setOrder: plannedSet.setOrder,
                   plannedReps: plannedSet.targetReps,
                   plannedWeight: plannedSet.targetWeight,
                   plannedRestSeconds: plannedSet.restSeconds,
+                  plannedIsWarmup: plannedSet.isWarmup,
                   logged: _loggedFor(plannedSet.setOrder),
                   onLogSet: onLogSet,
                 );
@@ -90,6 +84,7 @@ class _SetRow extends ConsumerStatefulWidget {
   final int? plannedReps;
   final double? plannedWeight;
   final int? plannedRestSeconds;
+  final bool plannedIsWarmup;
   final ExerciseSet? logged;
   final LogSetCallback onLogSet;
 
@@ -99,6 +94,7 @@ class _SetRow extends ConsumerStatefulWidget {
     this.plannedReps,
     this.plannedWeight,
     this.plannedRestSeconds,
+    this.plannedIsWarmup = false,
     this.logged,
     required this.onLogSet,
   });
@@ -145,7 +141,7 @@ class _SetRowState extends ConsumerState<_SetRow> {
       reps: int.tryParse(_repsController.text),
       weightKg: double.tryParse(_weightController.text),
       restSeconds: actualRestSeconds,
-      isWarmup: false,
+      isWarmup: widget.plannedIsWarmup,
     );
     setState(() => _isEditing = false);
   }
@@ -153,6 +149,7 @@ class _SetRowState extends ConsumerState<_SetRow> {
   @override
   Widget build(BuildContext context) {
     final isDone = widget.logged != null && !_isEditing;
+    final isWarmup = widget.logged?.isWarmup ?? widget.plannedIsWarmup;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -170,6 +167,11 @@ class _SetRowState extends ConsumerState<_SetRow> {
                 '${widget.logged!.reps ?? '-'} reps • ${widget.logged!.weightKg ?? '-'} kg • ${formatRestDuration(widget.logged!.restSeconds)} repos',
               ),
             ),
+            if (isWarmup) ...[
+              const Icon(Icons.local_fire_department,
+                  size: 16, color: Colors.orange),
+              const SizedBox(width: 4),
+            ],
             IconButton(
               icon: const Icon(Icons.check_circle, color: Colors.green),
               onPressed: () => setState(() => _isEditing = true),
@@ -202,6 +204,11 @@ class _SetRowState extends ConsumerState<_SetRow> {
                 id: widget.setId,
                 initialSeconds: widget.plannedRestSeconds!,
               ),
+            if (isWarmup) ...[
+              const SizedBox(width: 4),
+              const Icon(Icons.local_fire_department,
+                  size: 16, color: Colors.orange),
+            ],
             IconButton(
               icon: const Icon(Icons.check_circle_outline),
               onPressed: _validate,

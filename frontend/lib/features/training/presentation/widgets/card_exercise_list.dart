@@ -16,8 +16,16 @@ class CardExerciseList extends ConsumerWidget {
     required this.onToggle,
   });
 
-  bool _isSelected(Exercise exercise) {
-    return selectedExercises.any((config) => config.exercise.id == exercise.id);
+  ExerciseConfig? _configFor(Exercise exercise) {
+    for (final config in selectedExercises) {
+      if (config.exercise.id == exercise.id) return config;
+    }
+    return null;
+  }
+
+  bool _hasWarmupSet(ExerciseConfig? config) {
+    if (config == null) return false;
+    return config.sets.any((set) => set.isWarmup);
   }
 
   @override
@@ -32,7 +40,10 @@ class CardExerciseList extends ConsumerWidget {
       itemCount: exercises.length,
       itemBuilder: (context, index) {
         final exercise = exercises[index];
-        final isSelected = _isSelected(exercise);
+        final config = _configFor(exercise);
+        final isSelected = config != null;
+        final hasWarmup = _hasWarmupSet(config);
+
         return ListTile(
           title: Text(exercise.name),
           subtitle: Text(
@@ -41,6 +52,11 @@ class CardExerciseList extends ConsumerWidget {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (hasWarmup) ...[
+                const Icon(Icons.local_fire_department,
+                    size: 18, color: Colors.orange),
+                const SizedBox(width: 4),
+              ],
               IconButton(
                 icon: const Icon(Icons.info_outline),
                 onPressed: () async {
@@ -56,18 +72,14 @@ class CardExerciseList extends ConsumerWidget {
                   );
                   if (!context.mounted) return;
                   if (result == 'add_to_program') {
-                    final config = await showDialog<ExerciseConfig>(
+                    final newConfig = await showDialog<ExerciseConfig>(
                       context: context,
                       builder: (context) =>
                           PopupExerciseConfig(exercise: exercise),
                     );
-                    if (config != null) onToggle(config);
+                    if (newConfig != null) onToggle(newConfig);
                   } else if (result == 'remove_from_program' && isSelected) {
-                    onToggle(
-                      selectedExercises.firstWhere(
-                        (config) => config.exercise.id == exercise.id,
-                      ),
-                    );
+                    onToggle(config);
                   }
                 },
               ),
@@ -81,18 +93,14 @@ class CardExerciseList extends ConsumerWidget {
           ),
           onTap: () async {
             if (isSelected) {
-              onToggle(
-                selectedExercises.firstWhere(
-                  (config) => config.exercise.id == exercise.id,
-                ),
-              );
+              onToggle(config);
             } else {
-              final config = await showDialog<ExerciseConfig>(
+              final newConfig = await showDialog<ExerciseConfig>(
                 context: context,
                 builder: (context) => PopupExerciseConfig(exercise: exercise),
               );
-              if (config != null) {
-                onToggle(config);
+              if (newConfig != null) {
+                onToggle(newConfig);
               }
             }
           },

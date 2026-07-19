@@ -98,7 +98,7 @@ class _ScreenDashboardState extends ConsumerState<ScreenDashboard> {
             const SizedBox(width: 12),
             const Expanded(
               child: Text(
-                'Session en cours — Appuie pour continuer',
+                'Séance en cours — Appuie pour continuer',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),

@@ -1,8 +1,12 @@
 package com.ironpath.backend.training.application;
 
+import com.ironpath.backend.training.api.dto.SessionPlannedExerciseResponse;
+import com.ironpath.backend.training.api.dto.SessionPlannedSetResponse;
 import com.ironpath.backend.training.api.dto.SessionResponse;
 import com.ironpath.backend.training.api.dto.SetResponse;
 import com.ironpath.backend.training.domain.model.ExerciseSet;
+import com.ironpath.backend.training.domain.model.SessionPlannedExercise;
+import com.ironpath.backend.training.domain.model.SessionPlannedSet;
 import com.ironpath.backend.training.domain.model.TrainingSession;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +21,11 @@ public class SessionMapper {
                 .map(this::toSetResponse)
                 .toList();
 
+        List<SessionPlannedExerciseResponse> plannedExerciseResponses = session.getPlannedExercises()
+                .stream()
+                .map(this::toPlannedExerciseResponse)
+                .toList();
+
         return new SessionResponse(
                 session.getId(),
                 session.getName(),
@@ -25,6 +34,7 @@ public class SessionMapper {
                         ? session.getProgram().getId()
                         : null,
                 setResponses,
+                plannedExerciseResponses,
                 session.getStartedAt(),
                 session.getEndedAt()
         );
@@ -37,6 +47,31 @@ public class SessionMapper {
                 set.getSetOrder(),
                 set.getReps(),
                 set.getWeightKg(),
+                set.getRestSeconds(),
+                set.getIsWarmup()
+        );
+    }
+
+    private SessionPlannedExerciseResponse toPlannedExerciseResponse(SessionPlannedExercise exercise) {
+        List<SessionPlannedSetResponse> setResponses = exercise.getSets()
+                .stream()
+                .map(this::toPlannedSetResponse)
+                .toList();
+
+        return new SessionPlannedExerciseResponse(
+                exercise.getId(),
+                exercise.getExerciseId(),
+                exercise.getExerciseOrder(),
+                setResponses
+        );
+    }
+
+    private SessionPlannedSetResponse toPlannedSetResponse(SessionPlannedSet set) {
+        return new SessionPlannedSetResponse(
+                set.getId(),
+                set.getSetOrder(),
+                set.getTargetReps(),
+                set.getTargetWeightKg(),
                 set.getRestSeconds(),
                 set.getIsWarmup()
         );

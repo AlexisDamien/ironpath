@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -56,7 +57,7 @@ class AddSetUseCaseTest {
         when(sessionRepository.save(any(TrainingSession.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(sessionMapper.toResponse(any(TrainingSession.class)))
-                .thenReturn(new SessionResponse(sessionId, null, "IN_PROGRESS", null, null, null, null));
+                .thenReturn(new SessionResponse(sessionId, null, "IN_PROGRESS", null, null, List.of(), null, null));
 
         addSetUseCase.execute(userId, sessionId, request);
 

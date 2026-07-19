@@ -10,6 +10,7 @@ public record SessionResponse(
         String status,
         UUID programId,
         List<SetResponse> sets,
+        List<SessionPlannedExerciseResponse> plannedExercises,
         LocalDateTime startedAt,
         LocalDateTime endedAt
 ) {}

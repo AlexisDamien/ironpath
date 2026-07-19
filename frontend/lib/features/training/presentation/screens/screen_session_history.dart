@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/provider_training.dart';
 import '../../domain/models/training_session.dart';
-import '../widgets/card_active_session_exercise.dart';
+import '../../../../core/utils/format_duration.dart';
 
 class ScreenSessionHistory extends ConsumerStatefulWidget {
   const ScreenSessionHistory({super.key});
@@ -36,6 +36,36 @@ class _ScreenSessionHistoryState extends ConsumerState<ScreenSessionHistory> {
     return '$formattedDate • ${duration.inMinutes} min';
   }
 
+  Widget _buildSetLine(ExerciseSet set, List exercises) {
+    final name = _exerciseName(exercises, set.exerciseId);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Text(
+        '$name — série ${set.setOrder} : ${set.reps ?? '-'} reps • ${set.weightKg ?? '-'} kg • ${formatRestDuration(set.restSeconds)} repos',
+        style: const TextStyle(fontSize: 13),
+      ),
+    );
+  }
+
+  Widget _buildSection(String title, List<ExerciseSet> sets, List exercises) {
+    if (sets.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+                fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+          ),
+          const SizedBox(height: 2),
+          for (final set in sets) _buildSetLine(set, exercises),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final trainingState = ref.watch(providerTraining);
@@ -58,6 +88,19 @@ class _ScreenSessionHistoryState extends ConsumerState<ScreenSessionHistory> {
       itemCount: history.length,
       itemBuilder: (context, index) {
         final session = history[index];
+
+        final warmupSets = session.sets.where((set) => set.isWarmup).toList();
+        final plannedExerciseIds =
+            session.plannedExercises.map((e) => e.exerciseId).toSet();
+        final programSets = session.sets
+            .where((set) =>
+                !set.isWarmup && plannedExerciseIds.contains(set.exerciseId))
+            .toList();
+        final freeSets = session.sets
+            .where((set) =>
+                !set.isWarmup && !plannedExerciseIds.contains(set.exerciseId))
+            .toList();
+
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
           child: ExpansionTile(
@@ -74,17 +117,14 @@ class _ScreenSessionHistoryState extends ConsumerState<ScreenSessionHistory> {
                           const Text('Aucun set enregistré',
                               style: TextStyle(color: Colors.grey))
                         ]
-                      : session.sets.map((set) {
-                          final name = _exerciseName(
-                              trainingState.exercises, set.exerciseId);
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 2),
-                            child: Text(
-                              '$name — série ${set.setOrder} : ${set.reps ?? '-'} reps • ${set.weightKg ?? '-'} kg • ${formatRestDuration(set.restSeconds)} repos',
-                              style: const TextStyle(fontSize: 13),
-                            ),
-                          );
-                        }).toList(),
+                      : [
+                          _buildSection('Échauffement', warmupSets,
+                              trainingState.exercises),
+                          _buildSection('Programme', programSets,
+                              trainingState.exercises),
+                          _buildSection(
+                              'Libre', freeSets, trainingState.exercises),
+                        ],
                 ),
               ),
             ],

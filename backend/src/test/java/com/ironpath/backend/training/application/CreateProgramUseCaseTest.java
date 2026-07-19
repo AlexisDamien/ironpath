@@ -61,10 +61,10 @@ class CreateProgramUseCaseTest {
                         1,
                         true,
                         List.of(
-                                new ProgramExerciseSetRequest(1, 8, 80.0, 120),
-                                new ProgramExerciseSetRequest(2, 8, 80.0, 120),
-                                new ProgramExerciseSetRequest(3, 8, 80.0, 120),
-                                new ProgramExerciseSetRequest(4, 8, 80.0, 120)
+                                new ProgramExerciseSetRequest(1, 8, 80.0, 120, false),
+                                new ProgramExerciseSetRequest(2, 8, 80.0, 120, false),
+                                new ProgramExerciseSetRequest(3, 8, 80.0, 120, false),
+                                new ProgramExerciseSetRequest(4, 8, 80.0, 120, false)
                         )
                 ))
         );

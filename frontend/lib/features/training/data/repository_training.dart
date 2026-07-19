@@ -61,6 +61,7 @@ class RepositoryTraining {
                         'targetReps': set.targetReps,
                         'targetWeightKg': set.targetWeight,
                         'restSeconds': set.restSeconds,
+                        'isWarmup': set.isWarmup,
                       })
                   .toList(),
             })

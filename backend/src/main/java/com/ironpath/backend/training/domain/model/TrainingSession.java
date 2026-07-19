@@ -48,6 +48,11 @@ public class TrainingSession {
     @Builder.Default
     private List<ExerciseSet> sets = new ArrayList<>();
 
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("exerciseOrder ASC")
+    @Builder.Default
+    private List<SessionPlannedExercise> plannedExercises = new ArrayList<>();
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

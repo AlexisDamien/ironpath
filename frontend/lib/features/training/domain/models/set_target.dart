@@ -1,11 +1,11 @@
-class ExerciseSetConfig {
+class SetTarget {
   final int setOrder;
   final int? targetReps;
   final double? targetWeight;
   final int? restSeconds;
   final bool isWarmup;
 
-  ExerciseSetConfig({
+  SetTarget({
     required this.setOrder,
     this.targetReps,
     this.targetWeight,

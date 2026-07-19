@@ -33,6 +33,7 @@ class ProgramExerciseSetModel {
   final int? targetReps;
   final double? targetWeight;
   final int? restSeconds;
+  final bool isWarmup;
 
   ProgramExerciseSetModel({
     required this.id,
@@ -40,6 +41,7 @@ class ProgramExerciseSetModel {
     this.targetReps,
     this.targetWeight,
     this.restSeconds,
+    this.isWarmup = false,
   });
 
   factory ProgramExerciseSetModel.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,7 @@ class ProgramExerciseSetModel {
       targetReps: json['targetReps'],
       targetWeight: json['targetWeightKg']?.toDouble(),
       restSeconds: json['restSeconds'],
+      isWarmup: json['isWarmup'] ?? false,
     );
   }
 }

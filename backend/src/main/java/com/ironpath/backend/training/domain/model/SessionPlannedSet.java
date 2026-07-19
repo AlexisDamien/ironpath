@@ -6,20 +6,20 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "program_exercise_sets")
+@Table(name = "session_planned_sets")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProgramExerciseSet {
+public class SessionPlannedSet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "program_exercise_id", nullable = false)
-    private ProgramExercise programExercise;
+    @JoinColumn(name = "session_planned_exercise_id", nullable = false)
+    private SessionPlannedExercise plannedExercise;
 
     @Column(name = "set_order", nullable = false)
     private Integer setOrder;

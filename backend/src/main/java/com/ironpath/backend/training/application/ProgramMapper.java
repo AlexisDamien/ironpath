@@ -49,7 +49,8 @@ public class ProgramMapper {
                 set.getSetOrder(),
                 set.getTargetReps(),
                 set.getTargetWeightKg(),
-                set.getRestSeconds()
+                set.getRestSeconds(),
+                set.getIsWarmup()
         );
     }
 }

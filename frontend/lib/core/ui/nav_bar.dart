@@ -30,7 +30,7 @@ class NavBar extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.add_circle_outline),
           activeIcon: Icon(Icons.add_circle),
-          label: 'Session',
+          label: 'Séances',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.bar_chart_outlined),

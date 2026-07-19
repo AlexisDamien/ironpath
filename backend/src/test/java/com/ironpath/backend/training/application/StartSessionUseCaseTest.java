@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,8 +56,7 @@ class StartSessionUseCaseTest {
         when(sessionRepository.save(any(TrainingSession.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(sessionMapper.toResponse(any(TrainingSession.class)))
-                .thenReturn(new SessionResponse(UUID.randomUUID(), "Session libre", "IN_PROGRESS", null, null, null, null));
-
+                .thenReturn(new SessionResponse(UUID.randomUUID(), "Session libre", "IN_PROGRESS", null, null, List.of(), null, null));
         SessionResponse response = startSessionUseCase.execute(userId, request);
 
         assertNotNull(response);
@@ -79,8 +79,7 @@ class StartSessionUseCaseTest {
         when(sessionRepository.save(any(TrainingSession.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(sessionMapper.toResponse(any(TrainingSession.class)))
-                .thenReturn(new SessionResponse(UUID.randomUUID(), "PPL", "IN_PROGRESS", programId, null, null, null));
-
+                .thenReturn(new SessionResponse(UUID.randomUUID(), "PPL", "IN_PROGRESS", programId, null, List.of(), null, null));
         SessionResponse response = startSessionUseCase.execute(userId, request);
 
         assertNotNull(response);

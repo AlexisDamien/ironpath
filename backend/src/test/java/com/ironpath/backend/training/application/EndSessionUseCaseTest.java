@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -53,7 +54,7 @@ class EndSessionUseCaseTest {
         when(sessionRepository.save(any(TrainingSession.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(sessionMapper.toResponse(any(TrainingSession.class)))
-                .thenReturn(new SessionResponse(sessionId, null, "COMPLETED", null, null, null, null));
+                .thenReturn(new SessionResponse(sessionId, null, "COMPLETED", null, null, List.of(), null, null));
 
         endSessionUseCase.execute(userId, sessionId);
 

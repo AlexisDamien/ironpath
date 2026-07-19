@@ -18,7 +18,7 @@ class CardLastSession extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Dernière session',
+                  'Dernière séance',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -29,7 +29,7 @@ class CardLastSession extends StatelessWidget {
             const SizedBox(height: 8),
             if (lastSession == null)
               const Text(
-                'Aucune session enregistrée',
+                'Aucune séance enregistrée',
                 style: TextStyle(color: Colors.grey),
               )
             else
@@ -37,7 +37,7 @@ class CardLastSession extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    lastSession!.name ?? 'Session libre',
+                    lastSession!.name ?? 'Séance libre',
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 4),

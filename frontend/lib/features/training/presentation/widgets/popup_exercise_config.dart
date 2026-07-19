@@ -20,6 +20,7 @@ class PopupExerciseConfig extends StatefulWidget {
 class _PopupExerciseConfigState extends State<PopupExerciseConfig> {
   late final TextEditingController _setsCountController;
   bool _sameConfigForAllSets = true;
+  bool _isWarmup = false;
 
   late final TextEditingController _globalRepsController;
   late final TextEditingController _globalWeightController;
@@ -47,6 +48,7 @@ class _PopupExerciseConfigState extends State<PopupExerciseConfig> {
         TextEditingController(text: firstSet?.targetWeight?.toString() ?? '');
     _globalRestController =
         TextEditingController(text: '${firstSet?.restSeconds ?? 90}');
+    _isWarmup = firstSet?.isWarmup ?? false;
 
     _rebuildPerSetControllers(initialSetsCount, existing?.sets);
   }
@@ -76,14 +78,14 @@ class _PopupExerciseConfigState extends State<PopupExerciseConfig> {
   void _onSetsCountChanged(String value) {
     final count = int.tryParse(value);
     if (count == null || count < 1) return;
-    for (final controller in _repsControllers) {
-      controller.dispose();
+    for (final c in _repsControllers) {
+      c.dispose();
     }
-    for (final controller in _weightControllers) {
-      controller.dispose();
+    for (final c in _weightControllers) {
+      c.dispose();
     }
-    for (final controller in _restControllers) {
-      controller.dispose();
+    for (final c in _restControllers) {
+      c.dispose();
     }
     setState(() {
       _rebuildPerSetControllers(count, null);
@@ -124,6 +126,7 @@ class _PopupExerciseConfigState extends State<PopupExerciseConfig> {
           targetReps: reps,
           targetWeight: weight,
           restSeconds: rest,
+          isWarmup: _isWarmup,
         ),
       );
     } else {
@@ -139,6 +142,7 @@ class _PopupExerciseConfigState extends State<PopupExerciseConfig> {
           restSeconds: index < _restControllers.length
               ? int.tryParse(_restControllers[index].text)
               : null,
+          isWarmup: _isWarmup,
         );
       });
     }
@@ -185,13 +189,20 @@ class _PopupExerciseConfigState extends State<PopupExerciseConfig> {
               const SizedBox(height: 8),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text(
-                  'Même config pour toutes les séries',
-                  style: TextStyle(fontSize: 14),
-                ),
+                title: const Text('Même config pour toutes les séries',
+                    style: TextStyle(fontSize: 14)),
                 value: _sameConfigForAllSets,
                 onChanged: (value) =>
                     setState(() => _sameConfigForAllSets = value),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title:
+                    const Text('Échauffement', style: TextStyle(fontSize: 14)),
+                secondary: const Icon(Icons.local_fire_department,
+                    color: Colors.orange),
+                value: _isWarmup,
+                onChanged: (value) => setState(() => _isWarmup = value),
               ),
               const SizedBox(height: 8),
               if (_sameConfigForAllSets) ...[

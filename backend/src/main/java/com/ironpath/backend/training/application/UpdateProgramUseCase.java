@@ -77,6 +77,7 @@ public class UpdateProgramUseCase {
                     .targetReps(setRequest.targetReps())
                     .targetWeightKg(setRequest.targetWeightKg())
                     .restSeconds(setRequest.restSeconds())
+                    .isWarmup(setRequest.isWarmup() != null && setRequest.isWarmup())
                     .build());
         }
         return sets;

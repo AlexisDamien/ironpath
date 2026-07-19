@@ -7,5 +7,6 @@ public record ProgramExerciseSetResponse(
         Integer setOrder,
         Integer targetReps,
         Double targetWeightKg,
-        Integer restSeconds
+        Integer restSeconds,
+        Boolean isWarmup
 ) {}
