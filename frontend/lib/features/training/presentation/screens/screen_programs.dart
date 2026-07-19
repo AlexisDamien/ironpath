@@ -11,10 +11,10 @@ class ScreenPrograms extends ConsumerStatefulWidget {
   const ScreenPrograms({super.key});
 
   @override
-  ConsumerState<ScreenPrograms> createState() => _ProgramsScreenState();
+  ConsumerState<ScreenPrograms> createState() => _ScreenProgramsState();
 }
 
-class _ProgramsScreenState extends ConsumerState<ScreenPrograms> {
+class _ScreenProgramsState extends ConsumerState<ScreenPrograms> {
   @override
   void initState() {
     super.initState();

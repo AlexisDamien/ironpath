@@ -16,10 +16,10 @@ class ScreenBodyMetrics extends ConsumerStatefulWidget {
   const ScreenBodyMetrics({super.key});
 
   @override
-  ConsumerState<ScreenBodyMetrics> createState() => _BodyMetricsScreenState();
+  ConsumerState<ScreenBodyMetrics> createState() => _ScreenBodyMetricsState();
 }
 
-class _BodyMetricsScreenState extends ConsumerState<ScreenBodyMetrics>
+class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 

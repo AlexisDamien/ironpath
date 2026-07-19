@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../domain/models/profile.dart';
+import '../../../../core/utils/format_date.dart';
+import '../../../../core/utils/format_exception.dart';
+import '../../../../core/utils/parse_input.dart';
+import '../../domain/models/profile_input.dart';
 import '../providers/provider_profile.dart';
+import '../widgets/form_profile.dart';
 
 class ScreenOnboarding extends ConsumerStatefulWidget {
   const ScreenOnboarding({super.key});
@@ -22,8 +26,15 @@ class _ScreenOnboardingState extends ConsumerState<ScreenOnboarding> {
   String? _selectedGender;
   String? _selectedObjective;
   String? _selectedBirthDate;
-
   bool _isLoading = false;
+
+  bool get _isFormValid {
+    return parseNullableText(_firstNameController.text) != null &&
+        parseNullableText(_usernameController.text) != null &&
+        parseDecimal(_heightController.text) != null &&
+        _selectedBirthDate != null &&
+        _selectedGender != null;
+  }
 
   @override
   void dispose() {
@@ -43,69 +54,54 @@ class _ScreenOnboardingState extends ConsumerState<ScreenOnboarding> {
       lastDate: DateTime.now(),
     );
 
-    if (picked == null || !mounted) return;
-
-    final formattedDate = picked.toIso8601String().split('T').first;
+    if (picked == null || !mounted) {
+      return;
+    }
 
     setState(() {
-      _selectedBirthDate = formattedDate;
-      _birthDateController.text = formattedDate;
+      _selectedBirthDate = formatDateForApi(picked);
+      _birthDateController.text = formatDate(picked);
     });
   }
 
-  String? _nullableText(String value) {
-    final trimmedValue = value.trim();
-    return trimmedValue.isEmpty ? null : trimmedValue;
-  }
-
-  bool get _isFormValid {
-    final height = double.tryParse(
-      _heightController.text.trim().replaceAll(',', '.'),
-    );
-    return _nullableText(_firstNameController.text) != null &&
-        _nullableText(_usernameController.text) != null &&
-        height != null &&
-        _selectedBirthDate != null &&
-        _selectedGender != null;
-  }
-
   Future<void> _submit() async {
-    if (_isLoading || !_isFormValid) return;
+    if (_isLoading || !_isFormValid) {
+      return;
+    }
 
     setState(() => _isLoading = true);
 
     try {
-      final profile = Profile(
-        id: null,
-        firstName: _nullableText(_firstNameController.text),
-        lastName: _nullableText(_lastNameController.text),
-        username: _nullableText(_usernameController.text),
-        height: double.tryParse(
-          _heightController.text.trim().replaceAll(',', '.'),
-        ),
+      final input = ProfileInput(
+        firstName: parseNullableText(_firstNameController.text),
+        lastName: parseNullableText(_lastNameController.text),
+        username: parseNullableText(_usernameController.text),
+        height: parseDecimal(_heightController.text),
         gender: _selectedGender,
         objective: _selectedObjective,
         birthDate: _selectedBirthDate,
       );
 
-      await ref.read(providerProfile.notifier).updateProfile(profile);
+      await ref.read(providerProfile.notifier).updateProfile(input);
 
-      if (!mounted) return;
-
-      context.go('/dashboard');
-    } catch (exception) {
-      if (!mounted) return;
-
-      final message = exception.toString().replaceFirst('Exception: ', '');
+      if (mounted) {
+        context.go('/dashboard');
+      }
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(message),
+          content: Text(formatExceptionMessage(error)),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -128,100 +124,37 @@ class _ScreenOnboardingState extends ConsumerState<ScreenOnboarding> {
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 24),
-            TextField(
-              controller: _firstNameController,
-              decoration: const InputDecoration(
-                labelText: 'Prénom *',
-                prefixIcon: Icon(Icons.person_outline),
-              ),
-              textCapitalization: TextCapitalization.words,
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _lastNameController,
-              decoration: const InputDecoration(
-                labelText: 'Nom',
-                prefixIcon: Icon(Icons.person_outline),
-              ),
-              textCapitalization: TextCapitalization.words,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Nom d\'utilisateur *',
-                prefixIcon: Icon(Icons.alternate_email),
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _heightController,
-              decoration: const InputDecoration(
-                labelText: 'Taille (cm) *',
-                prefixIcon: Icon(Icons.height),
-              ),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 16),
-            GestureDetector(
-              onTap: _pickBirthDate,
-              child: AbsorbPointer(
-                child: TextField(
-                  controller: _birthDateController,
-                  decoration: const InputDecoration(
-                    labelText: 'Date de naissance *',
-                    prefixIcon: Icon(Icons.cake_outlined),
-                    hintText: 'Sélectionner une date',
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            DropdownMenu<String>(
-              initialSelection: _selectedGender,
-              label: const Text('Genre *'),
-              leadingIcon: const Icon(Icons.person_outline),
-              expandedInsets: EdgeInsets.zero,
-              onSelected: (value) => setState(() => _selectedGender = value),
-              dropdownMenuEntries: const [
-                DropdownMenuEntry(value: 'MALE', label: 'Homme'),
-                DropdownMenuEntry(value: 'FEMALE', label: 'Femme'),
-                DropdownMenuEntry(value: 'OTHER', label: 'Autre'),
-              ],
-            ),
-            const SizedBox(height: 16),
-            DropdownMenu<String>(
-              initialSelection: _selectedObjective,
-              label: const Text('Objectif'),
-              leadingIcon: const Icon(Icons.flag_outlined),
-              expandedInsets: EdgeInsets.zero,
-              onSelected: (value) => setState(() => _selectedObjective = value),
-              dropdownMenuEntries: const [
-                DropdownMenuEntry(
-                    value: 'MUSCLE_GAIN', label: 'Prise de masse'),
-                DropdownMenuEntry(
-                    value: 'WEIGHT_LOSS', label: 'Perte de poids'),
-                DropdownMenuEntry(value: 'MAINTENANCE', label: 'Maintien'),
-                DropdownMenuEntry(value: 'ENDURANCE', label: 'Endurance'),
-                DropdownMenuEntry(value: 'STRENGTH', label: 'Force'),
-              ],
+            FormProfile(
+              firstNameController: _firstNameController,
+              lastNameController: _lastNameController,
+              usernameController: _usernameController,
+              heightController: _heightController,
+              birthDateController: _birthDateController,
+              selectedGender: _selectedGender,
+              selectedObjective: _selectedObjective,
+              showRequiredIndicators: true,
+              onFieldChanged: (_) => setState(() {}),
+              onPickBirthDate: _pickBirthDate,
+              onGenderSelected: (value) {
+                setState(() => _selectedGender = value);
+              },
+              onObjectiveSelected: (value) {
+                setState(() => _selectedObjective = value);
+              },
             ),
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: (_isLoading || !_isFormValid) ? null : _submit,
+                onPressed: _isLoading || !_isFormValid ? null : _submit,
                 style: ElevatedButton.styleFrom(
-                    disabledBackgroundColor:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
-                    disabledForegroundColor: Theme.of(context)
-                        .colorScheme
-                        .onSurfaceVariant
-                        .withValues(alpha: 0.5)),
+                  disabledBackgroundColor:
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
+                  disabledForegroundColor: Theme.of(context)
+                      .colorScheme
+                      .onSurfaceVariant
+                      .withValues(alpha: 0.5),
+                ),
                 child: _isLoading
                     ? const SizedBox(
                         height: 16,

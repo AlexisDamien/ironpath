@@ -1,6 +1,7 @@
+import '../../../core/constants/enums.dart';
 import 'models/profile.dart';
 
-enum StatusProfile { idle, loading, success, error }
+export '../../../core/constants/enums.dart' show StatusProfile;
 
 class StateProfile {
   final StatusProfile status;
@@ -18,11 +19,13 @@ class StateProfile {
     Profile? profile,
     bool clearProfile = false,
     String? errorMessage,
+    bool clearErrorMessage = false,
   }) {
     return StateProfile(
       status: status ?? this.status,
       profile: clearProfile ? null : profile ?? this.profile,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorMessage:
+          clearErrorMessage ? null : errorMessage ?? this.errorMessage,
     );
   }
 }

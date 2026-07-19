@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/provider_training.dart';
-import '../providers/provider_rest_timer.dart';
+
 import '../../../identity/presentation/providers/provider_identity.dart';
 import '../../domain/models/exercise.dart';
 import '../../domain/models/exercise_config.dart';
 import '../../domain/models/set_target.dart';
 import '../../domain/models/training_session.dart';
 import '../../domain/models/workout_program.dart';
+import '../../domain/state_training.dart';
+import '../providers/provider_rest_timer.dart';
+import '../providers/provider_training.dart';
 import '../widgets/card_active_session_exercise.dart';
+import '../widgets/card_logged_set.dart';
+import '../widgets/card_session_start.dart';
+import '../widgets/popup_end_session.dart';
+import '../widgets/sheet_select_program.dart';
 import 'screen_select_exercises.dart';
 import 'screen_session_history.dart';
 
@@ -43,82 +49,72 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
   }
 
   void _syncFreeExercisesWithSession(String? sessionId) {
-    if (sessionId != _freeExercisesSessionId) {
-      _freeExerciseConfigs.clear();
-      _freeExercisesSessionId = sessionId;
+    if (sessionId == _freeExercisesSessionId) {
+      return;
     }
+
+    _freeExerciseConfigs.clear();
+    _freeExercisesSessionId = sessionId;
   }
 
   Future<void> _endSession(TrainingSession activeSession) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Terminer la séance'),
-        content: const Text('Es-tu sûr de vouloir terminer cette séance ?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Terminer'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true) {
-      ref.read(providerRestTimer.notifier).clear();
-      setState(() => _freeExerciseConfigs.clear());
-      await ref.read(providerTraining.notifier).endSession(activeSession.id);
+    final confirmed = await showEndSessionDialog(context);
+    if (!confirmed) {
+      return;
     }
+
+    ref.read(providerRestTimer.notifier).clear();
+    setState(_freeExerciseConfigs.clear);
+    await ref.read(providerTraining.notifier).endSession(activeSession.id);
   }
 
   Future<void> _pickProgramAndStart(List<WorkoutProgram> programs) async {
     if (programs.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text(
-                "Aucun programme — crée-en un depuis l'onglet Programmes")),
+          content: Text(
+            "Aucun programme — crée-en un depuis l'onglet Programmes",
+          ),
+        ),
       );
       return;
     }
-    final selected = await showModalBottomSheet<WorkoutProgram>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          children: programs.map((program) {
-            return ListTile(
-              title: Text(program.name),
-              subtitle: Text('${program.exercises.length} exercices'),
-              onTap: () => Navigator.of(context).pop(program),
-            );
-          }).toList(),
-        ),
-      ),
+
+    final selected = await showSelectProgramSheet(
+      context,
+      programs: programs,
     );
-    if (selected != null) {
-      await ref.read(providerTraining.notifier).startSession(
-            programId: selected.id,
-            name: selected.name,
-          );
+
+    if (selected == null) {
+      return;
     }
+
+    await ref.read(providerTraining.notifier).startSession(
+          programId: selected.id,
+          name: selected.name,
+        );
   }
 
   Future<void> _addFreeExercises() async {
     final result = await Navigator.of(context).push<List<ExerciseConfig>>(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (context) => const ScreenSelectExercises(initialSelection: []),
+        builder: (context) => const ScreenSelectExercises(
+          initialSelection: [],
+        ),
       ),
     );
-    if (result == null || result.isEmpty) return;
+
+    if (result == null || result.isEmpty) {
+      return;
+    }
 
     setState(() {
       for (final config in result) {
-        final alreadyExists = _freeExerciseConfigs
-            .any((existing) => existing.exercise.id == config.exercise.id);
+        final alreadyExists = _freeExerciseConfigs.any(
+          (existing) => existing.exercise.id == config.exercise.id,
+        );
+
         if (!alreadyExists) {
           _freeExerciseConfigs.add(config);
         }
@@ -128,6 +124,8 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
 
   @override
   Widget build(BuildContext context) {
+    final trainingState = ref.watch(providerTraining);
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
@@ -141,10 +139,13 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text('Session active'),
-                  if (ref.watch(providerTraining).activeSession != null) ...[
+                  if (trainingState.activeSession != null) ...[
                     const SizedBox(width: 6),
-                    const Icon(Icons.local_fire_department,
-                        size: 16, color: Colors.orange),
+                    const Icon(
+                      Icons.local_fire_department,
+                      size: 16,
+                      color: Colors.orange,
+                    ),
                   ],
                 ],
               ),
@@ -156,22 +157,28 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildActiveTab(),
+          _buildActiveTab(trainingState),
           const ScreenSessionHistory(),
         ],
       ),
     );
   }
 
-  Widget _buildActiveTab() {
-    final trainingState = ref.watch(providerTraining);
+  Widget _buildActiveTab(StateTraining trainingState) {
     final activeSession = trainingState.activeSession;
     final canWrite = ref.watch(providerIdentity).isEmailVerified;
 
     _syncFreeExercisesWithSession(activeSession?.id);
 
     if (activeSession == null) {
-      return _buildPlaceholder(canWrite, trainingState.programs);
+      return CardSessionStart(
+        canWrite: canWrite,
+        onStartFree: () => ref
+            .read(providerTraining.notifier)
+            .startSession(name: 'Session libre'),
+        onStartProgram: () => _pickProgramAndStart(trainingState.programs),
+        onRequiresVerification: _showVerifyEmailSnack,
+      );
     }
 
     return Column(
@@ -185,7 +192,9 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
                 child: Text(
                   activeSession.name ?? 'Séance en cours',
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 16),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               TextButton.icon(
@@ -207,16 +216,20 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
   }
 
   Widget _buildSessionContent(
-      TrainingSession activeSession, dynamic trainingState) {
-    final plannedExerciseIds =
-        activeSession.plannedExercises.map((e) => e.exerciseId).toSet();
+    TrainingSession activeSession,
+    StateTraining trainingState,
+  ) {
+    final plannedExerciseIds = activeSession.plannedExercises
+        .map((exercise) => exercise.exerciseId)
+        .toSet();
     final freeConfiguredIds =
-        _freeExerciseConfigs.map((c) => c.exercise.id).toSet();
-
+        _freeExerciseConfigs.map((config) => config.exercise.id).toSet();
     final orphanFreeSets = activeSession.sets
-        .where((set) =>
-            !plannedExerciseIds.contains(set.exerciseId) &&
-            !freeConfiguredIds.contains(set.exerciseId))
+        .where(
+          (set) =>
+              !plannedExerciseIds.contains(set.exerciseId) &&
+              !freeConfiguredIds.contains(set.exerciseId),
+        )
         .toList();
 
     return ListView(
@@ -224,12 +237,17 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
       children: [
         for (final plannedExercise in activeSession.plannedExercises)
           _buildPlannedExerciseCard(
-              plannedExercise, activeSession, trainingState),
+            plannedExercise,
+            activeSession,
+            trainingState.exercises,
+          ),
         if (_freeExerciseConfigs.isNotEmpty) ...[
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text('Exercices libres',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              'Exercices libres',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
           for (final config in _freeExerciseConfigs)
             _buildFreeExerciseCard(config, activeSession),
@@ -237,19 +255,17 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
         if (orphanFreeSets.isNotEmpty) ...[
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text('Autres sets enregistrés',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              'Autres sets enregistrés',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
           for (final exerciseSet in orphanFreeSets)
-            Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: ListTile(
-                leading: CircleAvatar(child: Text('${exerciseSet.setOrder}')),
-                title: Text(_exerciseName(
-                    exerciseSet.exerciseId, trainingState.exercises)),
-                subtitle: Text(
-                  '${exerciseSet.reps ?? '-'} reps • ${exerciseSet.weightKg ?? '-'} kg • ${exerciseSet.restSeconds ?? '-'}s repos',
-                ),
+            CardLoggedSet(
+              exerciseSet: exerciseSet,
+              exerciseName: _exerciseName(
+                exerciseSet.exerciseId,
+                trainingState.exercises,
               ),
             ),
         ],
@@ -270,10 +286,9 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
   Widget _buildPlannedExerciseCard(
     SessionPlannedExercise plannedExercise,
     TrainingSession activeSession,
-    dynamic trainingState,
+    List<Exercise> exercises,
   ) {
-    final exercise =
-        _findExercise(plannedExercise.exerciseId, trainingState.exercises);
+    final exercise = _findExercise(plannedExercise.exerciseId, exercises);
     final loggedSets = activeSession.sets
         .where((set) => set.exerciseId == plannedExercise.exerciseId)
         .toList();
@@ -283,13 +298,15 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
       exerciseName: exercise?.name ?? plannedExercise.exerciseId,
       muscleGroup: exercise?.muscleGroup,
       plannedSets: plannedExercise.sets
-          .map((s) => SetTarget(
-                setOrder: s.setOrder,
-                targetReps: s.targetReps,
-                targetWeight: s.targetWeight,
-                restSeconds: s.restSeconds,
-                isWarmup: s.isWarmup,
-              ))
+          .map(
+            (set) => SetTarget(
+              setOrder: set.setOrder,
+              targetReps: set.targetReps,
+              targetWeight: set.targetWeight,
+              restSeconds: set.restSeconds,
+              isWarmup: set.isWarmup,
+            ),
+          )
           .toList(),
       loggedSets: loggedSets,
       onLogSet: ({
@@ -313,7 +330,9 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
   }
 
   Widget _buildFreeExerciseCard(
-      ExerciseConfig config, TrainingSession activeSession) {
+    ExerciseConfig config,
+    TrainingSession activeSession,
+  ) {
     final loggedSets = activeSession.sets
         .where((set) => set.exerciseId == config.exercise.id)
         .toList();
@@ -323,13 +342,15 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
       exerciseName: config.exercise.name,
       muscleGroup: config.exercise.muscleGroup,
       plannedSets: config.sets
-          .map((s) => SetTarget(
-                setOrder: s.setOrder,
-                targetReps: s.targetReps,
-                targetWeight: s.targetWeight,
-                restSeconds: s.restSeconds,
-                isWarmup: s.isWarmup,
-              ))
+          .map(
+            (set) => SetTarget(
+              setOrder: set.setOrder,
+              targetReps: set.targetReps,
+              targetWeight: set.targetWeight,
+              restSeconds: set.restSeconds,
+              isWarmup: set.isWarmup,
+            ),
+          )
           .toList(),
       loggedSets: loggedSets,
       onLogSet: ({
@@ -352,77 +373,31 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
     );
   }
 
-  Exercise? _findExercise(String exerciseId, List exercises) {
-    for (final candidate in exercises) {
-      if (candidate.id == exerciseId) return candidate as Exercise;
+  Exercise? _findExercise(
+    String exerciseId,
+    List<Exercise> exercises,
+  ) {
+    for (final exercise in exercises) {
+      if (exercise.id == exerciseId) {
+        return exercise;
+      }
     }
+
     return null;
   }
 
-  String _exerciseName(String exerciseId, List exercises) {
-    for (final exercise in exercises) {
-      if (exercise.id == exerciseId) return exercise.name as String;
-    }
-    return exerciseId;
-  }
-
-  Widget _buildPlaceholder(bool canWrite, List<WorkoutProgram> programs) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.fitness_center,
-                size: 64, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 16),
-            const Text('Aucune séance en cours',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(
-              'Démarre une séance libre ou depuis un programme',
-              style: TextStyle(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.6),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: canWrite
-                    ? () => ref
-                        .read(providerTraining.notifier)
-                        .startSession(name: 'Session libre')
-                    : () => _showVerifyEmailSnack(),
-                icon: const Icon(Icons.play_arrow),
-                label: const Text('Séance libre'),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: canWrite
-                    ? () => _pickProgramAndStart(programs)
-                    : () => _showVerifyEmailSnack(),
-                icon: const Icon(Icons.list_alt),
-                label: const Text('Depuis un programme'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  String _exerciseName(
+    String exerciseId,
+    List<Exercise> exercises,
+  ) {
+    return _findExercise(exerciseId, exercises)?.name ?? exerciseId;
   }
 
   void _showVerifyEmailSnack() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-          content: Text('Vérifie ton email pour démarrer une séance')),
+        content: Text('Vérifie ton email pour démarrer une séance'),
+      ),
     );
   }
 }

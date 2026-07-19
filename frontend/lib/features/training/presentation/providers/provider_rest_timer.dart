@@ -29,7 +29,6 @@ class ProviderRestTimerNotifier extends StateNotifier<StateRestTimer> {
       if (state.remainingSeconds > 0) {
         state = state.copyWith(remainingSeconds: state.remainingSeconds - 1);
       } else {
-        // Décompte terminé : on continue en dépassement, on ne s'arrête plus tout seul
         state = state.copyWith(overtimeSeconds: state.overtimeSeconds + 1);
       }
     });

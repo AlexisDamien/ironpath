@@ -5,6 +5,7 @@ import '../../features/identity/presentation/providers/provider_identity.dart';
 import '../../features/training/presentation/providers/provider_training.dart';
 import '../../features/training/presentation/providers/provider_rest_timer.dart';
 import '../../features/training/presentation/screens/screen_rest_timer.dart';
+import '../utils/format_duration.dart';
 import '../widgets/component_email_verification_banner.dart';
 import 'nav_bar.dart';
 
@@ -12,12 +13,6 @@ class AppShell extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   const AppShell({super.key, required this.navigationShell});
-
-  String _formatSeconds(int totalSeconds) {
-    final minutes = totalSeconds ~/ 60;
-    final seconds = totalSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,9 +30,11 @@ class AppShell extends ConsumerWidget {
     if (!restTimerState.isActive) {
       fabLabel = 'Session active';
     } else if (restTimerState.isOvertime) {
-      fabLabel = 'Repos +${_formatSeconds(restTimerState.overtimeSeconds)}';
+      fabLabel =
+          'Repos +${formatClockDuration(restTimerState.overtimeSeconds)}';
     } else {
-      fabLabel = 'Repos ${_formatSeconds(restTimerState.remainingSeconds)}';
+      fabLabel =
+          'Repos ${formatClockDuration(restTimerState.remainingSeconds)}';
     }
 
     return Scaffold(

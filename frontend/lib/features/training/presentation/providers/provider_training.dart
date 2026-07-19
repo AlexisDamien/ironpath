@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/utils/format_exception.dart';
 import '../../../../core/network/api_client.dart';
 import '../../data/repository_training.dart';
 import '../../domain/models/exercise_config.dart';
@@ -31,7 +32,7 @@ class ProviderTrainingNotifier extends StateNotifier<StateTraining> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusTraining.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -39,11 +40,16 @@ class ProviderTrainingNotifier extends StateNotifier<StateTraining> {
   Future<void> loadActiveSession() async {
     try {
       final session = await _repository.getActiveSession();
-      if (session != null) {
-        state = state.copyWith(activeSession: session);
-      }
+
+      state = state.copyWith(
+        activeSession: session,
+        clearActiveSession: session == null,
+        clearErrorMessage: true,
+      );
     } catch (exception) {
-      // Pas de session active — c'est un cas normal, pas une erreur à afficher
+      state = state.copyWith(
+        errorMessage: formatExceptionMessage(exception),
+      );
     }
   }
 
@@ -63,7 +69,7 @@ class ProviderTrainingNotifier extends StateNotifier<StateTraining> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusTraining.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -75,7 +81,7 @@ class ProviderTrainingNotifier extends StateNotifier<StateTraining> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusTraining.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -94,7 +100,7 @@ class ProviderTrainingNotifier extends StateNotifier<StateTraining> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusTraining.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -122,7 +128,7 @@ class ProviderTrainingNotifier extends StateNotifier<StateTraining> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusTraining.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -135,7 +141,7 @@ class ProviderTrainingNotifier extends StateNotifier<StateTraining> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusTraining.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -147,7 +153,7 @@ class ProviderTrainingNotifier extends StateNotifier<StateTraining> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusTraining.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -162,7 +168,7 @@ class ProviderTrainingNotifier extends StateNotifier<StateTraining> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusTraining.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -185,7 +191,7 @@ class ProviderTrainingNotifier extends StateNotifier<StateTraining> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusTraining.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }

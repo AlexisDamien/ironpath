@@ -9,10 +9,10 @@ class ScreenLogin extends ConsumerStatefulWidget {
   const ScreenLogin({super.key});
 
   @override
-  ConsumerState<ScreenLogin> createState() => _LoginScreenState();
+  ConsumerState<ScreenLogin> createState() => _ScreenLoginState();
 }
 
-class _LoginScreenState extends ConsumerState<ScreenLogin> {
+class _ScreenLoginState extends ConsumerState<ScreenLogin> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();

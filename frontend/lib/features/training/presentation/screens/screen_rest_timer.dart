@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/utils/format_duration.dart';
 import '../providers/provider_rest_timer.dart';
 import '../../domain/state_rest_timer.dart';
 
@@ -27,12 +28,6 @@ class _ScreenRestTimerState extends ConsumerState<ScreenRestTimer> {
         });
       }
     }
-  }
-
-  String _format(int totalSeconds) {
-    final minutes = totalSeconds ~/ 60;
-    final seconds = totalSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   String _ownerId(StateRestTimer timerState) {
@@ -81,7 +76,7 @@ class _ScreenRestTimerState extends ConsumerState<ScreenRestTimer> {
               ),
               const SizedBox(height: 8),
               Text(
-                '+${_format(timerState.overtimeSeconds)}',
+                '+${formatClockDuration(timerState.overtimeSeconds)}',
                 style: TextStyle(
                   fontSize: 72,
                   fontWeight: FontWeight.bold,

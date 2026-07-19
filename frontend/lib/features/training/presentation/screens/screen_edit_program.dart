@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/utils/format_exception.dart';
 import '../../domain/models/exercise.dart';
 import '../../domain/models/exercise_config.dart';
 import '../../domain/models/exercise_set_config.dart';
@@ -99,7 +100,7 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(exception.toString()),
+            content: Text(formatExceptionMessage(exception)),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

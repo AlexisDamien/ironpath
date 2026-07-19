@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../utils/format_exception.dart';
 import '../../features/identity/presentation/providers/provider_identity.dart';
 
 class ComponentEmailVerificationBanner extends ConsumerStatefulWidget {
@@ -71,7 +72,7 @@ class _ComponentEmailVerificationBannerState
       );
     } catch (exception) {
       if (!mounted) return;
-      final message = exception.toString().replaceFirst('Exception: ', '');
+      final message = formatExceptionMessage(exception);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );

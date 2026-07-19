@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/utils/format_exception.dart';
 import '../../domain/models/body_composition.dart';
 import '../providers/provider_bodymetrics.dart';
 
@@ -103,7 +104,7 @@ class _FormCompositionState extends ConsumerState<FormComposition> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(exception.toString()),
+            content: Text(formatExceptionMessage(exception)),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/utils/format_exception.dart';
 import '../../../../core/network/api_client.dart';
 import '../../data/repository_bodymetrics.dart';
 import '../../domain/state_bodymetrics.dart';
@@ -34,7 +35,7 @@ class ProviderBodyMetricsNotifier extends StateNotifier<StateBodyMetrics> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusBodyMetrics.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -72,7 +73,7 @@ class ProviderBodyMetricsNotifier extends StateNotifier<StateBodyMetrics> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusBodyMetrics.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -88,7 +89,7 @@ class ProviderBodyMetricsNotifier extends StateNotifier<StateBodyMetrics> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusBodyMetrics.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -126,7 +127,7 @@ class ProviderBodyMetricsNotifier extends StateNotifier<StateBodyMetrics> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusBodyMetrics.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -164,7 +165,7 @@ class ProviderBodyMetricsNotifier extends StateNotifier<StateBodyMetrics> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusBodyMetrics.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -176,7 +177,7 @@ class ProviderBodyMetricsNotifier extends StateNotifier<StateBodyMetrics> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusBodyMetrics.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -214,7 +215,7 @@ class ProviderBodyMetricsNotifier extends StateNotifier<StateBodyMetrics> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusBodyMetrics.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }
@@ -226,7 +227,7 @@ class ProviderBodyMetricsNotifier extends StateNotifier<StateBodyMetrics> {
     } catch (exception) {
       state = state.copyWith(
         status: StatusBodyMetrics.error,
-        errorMessage: exception.toString(),
+        errorMessage: formatExceptionMessage(exception),
       );
     }
   }

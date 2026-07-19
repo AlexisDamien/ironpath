@@ -1,7 +1,8 @@
+import '../../../core/constants/enums.dart';
 import 'models/body_composition.dart';
 import 'models/body_measurement.dart';
 
-enum StatusBodyMetrics { idle, loading, success, error }
+export '../../../core/constants/enums.dart' show StatusBodyMetrics;
 
 class StateBodyMetrics {
   final StatusBodyMetrics status;
@@ -24,12 +25,14 @@ class StateBodyMetrics {
     List<BodyComposition>? compositions,
     String? errorMessage,
     bool? isInitialized,
+    bool clearErrorMessage = false,
   }) {
     return StateBodyMetrics(
       status: status ?? this.status,
       measurements: measurements ?? this.measurements,
       compositions: compositions ?? this.compositions,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorMessage:
+          clearErrorMessage ? null : errorMessage ?? this.errorMessage,
       isInitialized: isInitialized ?? this.isInitialized,
     );
   }

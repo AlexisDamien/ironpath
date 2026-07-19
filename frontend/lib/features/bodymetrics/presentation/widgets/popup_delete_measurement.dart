@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/utils/format_date.dart';
 import '../../domain/models/body_measurement.dart';
 import '../providers/provider_bodymetrics.dart';
 
 void showPopupDeleteMeasurement(
-    BuildContext context, WidgetRef ref, BodyMeasurement measurement) {
-  final formattedDate =
-      '${measurement.recordedAt.day.toString().padLeft(2, '0')}/${measurement.recordedAt.month.toString().padLeft(2, '0')}/${measurement.recordedAt.year}';
+  BuildContext context,
+  WidgetRef ref,
+  BodyMeasurement measurement,
+) {
+  final formattedDate = formatDate(measurement.recordedAt);
 
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
       title: const Text('Supprimer la mesure'),
       content: Text(
-          'Supprimer la mesure du $formattedDate ? Cette action est irréversible.'),
+        'Supprimer la mesure du $formattedDate ? Cette action est irréversible.',
+      ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),

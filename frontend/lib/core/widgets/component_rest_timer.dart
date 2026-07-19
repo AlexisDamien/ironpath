@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/training/presentation/providers/provider_rest_timer.dart';
 import '../../features/training/presentation/screens/screen_rest_timer.dart';
+import '../utils/format_duration.dart';
 
 class ComponentRestTimer extends ConsumerWidget {
   final String id;
@@ -13,12 +14,6 @@ class ComponentRestTimer extends ConsumerWidget {
     required this.initialSeconds,
   });
 
-  String _format(int totalSeconds) {
-    final minutes = totalSeconds ~/ 60;
-    final seconds = totalSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final timerState = ref.watch(providerRestTimer);
@@ -28,9 +23,9 @@ class ComponentRestTimer extends ConsumerWidget {
 
     final displayText = isOwner
         ? (isOvertime
-            ? '+${_format(timerState.overtimeSeconds)}'
-            : _format(timerState.remainingSeconds))
-        : _format(initialSeconds);
+            ? '+${formatClockDuration(timerState.overtimeSeconds)}'
+            : formatClockDuration(timerState.remainingSeconds))
+        : formatClockDuration(initialSeconds);
 
     final color = isOvertime
         ? Theme.of(context).colorScheme.error

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/utils/format_date.dart';
 import '../../domain/models/body_measurement.dart';
 import 'chip_metric.dart';
 
-class CardMeasurement extends ConsumerWidget {
+class CardMeasurement extends StatelessWidget {
   final BodyMeasurement measurement;
   final bool isEditable;
   final VoidCallback onEdit;
@@ -18,7 +18,7 @@ class CardMeasurement extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -30,7 +30,7 @@ class CardMeasurement extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  _formatDate(measurement.recordedAt),
+                  formatDate(measurement.recordedAt),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -112,9 +112,5 @@ class CardMeasurement extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 }

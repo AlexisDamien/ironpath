@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/utils/format_date.dart';
+import '../../../../core/utils/format_profile.dart';
 import '../../domain/models/profile.dart';
 
 class CardProfile extends StatelessWidget {
@@ -14,6 +17,8 @@ class CardProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentProfile = profile;
+    final username = currentProfile?.username?.trim();
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -47,48 +52,57 @@ class CardProfile extends StatelessWidget {
             const SizedBox(height: 16),
             Center(
               child: Text(
-                _getDisplayName(currentProfile),
+                formatProfileDisplayName(
+                  firstName: currentProfile?.firstName,
+                  lastName: currentProfile?.lastName,
+                  username: currentProfile?.username,
+                ),
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            if (currentProfile?.username != null) ...[
+            if (username != null && username.isNotEmpty) ...[
               const SizedBox(height: 4),
               Center(
                 child: Text(
-                  '@${currentProfile!.username}',
+                  '@$username',
                   style: const TextStyle(color: Colors.grey),
                 ),
               ),
             ],
             const Divider(height: 32),
-            if (currentProfile != null) ...[
-              _buildInfoRow(
-                Icons.cake_outlined,
-                'Date de naissance',
-                currentProfile.birthDate ?? 'Non renseigné',
+            if (currentProfile == null)
+              const Text(
+                'Complète ton profil pour personnaliser ton suivi.',
+                style: TextStyle(color: Colors.grey),
+              )
+            else ...[
+              _ProfileInfoRow(
+                icon: Icons.cake_outlined,
+                label: 'Date de naissance',
+                value: formatApiDate(currentProfile.birthDate),
               ),
               const SizedBox(height: 12),
-              _buildInfoRow(
-                Icons.height,
-                'Taille',
-                currentProfile.height != null
-                    ? '${currentProfile.height} cm'
-                    : 'Non renseigné',
+              _ProfileInfoRow(
+                icon: Icons.height,
+                label: 'Taille',
+                value: currentProfile.height == null
+                    ? 'Non renseigné'
+                    : '${currentProfile.height} cm',
               ),
               const SizedBox(height: 12),
-              _buildInfoRow(
-                Icons.person_outline,
-                'Genre',
-                _formatGender(currentProfile.gender),
+              _ProfileInfoRow(
+                icon: Icons.person_outline,
+                label: 'Genre',
+                value: formatGender(currentProfile.gender),
               ),
               const SizedBox(height: 12),
-              _buildInfoRow(
-                Icons.flag_outlined,
-                'Objectif',
-                _formatObjective(currentProfile.objective),
+              _ProfileInfoRow(
+                icon: Icons.flag_outlined,
+                label: 'Objectif',
+                value: formatObjective(currentProfile.objective),
               ),
             ],
           ],
@@ -96,69 +110,47 @@ class CardProfile extends StatelessWidget {
       ),
     );
   }
+}
 
-  String _getDisplayName(Profile? profile) {
-    if (profile == null) {
-      return 'Utilisateur';
-    }
+class _ProfileInfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
 
-    final fullName = [
-      profile.firstName,
-      profile.lastName,
-    ].whereType<String>().where((value) => value.trim().isNotEmpty).join(' ');
+  const _ProfileInfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
-    if (fullName.isNotEmpty) {
-      return fullName;
-    }
-
-    final username = profile.username?.trim();
-
-    if (username != null && username.isNotEmpty) {
-      return username;
-    }
-
-    return 'Utilisateur';
-  }
-
-  Widget _buildInfoRow(IconData icon, String label, String value) {
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
         Icon(icon, size: 20, color: Colors.grey),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-            ),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
-  }
-
-  String _formatGender(String? gender) {
-    return switch (gender) {
-      'MALE' => 'Homme',
-      'FEMALE' => 'Femme',
-      'OTHER' => 'Autre',
-      _ => 'Non renseigné',
-    };
-  }
-
-  String _formatObjective(String? objective) {
-    return switch (objective) {
-      'MUSCLE_GAIN' => 'Prise de masse',
-      'WEIGHT_LOSS' => 'Perte de poids',
-      'MAINTENANCE' => 'Maintien',
-      'ENDURANCE' => 'Endurance',
-      'STRENGTH' => 'Force',
-      _ => 'Non renseigné',
-    };
   }
 }

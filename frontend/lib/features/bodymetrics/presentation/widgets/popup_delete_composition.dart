@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/utils/format_date.dart';
 import '../../domain/models/body_composition.dart';
 import '../providers/provider_bodymetrics.dart';
 
 void showPopupDeleteComposition(
-    BuildContext context, WidgetRef ref, BodyComposition composition) {
-  final formattedDate =
-      '${composition.recordedAt.day.toString().padLeft(2, '0')}/${composition.recordedAt.month.toString().padLeft(2, '0')}/${composition.recordedAt.year}';
+  BuildContext context,
+  WidgetRef ref,
+  BodyComposition composition,
+) {
+  final formattedDate = formatDate(composition.recordedAt);
 
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
       title: const Text('Supprimer la composition'),
       content: Text(
-          'Supprimer la composition du $formattedDate ? Cette action est irréversible.'),
+        'Supprimer la composition du $formattedDate ? Cette action est irréversible.',
+      ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),

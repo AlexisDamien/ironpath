@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/utils/format_exception.dart';
 import 'package:go_router/go_router.dart';
 import '../../../identity/presentation/providers/provider_identity.dart';
 
@@ -62,7 +63,7 @@ void showDeleteAccountDialog(BuildContext context, WidgetRef ref) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text(exception.toString()),
+                            content: Text(formatExceptionMessage(exception)),
                             backgroundColor:
                                 Theme.of(context).colorScheme.error,
                           ),

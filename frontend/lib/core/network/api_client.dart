@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../storage/token_storage.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) {
@@ -11,13 +12,36 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 class ApiClient {
   static const String baseUrl = 'http://localhost:8080/api';
 
+  final TokenStorage tokenStorage;
   late final Dio dio;
   late final Dio _refreshDio;
 
-  final TokenStorage tokenStorage;
-
   ApiClient({required this.tokenStorage}) {
-    dio = Dio(BaseOptions(
+    dio = Dio(_createBaseOptions());
+    _refreshDio = Dio(_createBaseOptions());
+
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: _addAuthorizationHeader,
+        onError: _handleUnauthorized,
+      ),
+    );
+
+    if (kDebugMode) {
+      dio.interceptors.add(
+        LogInterceptor(
+          requestHeader: false,
+          requestBody: false,
+          responseHeader: false,
+          responseBody: true,
+          error: true,
+        ),
+      );
+    }
+  }
+
+  BaseOptions _createBaseOptions() {
+    return BaseOptions(
       baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
@@ -25,118 +49,101 @@ class ApiClient {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-    ));
-    _refreshDio = Dio(
-      BaseOptions(
-        baseUrl: baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ),
     );
-    dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        final accessToken = await tokenStorage.getAccessToken();
-        if (accessToken != null) {
-          options.headers['Authorization'] = 'Bearer $accessToken';
-        }
-        return handler.next(options);
-      },
-      onError: (error, handler) async {
-        final request = error.requestOptions;
-        final statusCode = error.response?.statusCode;
+  }
 
-        final isRefreshRequest = request.path.endsWith('/auth/refresh');
+  Future<void> _addAuthorizationHeader(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    final accessToken = await tokenStorage.getAccessToken();
 
-        final alreadyRetried = request.extra['retriedAfterRefresh'] == true;
+    if (accessToken != null && accessToken.isNotEmpty) {
+      options.headers['Authorization'] = 'Bearer $accessToken';
+    }
 
-        if (statusCode != 401 || isRefreshRequest || alreadyRetried) {
-          return handler.next(error);
-        }
+    handler.next(options);
+  }
 
-        final refreshToken = await tokenStorage.getRefreshToken();
+  Future<void> _handleUnauthorized(
+    DioException error,
+    ErrorInterceptorHandler handler,
+  ) async {
+    final request = error.requestOptions;
+    final isRefreshRequest = request.path.endsWith('/auth/refresh');
+    final alreadyRetried = request.extra['retriedAfterRefresh'] == true;
 
-        if (refreshToken == null || refreshToken.isEmpty) {
-          await tokenStorage.clearTokens();
-          return handler.next(error);
-        }
+    if (error.response?.statusCode != 401 ||
+        isRefreshRequest ||
+        alreadyRetried) {
+      handler.next(error);
+      return;
+    }
 
-        request.extra['retriedAfterRefresh'] = true;
+    final refreshToken = await tokenStorage.getRefreshToken();
 
-        late final String newAccessToken;
-        String newRefreshToken = refreshToken;
+    if (refreshToken == null || refreshToken.isEmpty) {
+      await tokenStorage.clearTokens();
+      handler.next(error);
+      return;
+    }
 
-        try {
-          final response = await _refreshDio.post<Map<String, dynamic>>(
-            '/auth/refresh',
-            data: {
-              'refreshToken': refreshToken,
-            },
-          );
+    request.extra['retriedAfterRefresh'] = true;
 
-          final responseData = response.data;
-          final tokenValue = responseData?['token'];
+    try {
+      final response = await _refreshDio.post<Map<String, dynamic>>(
+        '/auth/refresh',
+        data: {'refreshToken': refreshToken},
+      );
+      final responseData = response.data;
+      final newAccessToken = responseData?['token'];
+      final returnedRefreshToken = responseData?['refreshToken'];
 
-          if (tokenValue is! String || tokenValue.isEmpty) {
-            throw StateError(
-              'Le serveur n’a pas renvoyé de nouveau token',
-            );
-          }
+      if (newAccessToken is! String || newAccessToken.isEmpty) {
+        throw const FormatException('Réponse de refresh invalide');
+      }
 
-          newAccessToken = tokenValue;
+      final newRefreshToken =
+          returnedRefreshToken is String && returnedRefreshToken.isNotEmpty
+              ? returnedRefreshToken
+              : refreshToken;
 
-          final returnedRefreshToken = responseData?['refreshToken'];
+      await tokenStorage.saveTokens(
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      );
 
-          if (returnedRefreshToken is String &&
-              returnedRefreshToken.isNotEmpty) {
-            newRefreshToken = returnedRefreshToken;
-          }
-
-          await tokenStorage.saveTokens(
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-          );
-        } catch (_) {
-          await tokenStorage.clearTokens();
-          return handler.next(error);
-        }
-
-        request.headers['Authorization'] = 'Bearer $newAccessToken';
-
-        try {
-          final retryResponse = await dio.fetch(request);
-          return handler.resolve(retryResponse);
-        } on DioException catch (retryError) {
-          return handler.next(retryError);
-        }
-      },
-    ));
-    if (kDebugMode) {
-      dio.interceptors.add(LogInterceptor(
-        requestBody: false,
-        responseBody: true,
-        error: true,
-      ));
+      request.headers['Authorization'] = 'Bearer $newAccessToken';
+      final retryResponse = await dio.fetch(request);
+      handler.resolve(retryResponse);
+    } catch (_) {
+      await tokenStorage.clearTokens();
+      handler.next(error);
     }
   }
 
-  Future<Response> get(String path,
-      {Map<String, dynamic>? queryParameters}) async {
-    return await dio.get(path, queryParameters: queryParameters);
+  Future<Response<dynamic>> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+  }) {
+    return dio.get(path, queryParameters: queryParameters);
   }
 
-  Future<Response> post(String path, {Map<String, dynamic>? data}) async {
-    return await dio.post(path, data: data);
+  Future<Response<dynamic>> post(
+    String path, {
+    Map<String, dynamic>? data,
+  }) {
+    return dio.post(path, data: data);
   }
 
-  Future<Response> put(String path, {Map<String, dynamic>? data}) async {
-    return await dio.put(path, data: data);
+  Future<Response<dynamic>> put(
+    String path, {
+    Map<String, dynamic>? data,
+  }) {
+    return dio.put(path, data: data);
   }
 
-  Future<Response> delete(String path) async {
-    return await dio.delete(path);
+  Future<Response<dynamic>> delete(String path) {
+    return dio.delete(path);
   }
 }

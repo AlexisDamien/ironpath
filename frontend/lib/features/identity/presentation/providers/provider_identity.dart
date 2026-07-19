@@ -1,10 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/token_storage.dart';
+import '../../../../core/utils/format_exception.dart';
 import '../../../profile/presentation/providers/provider_profile.dart';
 import '../../data/repository_identity.dart';
 import '../../domain/state_identity.dart';
-import 'package:dio/dio.dart';
 
 final providerIdentityRepository = Provider<RepositoryIdentity>((ref) {
   final apiClient = ref.watch(apiClientProvider);
@@ -16,39 +17,48 @@ final providerIdentityRepository = Provider<RepositoryIdentity>((ref) {
 });
 
 final providerIdentity =
-    StateNotifierProvider<ProviderIdentityNotifier, IdentityState>((ref) {
+    StateNotifierProvider<ProviderIdentityNotifier, StateIdentity>((ref) {
   final repository = ref.watch(providerIdentityRepository);
   return ProviderIdentityNotifier(repository, ref);
 });
 
-class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
+class ProviderIdentityNotifier extends StateNotifier<StateIdentity> {
   final RepositoryIdentity _repository;
   final Ref _ref;
 
   ProviderIdentityNotifier(this._repository, this._ref)
-      : super(const IdentityState());
+      : super(const StateIdentity());
 
   Future<void> login(String email, String password) async {
     _ref.read(providerProfile.notifier).reset();
-    state = state.copyWith(status: StatusAuth.loading);
+    state = state.copyWith(
+      status: StatusAuth.loading,
+      clearErrorMessage: true,
+    );
+
     try {
       final isEmailVerified =
           await _repository.login(email: email, password: password);
       state = state.copyWith(
         status: StatusAuth.authenticated,
         isEmailVerified: isEmailVerified,
+        clearErrorMessage: true,
       );
     } catch (error) {
       state = state.copyWith(
         status: StatusAuth.error,
-        errorMessage: _extractErrorMessage(error),
+        errorMessage: formatExceptionMessage(error),
       );
     }
   }
 
   Future<void> register(String email, String password) async {
     _ref.read(providerProfile.notifier).reset();
-    state = state.copyWith(status: StatusAuth.loading);
+    state = state.copyWith(
+      status: StatusAuth.loading,
+      clearErrorMessage: true,
+    );
+
     try {
       final isEmailVerified = await _repository.register(
         email: email,
@@ -58,24 +68,30 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
       state = state.copyWith(
         status: StatusAuth.authenticated,
         isEmailVerified: isEmailVerified,
+        clearErrorMessage: true,
       );
     } catch (error) {
       state = state.copyWith(
         status: StatusAuth.error,
-        errorMessage: _extractErrorMessage(error),
+        errorMessage: formatExceptionMessage(error),
       );
     }
   }
 
   Future<void> logout() async {
-    state = state.copyWith(status: StatusAuth.loading);
+    state = state.copyWith(
+      status: StatusAuth.loading,
+      clearErrorMessage: true,
+    );
+
     try {
       await _repository.logout();
+    } finally {
       _ref.read(providerProfile.notifier).reset();
-      state = state.copyWith(status: StatusAuth.unauthenticated);
-    } catch (error) {
-      _ref.read(providerProfile.notifier).reset();
-      state = state.copyWith(status: StatusAuth.unauthenticated);
+      state = state.copyWith(
+        status: StatusAuth.unauthenticated,
+        clearErrorMessage: true,
+      );
     }
   }
 
@@ -89,7 +105,7 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
         newPassword: newPassword,
       );
     } catch (error) {
-      throw Exception(_extractErrorMessage(error));
+      throw Exception(formatExceptionMessage(error));
     }
   }
 
@@ -97,13 +113,14 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
     try {
       await _repository.deleteAccount(password: password);
       _ref.read(providerProfile.notifier).reset();
-      state = state.copyWith(status: StatusAuth.unauthenticated);
-    } catch (error) {
       state = state.copyWith(
-        status: StatusAuth.error,
-        errorMessage: _extractErrorMessage(error),
+        status: StatusAuth.unauthenticated,
+        clearErrorMessage: true,
       );
-      rethrow;
+    } catch (error) {
+      final message = formatExceptionMessage(error);
+      state = state.copyWith(errorMessage: message);
+      throw Exception(message);
     }
   }
 
@@ -111,44 +128,14 @@ class ProviderIdentityNotifier extends StateNotifier<IdentityState> {
     try {
       final isEmailVerified = await _repository.checkEmailVerificationStatus();
       state = state.copyWith(isEmailVerified: isEmailVerified);
-    } catch (error) {
-      // silencieux — on retentera plus tard
-    }
+    } catch (_) {}
   }
 
   Future<void> resendVerificationEmail() async {
     try {
       await _repository.resendVerificationEmail();
     } catch (error) {
-      throw Exception(_extractErrorMessage(error));
+      throw Exception(formatExceptionMessage(error));
     }
-  }
-
-  String _extractErrorMessage(Object error) {
-    if (error is DioException) {
-      final data = error.response?.data;
-
-      if (data is Map<String, dynamic>) {
-        final errorMessage = data['error'];
-
-        if (errorMessage is String && errorMessage.isNotEmpty) {
-          return errorMessage;
-        }
-
-        final message = data['message'];
-
-        if (message is String && message.isNotEmpty) {
-          return message;
-        }
-      }
-
-      if (error.type == DioExceptionType.connectionTimeout ||
-          error.type == DioExceptionType.receiveTimeout ||
-          error.type == DioExceptionType.connectionError) {
-        return 'Impossible de contacter le serveur';
-      }
-    }
-
-    return 'Une erreur est survenue';
   }
 }

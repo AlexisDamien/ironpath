@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/widgets/component_metric_value.dart';
 import '../../../bodymetrics/domain/models/body_composition.dart';
 
 class CardStats extends StatelessWidget {
@@ -16,33 +18,33 @@ class CardStats extends StatelessWidget {
           children: [
             const Text(
               'Statistiques corporelles',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 16),
             Row(
               children: [
                 if (composition.bmi != null)
                   Expanded(
-                    child: _buildStatItem(
-                      context,
-                      composition.bmi!.toStringAsFixed(1),
-                      'IMC',
+                    child: ComponentMetricValue(
+                      value: composition.bmi!.toStringAsFixed(1),
+                      label: 'IMC',
                     ),
                   ),
                 if (composition.bmr != null)
                   Expanded(
-                    child: _buildStatItem(
-                      context,
-                      '${composition.bmr}',
-                      'BMR (kcal)',
+                    child: ComponentMetricValue(
+                      value: '${composition.bmr}',
+                      label: 'BMR (kcal)',
                     ),
                   ),
                 if (composition.metabolicAge != null)
                   Expanded(
-                    child: _buildStatItem(
-                      context,
-                      '${composition.metabolicAge} ans',
-                      'Âge métabo.',
+                    child: ComponentMetricValue(
+                      value: '${composition.metabolicAge} ans',
+                      label: 'Âge métabo.',
                     ),
                   ),
               ],
@@ -50,25 +52,6 @@ class CardStats extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildStatItem(BuildContext context, String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.grey, fontSize: 12),
-        ),
-      ],
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/utils/format_exception.dart';
 import '../../../identity/presentation/providers/provider_identity.dart';
 import '../../../../core/widgets/form_password.dart';
 
@@ -64,7 +65,7 @@ class _ScreenChangePasswordState extends ConsumerState<ScreenChangePassword> {
     } catch (exception) {
       if (!mounted) return;
 
-      final message = exception.toString().replaceFirst('Exception: ', '');
+      final message = formatExceptionMessage(exception);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

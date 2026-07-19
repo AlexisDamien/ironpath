@@ -1,8 +1,9 @@
+import '../../../core/constants/enums.dart';
 import 'models/exercise.dart';
-import 'models/workout_program.dart';
 import 'models/training_session.dart';
+import 'models/workout_program.dart';
 
-enum StatusTraining { idle, loading, success, error }
+export '../../../core/constants/enums.dart' show StatusTraining;
 
 class StateTraining {
   final StatusTraining status;
@@ -29,6 +30,7 @@ class StateTraining {
     List<TrainingSession>? sessionHistory,
     String? errorMessage,
     List<Exercise>? exercises,
+    bool clearErrorMessage = false,
   }) {
     return StateTraining(
       status: status ?? this.status,
@@ -36,7 +38,8 @@ class StateTraining {
       activeSession:
           clearActiveSession ? null : activeSession ?? this.activeSession,
       sessionHistory: sessionHistory ?? this.sessionHistory,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorMessage:
+          clearErrorMessage ? null : errorMessage ?? this.errorMessage,
       exercises: exercises ?? this.exercises,
     );
   }
