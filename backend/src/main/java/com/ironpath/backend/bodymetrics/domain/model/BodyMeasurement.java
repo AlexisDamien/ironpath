@@ -70,6 +70,7 @@ public class BodyMeasurement {
     private LocalDateTime recordedAt;
 
     @Column(name = "archived")
+    @Builder.Default
     private Boolean archived = false;
 
     @PrePersist

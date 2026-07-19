@@ -8,7 +8,7 @@ class RepositoryProfile {
   RepositoryProfile(this._apiClient);
 
   Future<Profile?> getProfile() async {
-    final response = await _apiClient.get('/profile');
+    final response = await _apiClient.get('/api/profile');
     final data = response.data;
 
     if (response.statusCode == 204 || data == null || data == '') {
@@ -24,7 +24,7 @@ class RepositoryProfile {
 
   Future<Profile> updateProfile(ProfileInput input) async {
     final response = await _apiClient.put(
-      '/profile',
+      '/api/profile',
       data: input.toJson(),
     );
     final data = response.data;

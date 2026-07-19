@@ -2,17 +2,18 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../config/app_config.dart';
 import '../storage/token_storage.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) {
   final tokenStorage = ref.watch(tokenStorageProvider);
+
   return ApiClient(tokenStorage: tokenStorage);
 });
 
 class ApiClient {
-  static const String baseUrl = 'http://localhost:8080/api';
-
   final TokenStorage tokenStorage;
+
   late final Dio dio;
   late final Dio _refreshDio;
 
@@ -42,10 +43,10 @@ class ApiClient {
 
   BaseOptions _createBaseOptions() {
     return BaseOptions(
-      baseUrl: baseUrl,
+      baseUrl: AppConfig.apiBaseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
-      headers: {
+      headers: const {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
@@ -70,11 +71,22 @@ class ApiClient {
     ErrorInterceptorHandler handler,
   ) async {
     final request = error.requestOptions;
-    final isRefreshRequest = request.path.endsWith('/auth/refresh');
+
+    final publicAuthPaths = {
+      '/api/auth/login',
+      '/api/auth/register',
+      '/api/auth/verify-email',
+      '/api/auth/refresh',
+    };
+
+    final isPublicAuthRequest = publicAuthPaths.any(
+      request.path.endsWith,
+    );
+
     final alreadyRetried = request.extra['retriedAfterRefresh'] == true;
 
     if (error.response?.statusCode != 401 ||
-        isRefreshRequest ||
+        isPublicAuthRequest ||
         alreadyRetried) {
       handler.next(error);
       return;
@@ -92,9 +104,12 @@ class ApiClient {
 
     try {
       final response = await _refreshDio.post<Map<String, dynamic>>(
-        '/auth/refresh',
-        data: {'refreshToken': refreshToken},
+        '/api/auth/refresh',
+        data: {
+          'refreshToken': refreshToken,
+        },
       );
+
       final responseData = response.data;
       final newAccessToken = responseData?['token'];
       final returnedRefreshToken = responseData?['refreshToken'];
@@ -114,9 +129,15 @@ class ApiClient {
       );
 
       request.headers['Authorization'] = 'Bearer $newAccessToken';
-      final retryResponse = await dio.fetch(request);
+
+      final retryResponse = await dio.fetch<dynamic>(request);
+
       handler.resolve(retryResponse);
-    } catch (_) {
+    } catch (exception) {
+      if (kDebugMode) {
+        debugPrint('Échec du renouvellement du token : $exception');
+      }
+
       await tokenStorage.clearTokens();
       handler.next(error);
     }
@@ -126,24 +147,33 @@ class ApiClient {
     String path, {
     Map<String, dynamic>? queryParameters,
   }) {
-    return dio.get(path, queryParameters: queryParameters);
+    return dio.get<dynamic>(
+      path,
+      queryParameters: queryParameters,
+    );
   }
 
   Future<Response<dynamic>> post(
     String path, {
     Map<String, dynamic>? data,
   }) {
-    return dio.post(path, data: data);
+    return dio.post<dynamic>(
+      path,
+      data: data,
+    );
   }
 
   Future<Response<dynamic>> put(
     String path, {
     Map<String, dynamic>? data,
   }) {
-    return dio.put(path, data: data);
+    return dio.put<dynamic>(
+      path,
+      data: data,
+    );
   }
 
   Future<Response<dynamic>> delete(String path) {
-    return dio.delete(path);
+    return dio.delete<dynamic>(path);
   }
 }

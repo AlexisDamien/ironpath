@@ -79,9 +79,11 @@ public class BodyComposition {
     private LocalDateTime recordedAt;
 
     @Column(name = "source")
+    @Builder.Default
     private String source = "MANUAL";
 
     @Column(name = "archived")
+    @Builder.Default
     private Boolean archived = false;
 
     @PrePersist

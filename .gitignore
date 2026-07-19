@@ -3,7 +3,6 @@ backend/build/
 backend/.gradle/
 backend/bin/
 backend/*.class
-backend/application-prod.properties
 
 # Flutter
 frontend/.dart_tool/

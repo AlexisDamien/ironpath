@@ -8,7 +8,7 @@ class RepositoryBodyMetrics {
   RepositoryBodyMetrics(this._apiClient);
 
   Future<List<BodyMeasurement>> getMeasurements() async {
-    final response = await _apiClient.get('/bodymetrics/measurements');
+    final response = await _apiClient.get('/api/bodymetrics/measurements');
     return (response.data as List)
         .map((measurementData) => BodyMeasurement.fromJson(measurementData))
         .toList();
@@ -28,7 +28,8 @@ class RepositoryBodyMetrics {
     String? notes,
     DateTime? recordedAt,
   }) async {
-    final response = await _apiClient.post('/bodymetrics/measurements', data: {
+    final response =
+        await _apiClient.post('/api/bodymetrics/measurements', data: {
       'weight': weight,
       'chest': chest,
       'waist': waist,
@@ -46,7 +47,7 @@ class RepositoryBodyMetrics {
   }
 
   Future<List<BodyComposition>> getCompositions() async {
-    final response = await _apiClient.get('/bodymetrics/compositions');
+    final response = await _apiClient.get('/api/bodymetrics/compositions');
     return (response.data as List)
         .map((compositionData) => BodyComposition.fromJson(compositionData))
         .toList();
@@ -66,7 +67,8 @@ class RepositoryBodyMetrics {
     String? notes,
     DateTime? recordedAt,
   }) async {
-    final response = await _apiClient.post('/bodymetrics/compositions', data: {
+    final response =
+        await _apiClient.post('/api/bodymetrics/compositions', data: {
       'bodyFat': bodyFat,
       'skeletalMuscle': skeletalMuscle,
       'fatFreeMass': fatFreeMass,
@@ -98,7 +100,7 @@ class RepositoryBodyMetrics {
     String? notes,
   }) async {
     final response = await _apiClient.put(
-      '/bodymetrics/measurements/$measurementId',
+      '/api/bodymetrics/measurements/$measurementId',
       data: {
         'weight': weight,
         'chest': chest,
@@ -117,7 +119,7 @@ class RepositoryBodyMetrics {
   }
 
   Future<void> deleteMeasurement(String measurementId) async {
-    await _apiClient.delete('/bodymetrics/measurements/$measurementId');
+    await _apiClient.delete('/api/bodymetrics/measurements/$measurementId');
   }
 
   Future<BodyComposition> updateComposition({
@@ -135,7 +137,7 @@ class RepositoryBodyMetrics {
     String? notes,
   }) async {
     final response = await _apiClient.put(
-      '/bodymetrics/compositions/$compositionId',
+      '/api/bodymetrics/compositions/$compositionId',
       data: {
         'bodyFat': bodyFat,
         'skeletalMuscle': skeletalMuscle,
@@ -154,6 +156,6 @@ class RepositoryBodyMetrics {
   }
 
   Future<void> deleteComposition(String compositionId) async {
-    await _apiClient.delete('/bodymetrics/compositions/$compositionId');
+    await _apiClient.delete('/api/bodymetrics/compositions/$compositionId');
   }
 }

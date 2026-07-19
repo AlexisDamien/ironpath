@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ironpath/core/config/app_config.dart';
+
 import 'core/router/app_router.dart';
 import 'core/ui/app_theme.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  AppConfig.validate();
+
   runApp(
     const ProviderScope(
       child: IronPathApp(),

@@ -1,13 +1,16 @@
 package com.ironpath.backend.identity.application;
 
+import com.ironpath.backend.shared.infrastructure.AppProperties;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+
+import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,8 +23,16 @@ class EmailServiceTest {
     @Mock
     private JavaMailSender mailSender;
 
-    @InjectMocks
     private EmailService emailService;
+
+    @BeforeEach
+    void setUp() {
+        AppProperties appProperties = new AppProperties();
+        appProperties.setPublicBaseUrl(URI.create("http://localhost:8080"));
+        appProperties.getMail().setFrom("noreply@ironpath.com");
+
+        emailService = new EmailService(mailSender, appProperties);
+    }
 
     @Test
     void sendVerificationEmail_shouldSendMessage_withTokenLinkAndCorrectRecipient() {

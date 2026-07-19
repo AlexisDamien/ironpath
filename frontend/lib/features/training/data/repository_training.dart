@@ -10,7 +10,7 @@ class RepositoryTraining {
   RepositoryTraining(this._apiClient);
 
   Future<List<WorkoutProgram>> getPrograms() async {
-    final response = await _apiClient.get('/training/programs');
+    final response = await _apiClient.get('/api/training/programs');
     return (response.data as List)
         .map((programData) => WorkoutProgram.fromJson(programData))
         .toList();
@@ -21,7 +21,7 @@ class RepositoryTraining {
     String? description,
     List<ExerciseConfig> exercises = const [],
   }) async {
-    final response = await _apiClient.post('/training/programs', data: {
+    final response = await _apiClient.post('/api/training/programs', data: {
       'name': name,
       'description': description,
       'exercises': _serializeExercises(exercises),
@@ -36,7 +36,7 @@ class RepositoryTraining {
     List<ExerciseConfig> exercises = const [],
   }) async {
     final response = await _apiClient.put(
-      '/training/programs/$programId',
+      '/api/training/programs/$programId',
       data: {
         'name': name,
         'description': description,
@@ -69,14 +69,14 @@ class RepositoryTraining {
   }
 
   Future<void> deleteProgram(String programId) async {
-    await _apiClient.delete('/training/programs/$programId');
+    await _apiClient.delete('/api/training/programs/$programId');
   }
 
   Future<TrainingSession> startSession({
     String? programId,
     String? name,
   }) async {
-    final response = await _apiClient.post('/training/sessions', data: {
+    final response = await _apiClient.post('/api/training/sessions', data: {
       'programId': programId,
       'name': name,
     });
@@ -85,7 +85,7 @@ class RepositoryTraining {
 
   Future<TrainingSession?> getActiveSession() async {
     try {
-      final response = await _apiClient.get('/training/sessions/active');
+      final response = await _apiClient.get('/api/training/sessions/active');
       if (response.statusCode == 204) return null;
       return TrainingSession.fromJson(response.data);
     } catch (exception) {
@@ -103,7 +103,7 @@ class RepositoryTraining {
     bool isWarmup = false,
   }) async {
     final response = await _apiClient.post(
-      '/training/sessions/$sessionId/sets',
+      '/api/training/sessions/$sessionId/sets',
       data: {
         'exerciseId': exerciseId,
         'setOrder': setOrder,
@@ -118,13 +118,13 @@ class RepositoryTraining {
 
   Future<TrainingSession> endSession(String sessionId) async {
     final response = await _apiClient.put(
-      '/training/sessions/$sessionId/end',
+      '/api/training/sessions/$sessionId/end',
     );
     return TrainingSession.fromJson(response.data);
   }
 
   Future<List<TrainingSession>> getSessionHistory() async {
-    final response = await _apiClient.get('/training/sessions');
+    final response = await _apiClient.get('/api/training/sessions');
     return (response.data as List)
         .map((sessionData) => TrainingSession.fromJson(sessionData))
         .toList();
@@ -139,7 +139,7 @@ class RepositoryTraining {
     if (muscleGroup != null) queryParameters['muscleGroup'] = muscleGroup;
 
     final response = await _apiClient.get(
-      '/exercises',
+      '/api/exercises',
       queryParameters: queryParameters,
     );
     return (response.data as List)

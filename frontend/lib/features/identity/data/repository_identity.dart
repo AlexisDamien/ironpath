@@ -16,7 +16,7 @@ class RepositoryIdentity {
     required String password,
     required bool rgpdConsent,
   }) async {
-    final response = await _dio.post('/auth/register', data: {
+    final response = await _dio.post('/api/auth/register', data: {
       'email': email,
       'password': password,
       'rgpdConsent': rgpdConsent,
@@ -34,7 +34,7 @@ class RepositoryIdentity {
     required String email,
     required String password,
   }) async {
-    final response = await _dio.post('/auth/login', data: {
+    final response = await _dio.post('/api/auth/login', data: {
       'email': email,
       'password': password,
     });
@@ -48,7 +48,7 @@ class RepositoryIdentity {
   }
 
   Future<void> logout() async {
-    await _dio.post('/users/logout');
+    await _dio.post('/api/users/logout');
     await _tokenStorage.clearTokens();
   }
 
@@ -56,24 +56,24 @@ class RepositoryIdentity {
     required String currentPassword,
     required String newPassword,
   }) async {
-    await _dio.put('/users/password', data: {
+    await _dio.put('/api/users/password', data: {
       'currentPassword': currentPassword,
       'newPassword': newPassword,
     });
   }
 
   Future<void> deleteAccount({required String password}) async {
-    await _dio.delete('/users/account', data: {
+    await _dio.delete('/api/users/account', data: {
       'currentPassword': password,
     });
   }
 
   Future<bool> checkEmailVerificationStatus() async {
-    final response = await _dio.get('/auth/email-verification-status');
+    final response = await _dio.get('/api/auth/email-verification-status');
     return response.data['emailVerified'] ?? false;
   }
 
   Future<void> resendVerificationEmail() async {
-    await _dio.post('/auth/resend-verification');
+    await _dio.post('/api/auth/resend-verification');
   }
 }
