@@ -22,10 +22,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -116,6 +119,113 @@ class SaveCompositionUseCaseTest {
 
         assertNotNull(response);
         assertNull(response.bmi());
+    }
+
+    @Test
+    void execute_shouldArchivePreviousCompositions_whenOnesAlreadyExist() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder().id(userId).email("test@ironpath.com").build();
+
+        BodyComposition previous1 = BodyComposition.builder().archived(false).build();
+        BodyComposition previous2 = BodyComposition.builder().archived(false).build();
+
+        SaveCompositionRequest request = new SaveCompositionRequest(
+                18.5, null, null, null, null,
+                null, null, null, null, null,
+                null, null, "MANUAL"
+        );
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(compositionRepository.findByUserIdOrderByRecordedAtDesc(userId))
+                .thenReturn(List.of(previous1, previous2));
+        when(profileRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        when(measurementRepository.findByUserIdOrderByRecordedAtDesc(userId)).thenReturn(List.of());
+        when(compositionRepository.save(any(BodyComposition.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        saveCompositionUseCase.execute(userId, request);
+
+        assertTrue(previous1.getArchived());
+        assertTrue(previous2.getArchived());
+        verify(compositionRepository).saveAll(List.of(previous1, previous2));
+    }
+
+    @Test
+    void execute_shouldNotCalculateBmiOrBmr_whenProfileIsAbsent() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder().id(userId).email("test@ironpath.com").build();
+        BodyMeasurement lastMeasurement = BodyMeasurement.builder().weight(78.5).build();
+
+        SaveCompositionRequest request = new SaveCompositionRequest(
+                18.5, null, null, null, null,
+                null, null, null, null, null,
+                null, null, "MANUAL"
+        );
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(compositionRepository.findByUserIdOrderByRecordedAtDesc(userId)).thenReturn(List.of());
+        when(profileRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        when(measurementRepository.findByUserIdOrderByRecordedAtDesc(userId))
+                .thenReturn(List.of(lastMeasurement));
+        when(compositionRepository.save(any(BodyComposition.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        CompositionResponse response = saveCompositionUseCase.execute(userId, request);
+
+        assertNull(response.bmi());
+        assertNull(response.bmr());
+        assertNull(response.metabolicAge());
+    }
+
+    @Test
+    void execute_shouldUseExplicitBmr_whenProvidedInRequest() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder().id(userId).email("test@ironpath.com").build();
+        Profile profile = Profile.builder()
+                .user(user).height(178.0).birthDate(LocalDate.of(1998, 3, 15)).gender("MALE").build();
+        BodyMeasurement lastMeasurement = BodyMeasurement.builder().weight(78.5).build();
+
+        SaveCompositionRequest request = new SaveCompositionRequest(
+                null, null, null, null, null,
+                null, null, null, null, 1750,
+                null, null, "MANUAL"
+        );
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(compositionRepository.findByUserIdOrderByRecordedAtDesc(userId)).thenReturn(List.of());
+        when(profileRepository.findByUserId(userId)).thenReturn(Optional.of(profile));
+        when(measurementRepository.findByUserIdOrderByRecordedAtDesc(userId))
+                .thenReturn(List.of(lastMeasurement));
+        when(compositionRepository.save(any(BodyComposition.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        CompositionResponse response = saveCompositionUseCase.execute(userId, request);
+
+        assertEquals(1750, response.bmr());
+        assertNotNull(response.metabolicAge());
+    }
+
+    @Test
+    void execute_shouldDefaultSourceToManual_whenSourceNotProvided() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder().id(userId).email("test@ironpath.com").build();
+
+        SaveCompositionRequest request = new SaveCompositionRequest(
+                null, null, null, null, null,
+                null, null, null, null, null,
+                null, null, null
+        );
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(compositionRepository.findByUserIdOrderByRecordedAtDesc(userId)).thenReturn(List.of());
+        when(profileRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        when(measurementRepository.findByUserIdOrderByRecordedAtDesc(userId)).thenReturn(List.of());
+        when(compositionRepository.save(any(BodyComposition.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        CompositionResponse response = saveCompositionUseCase.execute(userId, request);
+
+        assertEquals("MANUAL", response.source());
     }
 
     @Test

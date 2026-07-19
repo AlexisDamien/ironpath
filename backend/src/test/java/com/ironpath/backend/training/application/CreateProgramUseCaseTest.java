@@ -94,6 +94,28 @@ class CreateProgramUseCaseTest {
     }
 
     @Test
+    void execute_shouldThrowIllegalArgumentException_whenAnExerciseHasNoSets() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .email("test@ironpath.com")
+                .passwordHash("hashedPassword")
+                .build();
+
+        CreateProgramRequest request = new CreateProgramRequest(
+                "PPL",
+                null,
+                List.of(new ProgramExerciseRequest("0001", 1, true, List.of()))
+        );
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        assertThrows(IllegalArgumentException.class, () ->
+                createProgramUseCase.execute(userId, request)
+        );
+    }
+
+    @Test
     void execute_shouldThrowIllegalArgumentException_whenExercisesNull() {
         UUID userId = UUID.randomUUID();
         User user = User.builder()

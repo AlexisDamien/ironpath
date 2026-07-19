@@ -53,7 +53,6 @@ public class SaveProfileUseCase  {
         }
 
         Profile savedProfile = profileRepository.save(profile);
-        System.out.println("=== USERNAME SAVED === " + savedProfile.getUsername());
         return toResponse(savedProfile);
     }
 
