@@ -27,6 +27,7 @@ class _ScreenEditProfileState extends ConsumerState<ScreenEditProfile> {
   final _usernameController = TextEditingController();
   final _heightController = TextEditingController();
   final _birthDateController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   String? _selectedGender;
   String? _selectedObjective;
@@ -68,7 +69,12 @@ class _ScreenEditProfileState extends ConsumerState<ScreenEditProfile> {
   }
 
   Future<void> _submit() async {
-    if (_isLoading) {
+    if (_isLoading) return;
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (_selectedGender == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sélectionnez votre genre.')),
+      );
       return;
     }
 
@@ -97,7 +103,12 @@ class _ScreenEditProfileState extends ConsumerState<ScreenEditProfile> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(formatExceptionMessage(error)),
+          content: Text(
+            formatExceptionMessage(error),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onError,
+            ),
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -140,46 +151,72 @@ class _ScreenEditProfileState extends ConsumerState<ScreenEditProfile> {
           _isCreating ? 'Créer le profil' : 'Modifier le profil',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        automaticallyImplyLeading: false,
         actions: [
-          TextButton(
-            onPressed: _isLoading ? null : _submit,
-            child: _isLoading
-                ? const SizedBox(
-                    height: 16,
-                    width: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(
-                    'Sauvegarder',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+          IconButton(
+            icon: const Icon(Icons.close),
+            tooltip: 'Annuler et fermer',
+            onPressed: () => Navigator.of(context).pop(),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: FormProfile(
-          firstNameController: _firstNameController,
-          lastNameController: _lastNameController,
-          usernameController: _usernameController,
-          heightController: _heightController,
-          birthDateController: _birthDateController,
-          selectedGender: _selectedGender,
-          selectedObjective: _selectedObjective,
-          onPickBirthDate: _pickBirthDate,
-          onGenderSelected: (value) {
-            setState(() => _selectedGender = value);
-          },
-          onObjectiveSelected: (value) {
-            setState(() => _selectedObjective = value);
-          },
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 112),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: FormProfile(
+                firstNameController: _firstNameController,
+                lastNameController: _lastNameController,
+                usernameController: _usernameController,
+                heightController: _heightController,
+                birthDateController: _birthDateController,
+                selectedGender: _selectedGender,
+                selectedObjective: _selectedObjective,
+                showRequiredIndicators: true,
+                onPickBirthDate: _pickBirthDate,
+                onGenderSelected: (value) {
+                  setState(() => _selectedGender = value);
+                },
+                onObjectiveSelected: (value) {
+                  setState(() => _selectedObjective = value);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Les champs marqués d’un * sont obligatoires.',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: ElevatedButton.icon(
+            onPressed: _isLoading ? null : _submit,
+            icon: _isLoading
+                ? const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+                : const Icon(Icons.save_outlined),
+            label: Text(
+              _isLoading
+                  ? 'Enregistrement…'
+                  : _isCreating
+                  ? 'Créer le profil'
+                  : 'Enregistrer les modifications',
+            ),
+          ),
         ),
       ),
     );

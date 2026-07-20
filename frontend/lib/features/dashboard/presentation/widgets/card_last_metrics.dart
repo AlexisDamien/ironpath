@@ -20,6 +20,7 @@ class CardLastMetrics extends StatelessWidget {
   Widget build(BuildContext context) {
     final measurement = lastMeasurement;
     final composition = lastComposition;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
       child: Padding(
@@ -27,15 +28,15 @@ class CardLastMetrics extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 const Text(
                   'Dernières mesures',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 TextButton(
                   onPressed: () => context.go('/bodymetrics'),
@@ -44,46 +45,48 @@ class CardLastMetrics extends StatelessWidget {
               ],
             ),
             if (measurement == null && composition == null)
-              const Text(
+              Text(
                 'Aucune mesure enregistrée',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: colorScheme.onSurfaceVariant),
               ),
             if (measurement != null) ...[
               const SizedBox(height: 8),
               Text(
                 'Mensurations — ${formatDate(measurement.recordedAt)}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 13,
-                  color: Colors.grey,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 12,
-                runSpacing: 8,
-                children: [
-                  if (measurement.weight != null)
-                    ComponentMetricValue(
-                      value: '${measurement.weight} kg',
-                      label: 'Poids',
-                    ),
-                  if (measurement.chest != null)
-                    ComponentMetricValue(
-                      value: '${measurement.chest} cm',
-                      label: 'Poitrine',
-                    ),
-                  if (measurement.waist != null)
-                    ComponentMetricValue(
-                      value: '${measurement.waist} cm',
-                      label: 'Taille',
-                    ),
-                  if (measurement.hips != null)
-                    ComponentMetricValue(
-                      value: '${measurement.hips} cm',
-                      label: 'Hanches',
-                    ),
-                ],
+              LayoutBuilder(
+                builder: (context, _) => Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    if (measurement.weight != null)
+                      ComponentMetricValue(
+                        value: '${measurement.weight} kg',
+                        label: 'Poids',
+                      ),
+                    if (measurement.chest != null)
+                      ComponentMetricValue(
+                        value: '${measurement.chest} cm',
+                        label: 'Poitrine',
+                      ),
+                    if (measurement.waist != null)
+                      ComponentMetricValue(
+                        value: '${measurement.waist} cm',
+                        label: 'Taille',
+                      ),
+                    if (measurement.hips != null)
+                      ComponentMetricValue(
+                        value: '${measurement.hips} cm',
+                        label: 'Hanches',
+                      ),
+                  ],
+                ),
               ),
             ],
             if (measurement != null && composition != null)
@@ -91,16 +94,16 @@ class CardLastMetrics extends StatelessWidget {
             if (composition != null) ...[
               Text(
                 'Composition — ${formatDate(composition.recordedAt)}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 13,
-                  color: Colors.grey,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 12,
-                runSpacing: 8,
+                runSpacing: 12,
                 children: [
                   if (composition.bmi != null)
                     ComponentMetricValue(

@@ -11,15 +11,15 @@ final providerBodyMetricsRepository = Provider<RepositoryBodyMetrics>((ref) {
 
 final providerBodyMetrics =
     StateNotifierProvider<ProviderBodyMetricsNotifier, StateBodyMetrics>((ref) {
-  final repository = ref.watch(providerBodyMetricsRepository);
-  return ProviderBodyMetricsNotifier(repository);
-});
+      final repository = ref.watch(providerBodyMetricsRepository);
+      return ProviderBodyMetricsNotifier(repository);
+    });
 
 class ProviderBodyMetricsNotifier extends StateNotifier<StateBodyMetrics> {
   final RepositoryBodyMetrics _repository;
 
   ProviderBodyMetricsNotifier(this._repository)
-      : super(const StateBodyMetrics());
+    : super(const StateBodyMetrics());
 
   Future<void> loadMeasurements() async {
     if (!state.isInitialized) {

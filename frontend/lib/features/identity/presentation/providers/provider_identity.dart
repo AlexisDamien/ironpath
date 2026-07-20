@@ -27,35 +27,93 @@ class ProviderIdentityNotifier extends StateNotifier<StateIdentity> {
   final Ref _ref;
 
   ProviderIdentityNotifier(this._repository, this._ref)
-      : super(const StateIdentity());
+      : super(
+          const StateIdentity(
+            status: StatusAuth.loading,
+            isRestoringSession: true,
+          ),
+        ) {
+    Future.microtask(_restoreSession);
+  }
 
-  Future<void> login(String email, String password) async {
+  Future<void> _restoreSession() async {
+    try {
+      final isEmailVerified = await _repository.restoreSession();
+
+      if (isEmailVerified == null) {
+        state = state.copyWith(
+          status: StatusAuth.unauthenticated,
+          isEmailVerified: false,
+          isRestoringSession: false,
+          clearErrorMessage: true,
+        );
+        return;
+      }
+
+      await _ref.read(providerProfile.notifier).loadProfile();
+
+      state = state.copyWith(
+        status: StatusAuth.authenticated,
+        isEmailVerified: isEmailVerified,
+        isRestoringSession: false,
+        clearErrorMessage: true,
+      );
+    } catch (_) {
+      state = state.copyWith(
+        status: StatusAuth.unauthenticated,
+        isEmailVerified: false,
+        isRestoringSession: false,
+        clearErrorMessage: true,
+      );
+    }
+  }
+
+  Future<void> login(
+    String email,
+    String password, {
+    required bool rememberMe,
+  }) async {
     _ref.read(providerProfile.notifier).reset();
     state = state.copyWith(
       status: StatusAuth.loading,
+      isRestoringSession: false,
       clearErrorMessage: true,
     );
 
     try {
-      final isEmailVerified =
-          await _repository.login(email: email, password: password);
+      final isEmailVerified = await _repository.login(
+        email: email,
+        password: password,
+        rememberMe: rememberMe,
+      );
+
+      await _ref.read(providerProfile.notifier).loadProfile();
+
       state = state.copyWith(
         status: StatusAuth.authenticated,
         isEmailVerified: isEmailVerified,
+        isRestoringSession: false,
         clearErrorMessage: true,
       );
     } catch (error) {
       state = state.copyWith(
-        status: StatusAuth.error,
+        status: StatusAuth.unauthenticated,
+        isRestoringSession: false,
         errorMessage: formatExceptionMessage(error),
       );
     }
+  }
+
+  void clearError() {
+    if (state.errorMessage == null) return;
+    state = state.copyWith(clearErrorMessage: true);
   }
 
   Future<void> register(String email, String password) async {
     _ref.read(providerProfile.notifier).reset();
     state = state.copyWith(
       status: StatusAuth.loading,
+      isRestoringSession: false,
       clearErrorMessage: true,
     );
 
@@ -65,14 +123,19 @@ class ProviderIdentityNotifier extends StateNotifier<StateIdentity> {
         password: password,
         rgpdConsent: true,
       );
+
+      await _ref.read(providerProfile.notifier).loadProfile();
+
       state = state.copyWith(
         status: StatusAuth.authenticated,
         isEmailVerified: isEmailVerified,
+        isRestoringSession: false,
         clearErrorMessage: true,
       );
     } catch (error) {
       state = state.copyWith(
         status: StatusAuth.error,
+        isRestoringSession: false,
         errorMessage: formatExceptionMessage(error),
       );
     }
@@ -81,6 +144,7 @@ class ProviderIdentityNotifier extends StateNotifier<StateIdentity> {
   Future<void> logout() async {
     state = state.copyWith(
       status: StatusAuth.loading,
+      isRestoringSession: false,
       clearErrorMessage: true,
     );
 
@@ -90,7 +154,22 @@ class ProviderIdentityNotifier extends StateNotifier<StateIdentity> {
       _ref.read(providerProfile.notifier).reset();
       state = state.copyWith(
         status: StatusAuth.unauthenticated,
+        isEmailVerified: false,
+        isRestoringSession: false,
         clearErrorMessage: true,
+      );
+    }
+  }
+
+  Future<void> requestPasswordReset({required String email}) async {
+    try {
+      await _repository.requestPasswordReset(email: email);
+    } catch (error) {
+      throw Exception(
+        formatExceptionMessage(
+          error,
+          fallback: 'Impossible d’envoyer le lien de réinitialisation',
+        ),
       );
     }
   }
@@ -112,16 +191,19 @@ class ProviderIdentityNotifier extends StateNotifier<StateIdentity> {
   Future<void> deleteAccount({required String password}) async {
     try {
       await _repository.deleteAccount(password: password);
-      _ref.read(providerProfile.notifier).reset();
-      state = state.copyWith(
-        status: StatusAuth.unauthenticated,
-        clearErrorMessage: true,
-      );
     } catch (error) {
-      final message = formatExceptionMessage(error);
-      state = state.copyWith(errorMessage: message);
-      throw Exception(message);
+      throw Exception(formatExceptionMessage(error));
     }
+  }
+
+  void completeAccountDeletion() {
+    _ref.read(providerProfile.notifier).reset();
+    state = state.copyWith(
+      status: StatusAuth.unauthenticated,
+      isEmailVerified: false,
+      isRestoringSession: false,
+      clearErrorMessage: true,
+    );
   }
 
   Future<void> refreshEmailVerificationStatus() async {

@@ -60,6 +60,7 @@ class _ScreenProfileState extends ConsumerState<ScreenProfile> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Paramètres',
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
                 fullscreenDialog: true,
@@ -70,39 +71,38 @@ class _ScreenProfileState extends ConsumerState<ScreenProfile> {
         ],
       ),
       body: switch (stateProfile.status) {
-        StatusProfile.loading when stateProfile.profile == null =>
-          const Center(child: CircularProgressIndicator()),
+        StatusProfile.loading when stateProfile.profile == null => const Center(
+          child: CircularProgressIndicator(),
+        ),
         StatusProfile.error when stateProfile.profile == null => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  stateProfile.errorMessage ?? 'Une erreur est survenue',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () =>
-                      ref.read(providerProfile.notifier).loadProfile(),
-                  child: const Text('Réessayer'),
-                ),
-              ],
-            ),
-          ),
-        _ => ListView(
-            padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CardProfile(
-                profile: stateProfile.profile,
-                onEdit: _openProfileForm,
+              Text(
+                stateProfile.errorMessage ?? 'Une erreur est survenue',
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
               const SizedBox(height: 16),
-              if (lastComposition != null)
-                CardStats(composition: lastComposition),
+              ElevatedButton(
+                onPressed: () =>
+                    ref.read(providerProfile.notifier).loadProfile(),
+                child: const Text('Réessayer'),
+              ),
             ],
           ),
+        ),
+        _ => ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            CardProfile(
+              profile: stateProfile.profile,
+              onEdit: _openProfileForm,
+            ),
+            const SizedBox(height: 16),
+            if (lastComposition != null)
+              CardStats(composition: lastComposition),
+          ],
+        ),
       },
     );
   }

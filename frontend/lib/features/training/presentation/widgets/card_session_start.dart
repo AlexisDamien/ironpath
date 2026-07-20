@@ -33,19 +33,13 @@ class CardSessionStart extends StatelessWidget {
                 const SizedBox(height: 16),
                 const Text(
                   'Aucune séance en cours',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Démarre une séance libre ou depuis un programme',
                   style: TextStyle(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -62,8 +56,9 @@ class CardSessionStart extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed:
-                        canWrite ? onStartProgram : onRequiresVerification,
+                    onPressed: canWrite
+                        ? onStartProgram
+                        : onRequiresVerification,
                     icon: const Icon(Icons.list_alt),
                     label: const Text('Depuis un programme'),
                   ),

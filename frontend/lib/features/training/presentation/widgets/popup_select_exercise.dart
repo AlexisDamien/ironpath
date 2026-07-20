@@ -12,11 +12,18 @@ class PopupSelectExercise extends ConsumerStatefulWidget {
 
 class _PopupSelectExerciseState extends ConsumerState<PopupSelectExercise> {
   final _searchController = TextEditingController();
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(providerTraining.notifier).loadExercises());
+    Future.microtask(() => _loadExercises());
+  }
+
+  Future<void> _loadExercises({String? search}) async {
+    if (mounted) setState(() => _isLoading = true);
+    await ref.read(providerTraining.notifier).loadExercises(search: search);
+    if (mounted) setState(() => _isLoading = false);
   }
 
   @override
@@ -37,46 +44,69 @@ class _PopupSelectExerciseState extends ConsumerState<PopupSelectExercise> {
           'Choisir un exercice',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              decoration: const InputDecoration(
-                hintText: 'Rechercher un exercice...',
-                prefixIcon: Icon(Icons.search),
-              ),
-              onChanged: (searchValue) => ref
-                  .read(providerTraining.notifier)
-                  .loadExercises(
-                      search: searchValue.isEmpty ? null : searchValue),
-            ),
-          ),
-          Expanded(
-            child: exercises.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: exercises.length,
-                    itemBuilder: (context, index) {
-                      final exercise = exercises[index];
-                      return ListTile(
-                        title: Text(exercise.name),
-                        subtitle: Text(
-                          '${exercise.muscleGroup ?? ''} • ${exercise.equipment ?? ''}',
-                        ),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                        onTap: () => Navigator.of(context).pop(exercise),
-                      );
-                    },
-                  ),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            tooltip: 'Annuler et fermer',
+            onPressed: () => Navigator.of(context).pop(),
           ),
         ],
+      ),
+      body: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  labelText: 'Rechercher un exercice',
+                  hintText: 'Nom, muscle ou équipement',
+                  prefixIcon: Icon(Icons.search),
+                ),
+                textInputAction: TextInputAction.search,
+                onChanged: (searchValue) => _loadExercises(
+                  search: searchValue.isEmpty ? null : searchValue,
+                ),
+              ),
+            ),
+            Expanded(
+              child: _isLoading
+                  ? Center(
+                      child: Semantics(
+                        label: 'Chargement des exercices',
+                        child: const CircularProgressIndicator(),
+                      ),
+                    )
+                  : exercises.isEmpty
+                  ? const Center(child: Text('Aucun exercice trouvé'))
+                  : ListView.builder(
+                      itemCount: exercises.length,
+                      itemBuilder: (context, index) {
+                        final exercise = exercises[index];
+                        final details =
+                            [exercise.muscleGroup, exercise.equipment]
+                                .whereType<String>()
+                                .where((value) => value.isNotEmpty);
+
+                        return ListTile(
+                          title: Text(exercise.name),
+                          subtitle: details.isEmpty
+                              ? null
+                              : Text(details.join(' • ')),
+                          trailing: const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                          ),
+                          onTap: () => Navigator.of(context).pop(exercise),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -8,11 +8,7 @@ class CardProfile extends StatelessWidget {
   final Profile? profile;
   final VoidCallback onEdit;
 
-  const CardProfile({
-    super.key,
-    required this.profile,
-    required this.onEdit,
-  });
+  const CardProfile({super.key, required this.profile, required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +26,9 @@ class CardProfile extends StatelessWidget {
                 Center(
                   child: CircleAvatar(
                     radius: 40,
-                    backgroundColor:
-                        Theme.of(context).colorScheme.primaryContainer,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
                     child: Icon(
                       Icons.person,
                       size: 40,
@@ -44,6 +41,7 @@ class CardProfile extends StatelessWidget {
                   right: 0,
                   child: IconButton(
                     icon: const Icon(Icons.edit_outlined),
+                    tooltip: 'Modifier le profil',
                     onPressed: onEdit,
                   ),
                 ),
@@ -68,15 +66,19 @@ class CardProfile extends StatelessWidget {
               Center(
                 child: Text(
                   '@$username',
-                  style: const TextStyle(color: Colors.grey),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ],
             const Divider(height: 32),
             if (currentProfile == null)
-              const Text(
+              Text(
                 'Complète ton profil pour personnaliser ton suivi.',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               )
             else ...[
               _ProfileInfoRow(
@@ -127,7 +129,11 @@ class _ProfileInfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.grey),
+        Icon(
+          icon,
+          size: 20,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -135,9 +141,9 @@ class _ProfileInfoRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               Text(

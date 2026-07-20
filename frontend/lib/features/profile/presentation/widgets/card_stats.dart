@@ -18,10 +18,7 @@ class CardStats extends StatelessWidget {
           children: [
             const Text(
               'Statistiques corporelles',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Row(

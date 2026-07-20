@@ -28,21 +28,23 @@ class RepositoryBodyMetrics {
     String? notes,
     DateTime? recordedAt,
   }) async {
-    final response =
-        await _apiClient.post('/api/bodymetrics/measurements', data: {
-      'weight': weight,
-      'chest': chest,
-      'waist': waist,
-      'hips': hips,
-      'leftArm': leftArm,
-      'rightArm': rightArm,
-      'leftThigh': leftThigh,
-      'rightThigh': rightThigh,
-      'leftCalf': leftCalf,
-      'rightCalf': rightCalf,
-      'notes': notes,
-      'recordedAt': recordedAt?.toIso8601String(),
-    });
+    final response = await _apiClient.post(
+      '/api/bodymetrics/measurements',
+      data: {
+        'weight': weight,
+        'chest': chest,
+        'waist': waist,
+        'hips': hips,
+        'leftArm': leftArm,
+        'rightArm': rightArm,
+        'leftThigh': leftThigh,
+        'rightThigh': rightThigh,
+        'leftCalf': leftCalf,
+        'rightCalf': rightCalf,
+        'notes': notes,
+        'recordedAt': recordedAt?.toIso8601String(),
+      },
+    );
     return BodyMeasurement.fromJson(response.data);
   }
 
@@ -67,21 +69,23 @@ class RepositoryBodyMetrics {
     String? notes,
     DateTime? recordedAt,
   }) async {
-    final response =
-        await _apiClient.post('/api/bodymetrics/compositions', data: {
-      'bodyFat': bodyFat,
-      'skeletalMuscle': skeletalMuscle,
-      'fatFreeMass': fatFreeMass,
-      'subcutaneousFat': subcutaneousFat,
-      'visceralFat': visceralFat,
-      'bodyWater': bodyWater,
-      'muscleMass': muscleMass,
-      'boneMass': boneMass,
-      'protein': protein,
-      'bmr': bmr,
-      'notes': notes,
-      'recordedAt': recordedAt?.toIso8601String(),
-    });
+    final response = await _apiClient.post(
+      '/api/bodymetrics/compositions',
+      data: {
+        'bodyFat': bodyFat,
+        'skeletalMuscle': skeletalMuscle,
+        'fatFreeMass': fatFreeMass,
+        'subcutaneousFat': subcutaneousFat,
+        'visceralFat': visceralFat,
+        'bodyWater': bodyWater,
+        'muscleMass': muscleMass,
+        'boneMass': boneMass,
+        'protein': protein,
+        'bmr': bmr,
+        'notes': notes,
+        'recordedAt': recordedAt?.toIso8601String(),
+      },
+    );
     return BodyComposition.fromJson(response.data);
   }
 

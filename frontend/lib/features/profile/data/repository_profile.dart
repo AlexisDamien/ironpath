@@ -23,10 +23,7 @@ class RepositoryProfile {
   }
 
   Future<Profile> updateProfile(ProfileInput input) async {
-    final response = await _apiClient.put(
-      '/api/profile',
-      data: input.toJson(),
-    );
+    final response = await _apiClient.put('/api/profile', data: input.toJson());
     final data = response.data;
 
     if (data is! Map) {

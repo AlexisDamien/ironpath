@@ -20,16 +20,15 @@ class CardLastSession extends StatelessWidget {
           children: [
             const Text(
               'Dernière séance',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
             if (session == null)
-              const Text(
+              Text(
                 'Aucune séance enregistrée',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               )
             else ...[
               Text(
@@ -39,8 +38,8 @@ class CardLastSession extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 '${session.sets.length} set${session.sets.length > 1 ? 's' : ''} • ${formatDate(session.startedAt)}',
-                style: const TextStyle(
-                  color: Colors.grey,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 13,
                 ),
               ),

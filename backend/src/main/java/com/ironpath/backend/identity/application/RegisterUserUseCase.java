@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -31,17 +32,27 @@ public class RegisterUserUseCase {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
-    public LoginResponse execute(RegisterRequest request, String ipAdress) {
+    public LoginResponse execute(RegisterRequest request, String ipAddress) {
+        String normalizedEmail = request.email()
+                .toLowerCase(Locale.ROOT)
+                .trim();
 
-        if (userRepository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException("Un compte existe déjà avec cet email");
+        if (userRepository.existsByEmail(normalizedEmail)) {
+            throw new IllegalArgumentException(
+                    "Un compte existe déjà avec cet email"
+            );
         }
+
+        PasswordPolicy.validateOrThrow(request.password());
 
         if (!request.rgpdConsent()) {
-            throw new IllegalArgumentException("Le consentement RGPD est obligatoire");
+            throw new IllegalArgumentException(
+                    "Le consentement RGPD est obligatoire"
+            );
         }
+
         User user = User.builder()
-                .email(request.email().toLowerCase().trim())
+                .email(normalizedEmail)
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .build();
         userRepository.save(user);
@@ -49,20 +60,27 @@ public class RegisterUserUseCase {
         ConsentRecord consent = ConsentRecord.builder()
                 .user(user)
                 .consentType("RGPD_HEALTH_DATA")
-                .ipAddress(ipAdress)
+                .ipAddress(ipAddress)
                 .build();
         consentRecordRepository.save(consent);
 
         String verificationTokenValue = UUID.randomUUID().toString();
-        EmailVerificationToken verificationToken = EmailVerificationToken.builder()
-                .user(user)
-                .token(verificationTokenValue)
-                .build();
+        EmailVerificationToken verificationToken =
+                EmailVerificationToken.builder()
+                        .user(user)
+                        .token(verificationTokenValue)
+                        .build();
 
         tokenRepository.save(verificationToken);
-        emailService.sendVerificationEmail(user.getEmail(), verificationTokenValue);
+        emailService.sendVerificationEmail(
+                user.getEmail(),
+                verificationTokenValue
+        );
 
-        String jwt = jwtService.generateToken(user.getId(), user.getEmail());
+        String jwt = jwtService.generateToken(
+                user.getId(),
+                user.getEmail()
+        );
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
@@ -70,5 +88,10 @@ public class RegisterUserUseCase {
                 .build();
         refreshTokenRepository.save(refreshToken);
 
-        return new LoginResponse(jwt, refreshToken.getToken(), false);    }
+        return new LoginResponse(
+                jwt,
+                refreshToken.getToken(),
+                false
+        );
+    }
 }

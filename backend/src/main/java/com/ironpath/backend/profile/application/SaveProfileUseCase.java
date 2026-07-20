@@ -14,24 +14,29 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class SaveProfileUseCase  {
+public class SaveProfileUseCase {
 
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
 
     @Transactional
-    public ProfileResponse execute(UUID userId, UpdateProfileRequest request) {
+    public ProfileResponse execute(
+            UUID userId,
+            UpdateProfileRequest request
+    ) {
         var user = userRepository.findById(userId)
-                .orElseThrow(() -> new UnauthorizedException("Utilisateur introuvable"));
+                .orElseThrow(() ->
+                        new UnauthorizedException("Utilisateur introuvable")
+                );
 
         Profile profile = profileRepository.findByUserId(userId)
                 .orElse(Profile.builder().user(user).build());
 
         if (request.firstName() != null) {
-            profile.setFirstName(request.firstName());
+            profile.setFirstName(normalizeNullable(request.firstName()));
         }
         if (request.lastName() != null) {
-            profile.setLastName(request.lastName());
+            profile.setLastName(normalizeNullable(request.lastName()));
         }
         if (request.birthDate() != null) {
             profile.setBirthDate(request.birthDate());
@@ -46,14 +51,44 @@ public class SaveProfileUseCase  {
             profile.setObjective(request.objective());
         }
         if (request.username() != null) {
-            if (profileRepository.existsByUsernameAndUserIdNot(request.username(), userId)) {
-                throw new IllegalArgumentException("Ce pseudonyme est déjà utilisé");
-            }
-            profile.setUsername(request.username());
+            updateUsername(profile, userId, request.username());
         }
 
         Profile savedProfile = profileRepository.save(profile);
         return toResponse(savedProfile);
+    }
+
+    private void updateUsername(
+            Profile profile,
+            UUID userId,
+            String rawUsername
+    ) {
+        String username = normalizeNullable(rawUsername);
+
+        if (username == null) {
+            profile.setUsername(null);
+            return;
+        }
+        if (username.length() < 3 || username.length() > 30) {
+            throw new IllegalArgumentException(
+                    "Le nom d’utilisateur doit contenir entre 3 et 30 caractères"
+            );
+        }
+        if (profileRepository.existsByUsernameAndUserIdNot(
+                username,
+                userId
+        )) {
+            throw new IllegalArgumentException(
+                    "Ce pseudonyme est déjà utilisé"
+            );
+        }
+
+        profile.setUsername(username);
+    }
+
+    private String normalizeNullable(String value) {
+        String normalized = value.trim();
+        return normalized.isEmpty() ? null : normalized;
     }
 
     private ProfileResponse toResponse(Profile profile) {
@@ -69,4 +104,5 @@ public class SaveProfileUseCase  {
                 profile.getAvatarUrl(),
                 GetProfileUseCase.isComplete(profile)
         );
-    }}
+    }
+}

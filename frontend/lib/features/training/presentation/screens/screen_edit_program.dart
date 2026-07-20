@@ -47,18 +47,22 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
                 name: programExercise.exerciseId,
               ),
             );
-            _selectedExercises.add(ExerciseConfig(
-              exercise: exercise,
-              sameConfigForAllSets: programExercise.sameConfigForAllSets,
-              sets: programExercise.sets
-                  .map((s) => ExerciseSetConfig(
+            _selectedExercises.add(
+              ExerciseConfig(
+                exercise: exercise,
+                sameConfigForAllSets: programExercise.sameConfigForAllSets,
+                sets: programExercise.sets
+                    .map(
+                      (s) => ExerciseSetConfig(
                         setOrder: s.setOrder,
                         targetReps: s.targetReps,
                         targetWeight: s.targetWeight,
                         restSeconds: s.restSeconds,
-                      ))
-                  .toList(),
-            ));
+                      ),
+                    )
+                    .toList(),
+              ),
+            );
           }
         });
       }
@@ -78,7 +82,9 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
     setState(() => _isLoading = true);
     try {
       if (widget.program != null) {
-        await ref.read(providerTraining.notifier).updateProgram(
+        await ref
+            .read(providerTraining.notifier)
+            .updateProgram(
               programId: widget.program!.id,
               name: _nameController.text.trim(),
               description: _descriptionController.text.trim().isEmpty
@@ -87,7 +93,9 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
               exercises: _selectedExercises,
             );
       } else {
-        await ref.read(providerTraining.notifier).createProgram(
+        await ref
+            .read(providerTraining.notifier)
+            .createProgram(
               name: _nameController.text.trim(),
               description: _descriptionController.text.trim().isEmpty
                   ? null
@@ -100,7 +108,10 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(formatExceptionMessage(exception)),
+            content: Text(
+              formatExceptionMessage(exception),
+              style: TextStyle(color: Theme.of(context).colorScheme.onError),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -138,7 +149,8 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
     if (updated != null) {
       setState(() {
         final index = _selectedExercises.indexWhere(
-            (selected) => selected.exercise.id == config.exercise.id);
+          (selected) => selected.exercise.id == config.exercise.id,
+        );
         if (index != -1) {
           _selectedExercises[index] = updated;
         }
@@ -149,7 +161,18 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
   void _removeExercise(ExerciseConfig config) {
     setState(() {
       _selectedExercises.removeWhere(
-          (selected) => selected.exercise.id == config.exercise.id);
+        (selected) => selected.exercise.id == config.exercise.id,
+      );
+    });
+  }
+
+  void _moveExercise(int index, int offset) {
+    final newIndex = index + offset;
+    if (newIndex < 0 || newIndex >= _selectedExercises.length) return;
+
+    setState(() {
+      final item = _selectedExercises.removeAt(index);
+      _selectedExercises.insert(newIndex, item);
     });
   }
 
@@ -167,31 +190,12 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
               : 'Nouveau programme',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        automaticallyImplyLeading: false,
         actions: [
-          TextButton(
-            onPressed: canSubmit ? _submit : null,
-            child: _isLoading
-                ? const SizedBox(
-                    height: 16,
-                    width: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(
-                    widget.program != null ? 'Modifier' : 'Créer',
-                    style: TextStyle(
-                      color: canSubmit
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.4),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+          IconButton(
+            icon: const Icon(Icons.close),
+            tooltip: 'Annuler et fermer',
+            onPressed: () => Navigator.of(context).pop(),
           ),
         ],
       ),
@@ -208,8 +212,11 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
               ),
             ),
             const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Wrap(
+              spacing: 12,
+              runSpacing: 4,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 const Text(
                   'Exercices *',
@@ -227,11 +234,31 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
               ],
             ),
             if (_selectedExercises.isEmpty)
-              const Padding(
-                padding: EdgeInsets.only(bottom: 8),
-                child: Text(
-                  'Ajoute au moins un exercice',
-                  style: TextStyle(fontSize: 12, color: Colors.red),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Semantics(
+                  liveRegion: true,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: Theme.of(context).colorScheme.error,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Ajoutez au moins un exercice.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.error,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             Expanded(
@@ -240,10 +267,7 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
                       child: Text(
                         'Aucun exercice sélectionné',
                         style: TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.5),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     )
@@ -267,11 +291,40 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
                           config: config,
                           onEdit: () => _editExercise(config),
                           onRemove: () => _removeExercise(config),
+                          onMoveUp: index > 0
+                              ? () => _moveExercise(index, -1)
+                              : null,
+                          onMoveDown: index < _selectedExercises.length - 1
+                              ? () => _moveExercise(index, 1)
+                              : null,
                         );
                       },
                     ),
             ),
           ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: ElevatedButton.icon(
+            onPressed: canSubmit ? _submit : null,
+            icon: _isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.save_outlined),
+            label: Text(
+              _isLoading
+                  ? 'Enregistrement…'
+                  : widget.program != null
+                  ? 'Enregistrer les modifications'
+                  : 'Créer le programme',
+            ),
+          ),
         ),
       ),
     );

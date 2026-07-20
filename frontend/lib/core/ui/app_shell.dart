@@ -41,7 +41,10 @@ class AppShell extends ConsumerWidget {
       body: Column(
         children: [
           if (!stateIdentity.isEmailVerified)
-            const ComponentEmailVerificationBanner(),
+            const SafeArea(
+              bottom: false,
+              child: ComponentEmailVerificationBanner(),
+            ),
           Expanded(child: navigationShell),
         ],
       ),
@@ -60,9 +63,11 @@ class AppShell extends ConsumerWidget {
                 }
               },
               icon: Icon(
-                  restTimerState.isActive ? Icons.timer : Icons.fitness_center),
+                restTimerState.isActive ? Icons.timer : Icons.fitness_center,
+              ),
               label: Text(fabLabel),
               backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
             )
           : null,
       bottomNavigationBar: NavBar(

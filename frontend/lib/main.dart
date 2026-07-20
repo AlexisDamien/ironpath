@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ironpath/core/config/app_config.dart';
 
+import 'core/providers/provider_theme.dart';
 import 'core/router/app_router.dart';
 import 'core/ui/app_theme.dart';
 
@@ -10,11 +12,7 @@ void main() {
 
   AppConfig.validate();
 
-  runApp(
-    const ProviderScope(
-      child: IronPathApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: IronPathApp()));
 }
 
 class IronPathApp extends ConsumerWidget {
@@ -23,12 +21,16 @@ class IronPathApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
+    final themeMode = ref.watch(providerThemeMode);
 
     return MaterialApp.router(
       title: 'IronPath',
+      locale: const Locale('fr', 'FR'),
+      supportedLocales: const [Locale('fr', 'FR')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: buildIronLightTheme(),
       darkTheme: buildIronDarkTheme(),
-      themeMode: ThemeMode.dark,
+      themeMode: themeMode,
       routerConfig: router,
     );
   }

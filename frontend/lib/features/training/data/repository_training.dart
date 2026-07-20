@@ -21,11 +21,14 @@ class RepositoryTraining {
     String? description,
     List<ExerciseConfig> exercises = const [],
   }) async {
-    final response = await _apiClient.post('/api/training/programs', data: {
-      'name': name,
-      'description': description,
-      'exercises': _serializeExercises(exercises),
-    });
+    final response = await _apiClient.post(
+      '/api/training/programs',
+      data: {
+        'name': name,
+        'description': description,
+        'exercises': _serializeExercises(exercises),
+      },
+    );
     return WorkoutProgram.fromJson(response.data);
   }
 
@@ -47,24 +50,29 @@ class RepositoryTraining {
   }
 
   List<Map<String, dynamic>> _serializeExercises(
-      List<ExerciseConfig> exercises) {
+    List<ExerciseConfig> exercises,
+  ) {
     return exercises
         .asMap()
         .entries
-        .map((entry) => {
-              'exerciseId': entry.value.exercise.id,
-              'exerciseOrder': entry.key + 1,
-              'sameConfigForAllSets': entry.value.sameConfigForAllSets,
-              'sets': entry.value.sets
-                  .map((set) => {
-                        'setOrder': set.setOrder,
-                        'targetReps': set.targetReps,
-                        'targetWeightKg': set.targetWeight,
-                        'restSeconds': set.restSeconds,
-                        'isWarmup': set.isWarmup,
-                      })
-                  .toList(),
-            })
+        .map(
+          (entry) => {
+            'exerciseId': entry.value.exercise.id,
+            'exerciseOrder': entry.key + 1,
+            'sameConfigForAllSets': entry.value.sameConfigForAllSets,
+            'sets': entry.value.sets
+                .map(
+                  (set) => {
+                    'setOrder': set.setOrder,
+                    'targetReps': set.targetReps,
+                    'targetWeightKg': set.targetWeight,
+                    'restSeconds': set.restSeconds,
+                    'isWarmup': set.isWarmup,
+                  },
+                )
+                .toList(),
+          },
+        )
         .toList();
   }
 
@@ -76,10 +84,10 @@ class RepositoryTraining {
     String? programId,
     String? name,
   }) async {
-    final response = await _apiClient.post('/api/training/sessions', data: {
-      'programId': programId,
-      'name': name,
-    });
+    final response = await _apiClient.post(
+      '/api/training/sessions',
+      data: {'programId': programId, 'name': name},
+    );
     return TrainingSession.fromJson(response.data);
   }
 

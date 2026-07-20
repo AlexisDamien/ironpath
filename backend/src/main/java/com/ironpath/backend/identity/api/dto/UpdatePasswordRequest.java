@@ -9,6 +9,6 @@ public record UpdatePasswordRequest(
         String currentPassword,
 
         @NotBlank(message = "Nouveau mot de passe obligatoire")
-        @Size(min = 8, message = "Mot de passe minimum 8 caractères")
+        @Size(min = 12, message = "Mot de passe minimum 12 caractères")
         String newPassword
 ) {}

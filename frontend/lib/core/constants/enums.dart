@@ -6,31 +6,10 @@ enum UnitSystem {
   String get weightUnit => this == UnitSystem.metric ? 'kg' : 'lbs';
 }
 
-enum StatusAuth {
-  initial,
-  authenticated,
-  unauthenticated,
-  loading,
-  error,
-}
+enum StatusAuth { initial, authenticated, unauthenticated, loading, error }
 
-enum StatusProfile {
-  idle,
-  loading,
-  success,
-  error,
-}
+enum StatusProfile { idle, loading, success, error }
 
-enum StatusBodyMetrics {
-  idle,
-  loading,
-  success,
-  error,
-}
+enum StatusBodyMetrics { idle, loading, success, error }
 
-enum StatusTraining {
-  idle,
-  loading,
-  success,
-  error,
-}
+enum StatusTraining { idle, loading, success, error }

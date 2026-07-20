@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/widgets/component_modal_header.dart';
 import '../../domain/models/body_measurement.dart';
 import '../../domain/models/body_composition.dart';
 import 'form_measurement.dart';
@@ -45,50 +47,47 @@ class _SheetAddMetricsState extends State<SheetAddMetrics>
     final isEditing =
         widget.measurementToEdit != null || widget.compositionToEdit != null;
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  isEditing ? 'Modifier la mesure' : 'Ajouter une mesure',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return SafeArea(
+      top: false,
+      child: FractionallySizedBox(
+        heightFactor: 0.9,
+        child: Material(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 12, 8, 0),
+                child: ComponentModalHeader(
+                  title: isEditing
+                      ? 'Modifier la mesure'
+                      : 'Ajouter une mesure',
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
+              ),
+              TabBar(
+                controller: _tabController,
+                tabs: const [
+                  Tab(text: 'Mensurations'),
+                  Tab(text: 'Composition'),
+                ],
+              ),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    FormMeasurement(
+                      measurementToEdit: widget.measurementToEdit,
+                    ),
+                    FormComposition(
+                      compositionToEdit: widget.compositionToEdit,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          TabBar(
-            controller: _tabController,
-            tabs: const [
-              Tab(text: 'Mensurations'),
-              Tab(text: 'Composition'),
+              ),
             ],
           ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                FormMeasurement(measurementToEdit: widget.measurementToEdit),
-                FormComposition(compositionToEdit: widget.compositionToEdit),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

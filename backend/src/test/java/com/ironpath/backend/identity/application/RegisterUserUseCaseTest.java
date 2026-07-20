@@ -54,7 +54,7 @@ class RegisterUserUseCaseTest {
 
     @Test
     void execute_shouldRegisterUser_whenValidRequest() {
-        RegisterRequest request = new RegisterRequest("test@ironpath.com", "password123", true);
+        RegisterRequest request = new RegisterRequest("test@ironpath.com", "Password123!", true);
 
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("hashedPassword");
@@ -81,7 +81,7 @@ class RegisterUserUseCaseTest {
 
     @Test
     void execute_shouldThrowException_whenEmailAlreadyExists() {
-        RegisterRequest request = new RegisterRequest("test@ironpath.com", "password123", true);
+        RegisterRequest request = new RegisterRequest("test@ironpath.com", "Password123!", true);
 
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
@@ -94,7 +94,7 @@ class RegisterUserUseCaseTest {
 
     @Test
     void execute_shouldThrowException_whenRgpdConsentIsFalse() {
-        RegisterRequest request = new RegisterRequest("test@ironpath.com", "password123", false);
+        RegisterRequest request = new RegisterRequest("test@ironpath.com", "Password123!", false);
 
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
 

@@ -43,67 +43,82 @@ class CardExerciseList extends ConsumerWidget {
         final config = _configFor(exercise);
         final isSelected = config != null;
         final hasWarmup = _hasWarmupSet(config);
+        final details = [
+          exercise.muscleGroup,
+          exercise.equipment,
+        ].whereType<String>().where((value) => value.isNotEmpty).join(' • ');
 
-        return ListTile(
-          title: Text(exercise.name),
-          subtitle: Text(
-            '${exercise.muscleGroup ?? ''} • ${exercise.equipment ?? ''}',
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (hasWarmup) ...[
-                const Icon(Icons.local_fire_department,
-                    size: 18, color: Colors.orange),
-                const SizedBox(width: 4),
-              ],
-              IconButton(
-                icon: const Icon(Icons.info_outline),
-                onPressed: () async {
-                  final result = await Navigator.of(context).push<String>(
-                    MaterialPageRoute(
-                      fullscreenDialog: true,
-                      builder: (context) => ScreenExerciseDetail(
-                        exercise: exercise,
-                        showAddButton: true,
-                        isSelected: isSelected,
-                      ),
+        return Semantics(
+          selected: isSelected,
+          hint: isSelected
+              ? 'Appuyez pour retirer cet exercice du programme'
+              : 'Appuyez pour configurer et ajouter cet exercice au programme',
+          child: ListTile(
+            selected: isSelected,
+            title: Text(exercise.name),
+            subtitle: details.isEmpty ? null : Text(details),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (hasWarmup) ...[
+                  Tooltip(
+                    message: 'Contient une série d’échauffement',
+                    child: Semantics(
+                      label: 'Contient une série d’échauffement',
+                      child: const Icon(Icons.local_fire_department, size: 18),
                     ),
-                  );
-                  if (!context.mounted) return;
-                  if (result == 'add_to_program') {
-                    final newConfig = await showDialog<ExerciseConfig>(
-                      context: context,
-                      builder: (context) =>
-                          PopupExerciseConfig(exercise: exercise),
+                  ),
+                  const SizedBox(width: 4),
+                ],
+                IconButton(
+                  icon: const Icon(Icons.info_outline),
+                  tooltip: 'Voir les détails de ${exercise.name}',
+                  onPressed: () async {
+                    final result = await Navigator.of(context).push<String>(
+                      MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (context) => ScreenExerciseDetail(
+                          exercise: exercise,
+                          showAddButton: true,
+                          isSelected: isSelected,
+                        ),
+                      ),
                     );
-                    if (newConfig != null) onToggle(newConfig);
-                  } else if (result == 'remove_from_program' && isSelected) {
-                    onToggle(config);
-                  }
-                },
-              ),
-              isSelected
-                  ? Icon(
-                      Icons.check_circle,
-                      color: Theme.of(context).colorScheme.primary,
-                    )
-                  : const Icon(Icons.add_circle_outline),
-            ],
-          ),
-          onTap: () async {
-            if (isSelected) {
-              onToggle(config);
-            } else {
-              final newConfig = await showDialog<ExerciseConfig>(
-                context: context,
-                builder: (context) => PopupExerciseConfig(exercise: exercise),
-              );
-              if (newConfig != null) {
-                onToggle(newConfig);
+                    if (!context.mounted) return;
+                    if (result == 'add_to_program') {
+                      final newConfig = await showDialog<ExerciseConfig>(
+                        context: context,
+                        builder: (context) =>
+                            PopupExerciseConfig(exercise: exercise),
+                      );
+                      if (newConfig != null) onToggle(newConfig);
+                    } else if (result == 'remove_from_program' && isSelected) {
+                      onToggle(config);
+                    }
+                  },
+                ),
+                ExcludeSemantics(
+                  child: Icon(
+                    isSelected ? Icons.check_circle : Icons.add_circle_outline,
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+            onTap: () async {
+              if (isSelected) {
+                onToggle(config);
+              } else {
+                final newConfig = await showDialog<ExerciseConfig>(
+                  context: context,
+                  builder: (context) => PopupExerciseConfig(exercise: exercise),
+                );
+                if (newConfig != null) onToggle(newConfig);
               }
-            }
-          },
+            },
+          ),
         );
       },
     );

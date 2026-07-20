@@ -6,13 +6,14 @@ import '../providers/provider_rest_timer.dart';
 import '../../../../core/widgets/component_rest_timer.dart';
 import '../../../../core/utils/format_duration.dart';
 
-typedef LogSetCallback = void Function({
-  required int setOrder,
-  required int? reps,
-  required double? weightKg,
-  required int? restSeconds,
-  required bool isWarmup,
-});
+typedef LogSetCallback =
+    void Function({
+      required int setOrder,
+      required int? reps,
+      required double? weightKg,
+      required int? restSeconds,
+      required bool isWarmup,
+    });
 
 class CardActiveSessionExercise extends StatelessWidget {
   final String exerciseKey;
@@ -47,8 +48,10 @@ class CardActiveSessionExercise extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ExpansionTile(
-        title: Text(exerciseName,
-            style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(
+          exerciseName,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
         subtitle: Text(
           '$doneCount/$totalSets séries'
           '${muscleGroup != null ? ' • $muscleGroup' : ''}',
@@ -56,7 +59,7 @@ class CardActiveSessionExercise extends StatelessWidget {
         initiallyExpanded: doneCount < totalSets,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: Column(
               children: plannedSets.map((plannedSet) {
                 return _SetRow(
@@ -134,6 +137,7 @@ class _SetRowState extends ConsumerState<_SetRow> {
       actualRestSeconds = timerState.isOvertime
           ? timerState.totalSeconds + timerState.overtimeSeconds
           : timerState.totalSeconds - timerState.remainingSeconds;
+      ref.read(providerRestTimer.notifier).clear();
     }
 
     widget.onLogSet(
@@ -151,71 +155,112 @@ class _SetRowState extends ConsumerState<_SetRow> {
     final isDone = widget.logged != null && !_isEditing;
     final isWarmup = widget.logged?.isWarmup ?? widget.plannedIsWarmup;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 22,
-            child: Text('${widget.setOrder}',
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-          ),
-          const SizedBox(width: 6),
-          if (isDone) ...[
-            Expanded(
-              child: Text(
-                '${widget.logged!.reps ?? '-'} reps • ${widget.logged!.weightKg ?? '-'} kg • ${formatRestDuration(widget.logged!.restSeconds)} repos',
-              ),
+    return Semantics(
+      container: true,
+      label: 'Série ${widget.setOrder}${isWarmup ? ', échauffement' : ''}',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                SizedBox(
+                  width: 26,
+                  child: Text(
+                    '${widget.setOrder}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                if (isDone)
+                  Expanded(
+                    child: Text(
+                      '${widget.logged!.reps ?? '-'} reps • ${widget.logged!.weightKg ?? '-'} kg',
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                  )
+                else ...[
+                  SizedBox(
+                    width: 72,
+                    child: TextField(
+                      controller: _repsController,
+                      decoration: const InputDecoration(labelText: 'Reps'),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: 84,
+                    child: TextField(
+                      controller: _weightController,
+                      decoration: const InputDecoration(labelText: 'Kg'),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
-            if (isWarmup) ...[
-              const Icon(Icons.local_fire_department,
-                  size: 16, color: Colors.orange),
-              const SizedBox(width: 4),
-            ],
-            IconButton(
-              icon: const Icon(Icons.check_circle, color: Colors.green),
-              onPressed: () => setState(() => _isEditing = true),
-              visualDensity: VisualDensity.compact,
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    if (isWarmup) ...[
+                      Tooltip(
+                        message: 'Série d\'échauffement',
+                        child: Icon(
+                          Icons.local_fire_department,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.tertiary,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    if (!isDone && widget.plannedRestSeconds != null)
+                      ComponentRestTimer(
+                        id: widget.setId,
+                        initialSeconds: widget.plannedRestSeconds!,
+                      )
+                    else if (isDone)
+                      Text(
+                        '${formatRestDuration(widget.logged!.restSeconds)} repos',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
+                ),
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: isDone
+                      ? IconButton(
+                          icon: Icon(
+                            Icons.check_circle,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          tooltip: 'Série validée, appuyer pour modifier',
+                          onPressed: () => setState(() => _isEditing = true),
+                        )
+                      : IconButton(
+                          icon: const Icon(Icons.check_circle_outline),
+                          tooltip: 'Valider la série',
+                          onPressed: _validate,
+                        ),
+                ),
+              ],
             ),
-          ] else ...[
-            SizedBox(
-              width: 55,
-              child: TextField(
-                controller: _repsController,
-                decoration:
-                    const InputDecoration(labelText: 'Reps', isDense: true),
-                keyboardType: TextInputType.number,
-              ),
-            ),
-            const SizedBox(width: 6),
-            SizedBox(
-              width: 65,
-              child: TextField(
-                controller: _weightController,
-                decoration:
-                    const InputDecoration(labelText: 'Kg', isDense: true),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-              ),
-            ),
-            const Spacer(),
-            if (widget.plannedRestSeconds != null)
-              ComponentRestTimer(
-                id: widget.setId,
-                initialSeconds: widget.plannedRestSeconds!,
-              ),
-            if (isWarmup) ...[
-              const SizedBox(width: 4),
-              const Icon(Icons.local_fire_department,
-                  size: 16, color: Colors.orange),
-            ],
-            IconButton(
-              icon: const Icon(Icons.check_circle_outline),
-              onPressed: _validate,
-              visualDensity: VisualDensity.compact,
-            ),
+            const Divider(height: 16),
           ],
-        ],
+        ),
       ),
     );
   }

@@ -4,21 +4,31 @@ abstract final class IronColors {
   static const Color darkBackground = Color(0xFF0D0D0B);
   static const Color darkSurface = Color(0xFF1C1A17);
   static const Color darkElevated = Color(0xFF252220);
-  static const Color darkAccent = Color(0xFFE8532A);
+
+  // Suffisamment clair pour conserver un contraste >= 4.5:1 sur les
+  // surfaces sombres, avec un texte sombre sur les boutons remplis.
+  static const Color darkAccent = Color(0xFFF0643E);
+  static const Color darkError = Color(0xFFFF6B5E);
   static const Color darkTextPrimary = Color(0xFFEDE8E0);
   static const Color darkTextSecondary = Color(0xFF888880);
-  static const Color darkBorder = Color(0xFF333330);
+  static const Color darkBorder = Color(0xFF77736D);
 
   static const Color lightBackground = Color(0xFFEDE8E0);
   static const Color lightSurface = Color(0xFFFAF8F4);
   static const Color lightElevated = Color(0xFFF5F2EC);
-  static const Color lightAccent = Color(0xFFC84820);
+
+  // Plus sombre que l'ancienne teinte afin de rester lisible comme texte
+  // d'action sur les surfaces claires.
+  static const Color lightAccent = Color(0xFFB23B17);
+  static const Color lightError = Color(0xFFB3261E);
   static const Color lightTextPrimary = Color(0xFF1C1A17);
   static const Color lightTextSecondary = Color(0xFF5A5650);
-  static const Color lightBorder = Color(0xFFD4CFC6);
+  static const Color lightBorder = Color(0xFF8A857D);
 
-  static const Color success = Color(0xFF4CAF50);
-  static const Color warning = Color(0xFFFF9800);
+  static const Color successDark = Color(0xFF81C784);
+  static const Color successLight = Color(0xFF2E7D32);
+  static const Color warningDark = Color(0xFFFFB74D);
+  static const Color warningLight = Color(0xFFE65100);
 }
 
 abstract final class IronSpacing {
@@ -49,22 +59,46 @@ ThemeData _buildTheme(Brightness brightness) {
   final surface = isDark ? IronColors.darkSurface : IronColors.lightSurface;
   final elevated = isDark ? IronColors.darkElevated : IronColors.lightElevated;
   final accent = isDark ? IronColors.darkAccent : IronColors.lightAccent;
-  final textPri =
-      isDark ? IronColors.darkTextPrimary : IronColors.lightTextPrimary;
-  final textSec =
-      isDark ? IronColors.darkTextSecondary : IronColors.lightTextSecondary;
+  final error = isDark ? IronColors.darkError : IronColors.lightError;
+  final textPri = isDark
+      ? IronColors.darkTextPrimary
+      : IronColors.lightTextPrimary;
+  final textSec = isDark
+      ? IronColors.darkTextSecondary
+      : IronColors.lightTextSecondary;
   final border = isDark ? IronColors.darkBorder : IronColors.lightBorder;
+  final warning = isDark ? IronColors.warningDark : IronColors.warningLight;
+  final accentContainer = isDark
+      ? const Color(0xFF44241B)
+      : const Color(0xFFF5DED5);
+  final onAccentContainer = isDark
+      ? IronColors.darkTextPrimary
+      : const Color(0xFF5E1C09);
+
+  final onAccent = isDark ? IronColors.darkSurface : Colors.white;
+  final onError = isDark ? IronColors.darkBackground : Colors.white;
 
   final colorScheme = ColorScheme(
     brightness: brightness,
     surface: surface,
     primary: accent,
-    onPrimary: Colors.white,
+    onPrimary: onAccent,
+    primaryContainer: accentContainer,
+    onPrimaryContainer: onAccentContainer,
     secondary: accent,
-    onSecondary: Colors.white,
-    error: accent,
-    onError: Colors.white,
+    onSecondary: onAccent,
+    secondaryContainer: accentContainer,
+    onSecondaryContainer: onAccentContainer,
+    tertiary: warning,
+    onTertiary: isDark
+        ? IronColors.darkBackground
+        : IronColors.lightTextPrimary,
+    error: error,
+    onError: onError,
     onSurface: textPri,
+    onSurfaceVariant: textSec,
+    outline: border,
+    outlineVariant: border,
   );
 
   return ThemeData(
@@ -72,42 +106,51 @@ ThemeData _buildTheme(Brightness brightness) {
     brightness: brightness,
     colorScheme: colorScheme,
     scaffoldBackgroundColor: bg,
+    materialTapTargetSize: MaterialTapTargetSize.padded,
+    visualDensity: VisualDensity.standard,
     textTheme: TextTheme(
       displayLarge: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.w500,
-          color: textPri,
-          height: 1.2),
+        fontSize: 28,
+        fontWeight: FontWeight.w500,
+        color: textPri,
+        height: 1.2,
+      ),
       headlineMedium: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.w500,
-          color: textPri,
-          height: 1.3),
+        fontSize: 22,
+        fontWeight: FontWeight.w500,
+        color: textPri,
+        height: 1.3,
+      ),
       titleMedium: TextStyle(
-          fontSize: 17,
-          fontWeight: FontWeight.w500,
-          color: textPri,
-          height: 1.4),
+        fontSize: 17,
+        fontWeight: FontWeight.w500,
+        color: textPri,
+        height: 1.4,
+      ),
       bodyLarge: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w400,
-          color: textPri,
-          height: 1.6),
+        fontSize: 15,
+        fontWeight: FontWeight.w400,
+        color: textPri,
+        height: 1.6,
+      ),
       bodySmall: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w400,
-          color: textSec,
-          height: 1.5),
+        fontSize: 13,
+        fontWeight: FontWeight.w400,
+        color: textSec,
+        height: 1.5,
+      ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: accent,
-        foregroundColor: Colors.white,
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+        disabledBackgroundColor: border,
+        disabledForegroundColor: textSec,
         minimumSize: const Size(double.infinity, IronSpacing.minTapTarget),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(IronRadius.sm),
         ),
-        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -124,15 +167,26 @@ ThemeData _buildTheme(Brightness brightness) {
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: accent,
-        minimumSize:
-            const Size(IronSpacing.minTapTarget, IronSpacing.minTapTarget),
-        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+        minimumSize: const Size(
+          IronSpacing.minTapTarget,
+          IronSpacing.minTapTarget,
+        ),
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+      ),
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(
+        minimumSize: const Size.square(IronSpacing.minTapTarget),
+        tapTargetSize: MaterialTapTargetSize.padded,
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: elevated,
+      labelStyle: TextStyle(color: textSec),
       hintStyle: TextStyle(color: textSec),
+      helperStyle: TextStyle(color: textSec),
+      errorStyle: TextStyle(color: error, fontWeight: FontWeight.w500),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(IronRadius.sm),
@@ -144,11 +198,15 @@ ThemeData _buildTheme(Brightness brightness) {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(IronRadius.sm),
-        borderSide: BorderSide(color: accent, width: 1.5),
+        borderSide: BorderSide(color: accent, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(IronRadius.sm),
-        borderSide: const BorderSide(color: IronColors.darkAccent, width: 1.5),
+        borderSide: BorderSide(color: error, width: 1.5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(IronRadius.sm),
+        borderSide: BorderSide(color: error, width: 2),
       ),
     ),
     cardTheme: CardThemeData(
@@ -159,26 +217,28 @@ ThemeData _buildTheme(Brightness brightness) {
         side: BorderSide(color: border, width: 0.5),
       ),
     ),
-    dividerTheme: DividerThemeData(
-      color: border,
-      thickness: 0.5,
-      space: 0,
-    ),
+    dividerTheme: DividerThemeData(color: border, thickness: 0.5, space: 0),
     chipTheme: ChipThemeData(
       backgroundColor: elevated,
-      selectedColor: isDark ? const Color(0xFF2A1A14) : const Color(0xFFF5E8E0),
-      labelStyle:
-          TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: textPri),
+      selectedColor: isDark ? const Color(0xFF44241B) : const Color(0xFFF5E8E0),
+      labelStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: textPri,
+      ),
       side: BorderSide(color: border, width: 1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(IronRadius.xs),
       ),
       padding: const EdgeInsets.symmetric(
-          horizontal: IronSpacing.sm, vertical: IronSpacing.xs),
+        horizontal: IronSpacing.sm,
+        vertical: IronSpacing.xs,
+      ),
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: surface,
       contentTextStyle: TextStyle(color: textPri, fontSize: 14),
+      actionTextColor: accent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(IronRadius.sm),
         side: BorderSide(color: border, width: 0.5),

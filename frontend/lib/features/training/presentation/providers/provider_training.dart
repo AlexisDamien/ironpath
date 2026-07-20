@@ -12,9 +12,9 @@ final providerTrainingRepository = Provider<RepositoryTraining>((ref) {
 
 final providerTraining =
     StateNotifierProvider<ProviderTrainingNotifier, StateTraining>((ref) {
-  final repository = ref.watch(providerTrainingRepository);
-  return ProviderTrainingNotifier(repository);
-});
+      final repository = ref.watch(providerTrainingRepository);
+      return ProviderTrainingNotifier(repository);
+    });
 
 class ProviderTrainingNotifier extends StateNotifier<StateTraining> {
   final RepositoryTraining _repository;
@@ -47,9 +47,7 @@ class ProviderTrainingNotifier extends StateNotifier<StateTraining> {
         clearErrorMessage: true,
       );
     } catch (exception) {
-      state = state.copyWith(
-        errorMessage: formatExceptionMessage(exception),
-      );
+      state = state.copyWith(errorMessage: formatExceptionMessage(exception));
     }
   }
 

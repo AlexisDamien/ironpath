@@ -25,11 +25,13 @@ class TrainingSession {
       name: json['name'],
       status: json['status'],
       programId: json['programId'],
-      sets: (json['sets'] as List<dynamic>?)
+      sets:
+          (json['sets'] as List<dynamic>?)
               ?.map((s) => ExerciseSet.fromJson(s))
               .toList() ??
           [],
-      plannedExercises: (json['plannedExercises'] as List<dynamic>?)
+      plannedExercises:
+          (json['plannedExercises'] as List<dynamic>?)
               ?.map((e) => SessionPlannedExercise.fromJson(e))
               .toList() ??
           [],
@@ -86,7 +88,8 @@ class SessionPlannedExercise {
       id: json['id'],
       exerciseId: json['exerciseId'],
       exerciseOrder: json['exerciseOrder'],
-      sets: (json['sets'] as List<dynamic>?)
+      sets:
+          (json['sets'] as List<dynamic>?)
               ?.map((s) => SessionPlannedSet.fromJson(s))
               .toList() ??
           [],

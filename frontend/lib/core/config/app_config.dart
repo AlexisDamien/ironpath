@@ -4,9 +4,7 @@ abstract final class AppConfig {
     defaultValue: 'local',
   );
 
-  static const String apiBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-  );
+  static const String apiBaseUrl = String.fromEnvironment('API_BASE_URL');
 
   static bool get isLocal => environment == 'local';
 
@@ -15,11 +13,7 @@ abstract final class AppConfig {
   static bool get isProduction => environment == 'production';
 
   static void validate() {
-    const allowedEnvironments = {
-      'local',
-      'staging',
-      'production',
-    };
+    const allowedEnvironments = {'local', 'staging', 'production'};
 
     if (!allowedEnvironments.contains(environment)) {
       throw StateError(
@@ -39,15 +33,11 @@ abstract final class AppConfig {
     final uri = Uri.tryParse(apiBaseUrl);
 
     if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
-      throw StateError(
-        'API_BASE_URL est invalide : "$apiBaseUrl".',
-      );
+      throw StateError('API_BASE_URL est invalide : "$apiBaseUrl".');
     }
 
     if (isProduction && uri.scheme != 'https') {
-      throw StateError(
-        'API_BASE_URL doit utiliser HTTPS en production.',
-      );
+      throw StateError('API_BASE_URL doit utiliser HTTPS en production.');
     }
   }
 }

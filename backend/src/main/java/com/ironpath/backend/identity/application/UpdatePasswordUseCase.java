@@ -42,6 +42,8 @@ public class UpdatePasswordUseCase {
             );
         }
 
+        PasswordPolicy.validateOrThrow(newPassword);
+
         user.setPasswordHash(
                 passwordEncoder.encode(newPassword)
         );

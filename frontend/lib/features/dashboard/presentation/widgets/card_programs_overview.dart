@@ -20,10 +20,7 @@ class CardProgramsOverview extends StatelessWidget {
               children: [
                 const Text(
                   'Mes programmes',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 TextButton(
                   onPressed: () => context.go('/programs'),
@@ -33,12 +30,16 @@ class CardProgramsOverview extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             if (programs.isEmpty)
-              const Text(
+              Text(
                 'Aucun programme créé',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               )
             else
-              ...programs.take(3).map(
+              ...programs
+                  .take(3)
+                  .map(
                     (program) => ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(program.name),

@@ -4,11 +4,7 @@ class ChipMetric extends StatelessWidget {
   final String label;
   final String value;
 
-  const ChipMetric({
-    super.key,
-    required this.label,
-    required this.value,
-  });
+  const ChipMetric({super.key, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +19,10 @@ class ChipMetric extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 11, color: Colors.grey),
+            style: TextStyle(
+              fontSize: 11,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           Text(
             value,

@@ -18,9 +18,7 @@ class CardLoggedSet extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        leading: CircleAvatar(
-          child: Text('${exerciseSet.setOrder}'),
-        ),
+        leading: CircleAvatar(child: Text('${exerciseSet.setOrder}')),
         title: Text(exerciseName),
         subtitle: Text(
           '${exerciseSet.reps ?? '-'} reps • ${exerciseSet.weightKg ?? '-'} kg • ${formatRestDuration(exerciseSet.restSeconds)} repos',

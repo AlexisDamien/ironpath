@@ -63,28 +63,39 @@ class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: canWrite ? () => _showAddSheet(context) : null,
-            tooltip:
-                canWrite ? null : 'Vérifie ton email pour ajouter une mesure',
+            tooltip: canWrite
+                ? null
+                : 'Vérifie ton email pour ajouter une mesure',
           ),
         ],
       ),
-      body: bodyMetricsState.status == StatusBodyMetrics.loading &&
+      body:
+          bodyMetricsState.status == StatusBodyMetrics.loading &&
               !bodyMetricsState.isInitialized
           ? const Center(child: CircularProgressIndicator())
           : TabBarView(
               controller: _tabController,
               children: [
                 _buildMeasurementsList(
-                    context, bodyMetricsState.measurements, canWrite),
+                  context,
+                  bodyMetricsState.measurements,
+                  canWrite,
+                ),
                 _buildCompositionsList(
-                    context, bodyMetricsState.compositions, canWrite),
+                  context,
+                  bodyMetricsState.compositions,
+                  canWrite,
+                ),
               ],
             ),
     );
   }
 
   Widget _buildMeasurementsList(
-      BuildContext context, List<BodyMeasurement> measurements, bool canWrite) {
+    BuildContext context,
+    List<BodyMeasurement> measurements,
+    bool canWrite,
+  ) {
     if (measurements.isEmpty) {
       return Center(
         child: Column(
@@ -101,9 +112,11 @@ class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Ajoute ta première mesure',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -132,7 +145,10 @@ class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
   }
 
   Widget _buildCompositionsList(
-      BuildContext context, List<BodyComposition> compositions, bool canWrite) {
+    BuildContext context,
+    List<BodyComposition> compositions,
+    bool canWrite,
+  ) {
     if (compositions.isEmpty) {
       return Center(
         child: Column(
@@ -149,9 +165,11 @@ class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Ajoute ta première composition corporelle',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -190,35 +208,33 @@ class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => SheetAddMetrics(
-        selectedTab: _tabController.index,
-      ),
+      builder: (context) => SheetAddMetrics(selectedTab: _tabController.index),
     );
   }
 
   void _showEditMeasurementSheet(
-      BuildContext context, BodyMeasurement measurement) {
+    BuildContext context,
+    BodyMeasurement measurement,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => SheetAddMetrics(
-        selectedTab: 0,
-        measurementToEdit: measurement,
-      ),
+      builder: (context) =>
+          SheetAddMetrics(selectedTab: 0, measurementToEdit: measurement),
     );
   }
 
   void _showEditCompositionSheet(
-      BuildContext context, BodyComposition composition) {
+    BuildContext context,
+    BodyComposition composition,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => SheetAddMetrics(
-        selectedTab: 1,
-        compositionToEdit: composition,
-      ),
+      builder: (context) =>
+          SheetAddMetrics(selectedTab: 1, compositionToEdit: composition),
     );
   }
 }

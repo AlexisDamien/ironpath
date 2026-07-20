@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/widgets/component_modal_header.dart';
 import '../../domain/models/exercise.dart';
 import '../../domain/models/exercise_config.dart';
 import '../../domain/models/exercise_set_config.dart';
@@ -42,19 +44,24 @@ class _PopupExerciseConfigState extends State<PopupExerciseConfig> {
     final firstSet = (existing != null && existing.sets.isNotEmpty)
         ? existing.sets.first
         : null;
-    _globalRepsController =
-        TextEditingController(text: '${firstSet?.targetReps ?? 10}');
-    _globalWeightController =
-        TextEditingController(text: firstSet?.targetWeight?.toString() ?? '');
-    _globalRestController =
-        TextEditingController(text: '${firstSet?.restSeconds ?? 90}');
+    _globalRepsController = TextEditingController(
+      text: '${firstSet?.targetReps ?? 10}',
+    );
+    _globalWeightController = TextEditingController(
+      text: firstSet?.targetWeight?.toString() ?? '',
+    );
+    _globalRestController = TextEditingController(
+      text: '${firstSet?.restSeconds ?? 90}',
+    );
     _isWarmup = firstSet?.isWarmup ?? false;
 
     _rebuildPerSetControllers(initialSetsCount, existing?.sets);
   }
 
   void _rebuildPerSetControllers(
-      int count, List<ExerciseSetConfig>? existingSets) {
+    int count,
+    List<ExerciseSetConfig>? existingSets,
+  ) {
     _repsControllers = List.generate(count, (index) {
       final value = (existingSets != null && index < existingSets.length)
           ? existingSets[index].targetReps
@@ -160,7 +167,8 @@ class _PopupExerciseConfigState extends State<PopupExerciseConfig> {
     final setsCount = int.tryParse(_setsCountController.text) ?? 3;
 
     return AlertDialog(
-      title: Text(widget.exercise.name),
+      titlePadding: const EdgeInsets.fromLTRB(24, 12, 8, 0),
+      title: ComponentModalHeader(title: widget.exercise.name),
       content: SizedBox(
         width: double.maxFinite,
         child: SingleChildScrollView(
@@ -171,62 +179,62 @@ class _PopupExerciseConfigState extends State<PopupExerciseConfig> {
               Text(
                 '${widget.exercise.muscleGroup ?? ''} • ${widget.exercise.equipment ?? ''}',
                 style: TextStyle(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.6),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 13,
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _setsCountController,
-                decoration:
-                    const InputDecoration(labelText: 'Nombre de séries'),
+                decoration: const InputDecoration(
+                  labelText: 'Nombre de séries',
+                ),
                 keyboardType: TextInputType.number,
                 onChanged: _onSetsCountChanged,
               ),
               const SizedBox(height: 8),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Même config pour toutes les séries',
-                    style: TextStyle(fontSize: 14)),
+                title: const Text(
+                  'Même config pour toutes les séries',
+                  style: TextStyle(fontSize: 14),
+                ),
                 value: _sameConfigForAllSets,
                 onChanged: (value) =>
                     setState(() => _sameConfigForAllSets = value),
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title:
-                    const Text('Échauffement', style: TextStyle(fontSize: 14)),
-                secondary: const Icon(Icons.local_fire_department,
-                    color: Colors.orange),
+                title: const Text(
+                  'Échauffement',
+                  style: TextStyle(fontSize: 14),
+                ),
+                secondary: Tooltip(
+                  message: 'Échauffement',
+                  child: Icon(
+                    Icons.local_fire_department,
+                    color: Theme.of(context).colorScheme.tertiary,
+                  ),
+                ),
                 value: _isWarmup,
                 onChanged: (value) => setState(() => _isWarmup = value),
               ),
               const SizedBox(height: 8),
               if (_sameConfigForAllSets) ...[
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _globalRepsController,
-                        decoration:
-                            const InputDecoration(labelText: 'Répétitions'),
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        controller: _globalWeightController,
-                        decoration: const InputDecoration(
-                            labelText: 'Poids (kg, optionnel)'),
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                      ),
-                    ),
-                  ],
+                TextField(
+                  controller: _globalRepsController,
+                  decoration: const InputDecoration(labelText: 'Répétitions'),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _globalWeightController,
+                  decoration: const InputDecoration(
+                    labelText: 'Poids (kg, optionnel)',
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -247,59 +255,52 @@ class _PopupExerciseConfigState extends State<PopupExerciseConfig> {
                         Text(
                           'Série ${index + 1}',
                           style: const TextStyle(
-                              fontWeight: FontWeight.w600, fontSize: 13),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
                         ),
                         const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _repsControllers[index],
-                                decoration:
-                                    const InputDecoration(labelText: 'Reps'),
-                                keyboardType: TextInputType.number,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                controller: _weightControllers[index],
-                                decoration: const InputDecoration(
-                                    labelText: 'Poids (kg)'),
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                controller: _restControllers[index],
-                                decoration: const InputDecoration(
-                                    labelText: 'Repos (s)'),
-                                keyboardType: TextInputType.number,
-                              ),
-                            ),
-                          ],
+                        TextField(
+                          controller: _repsControllers[index],
+                          decoration: const InputDecoration(labelText: 'Reps'),
+                          keyboardType: TextInputType.number,
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _weightControllers[index],
+                          decoration: const InputDecoration(
+                            labelText: 'Poids (kg)',
+                          ),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _restControllers[index],
+                          decoration: const InputDecoration(
+                            labelText: 'Repos (s)',
+                          ),
+                          keyboardType: TextInputType.number,
                         ),
                       ],
                     ),
                   );
                 }),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: _submit,
+                icon: const Icon(Icons.save_outlined),
+                label: Text(
+                  widget.existingConfig == null
+                      ? 'Ajouter l’exercice'
+                      : 'Enregistrer les modifications',
+                ),
+              ),
             ],
           ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Annuler'),
-        ),
-        ElevatedButton(
-          onPressed: _submit,
-          child: const Text('Enregistrer'),
-        ),
-      ],
     );
   }
 }

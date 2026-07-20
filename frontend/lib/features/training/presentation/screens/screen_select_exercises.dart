@@ -45,19 +45,24 @@ class _ScreenSelectExercisesState extends ConsumerState<ScreenSelectExercises> {
   }
 
   void _onFilterChanged() {
-    ref.read(providerTraining.notifier).loadExercises(
-          search:
-              _searchController.text.isEmpty ? null : _searchController.text,
+    ref
+        .read(providerTraining.notifier)
+        .loadExercises(
+          search: _searchController.text.isEmpty
+              ? null
+              : _searchController.text,
           muscleGroup: _selectedMuscleGroup,
         );
   }
 
   void _toggle(ExerciseConfig config) {
     setState(() {
-      if (_selected
-          .any((selected) => selected.exercise.id == config.exercise.id)) {
+      if (_selected.any(
+        (selected) => selected.exercise.id == config.exercise.id,
+      )) {
         _selected.removeWhere(
-            (selected) => selected.exercise.id == config.exercise.id);
+          (selected) => selected.exercise.id == config.exercise.id,
+        );
       } else {
         _selected.add(config);
       }
@@ -70,75 +75,102 @@ class _ScreenSelectExercisesState extends ConsumerState<ScreenSelectExercises> {
 
   @override
   Widget build(BuildContext context) {
+    final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
+    final filterHeight = 48.0 * textScale.clamp(1.0, 2.0).toDouble();
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
         title: Text('Exercices (${_selected.length})'),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: _done,
-        ),
+        automaticallyImplyLeading: false,
         actions: [
-          TextButton(
-            onPressed: _done,
-            child: const Text('Valider'),
+          IconButton(
+            icon: const Icon(Icons.close),
+            tooltip: 'Annuler et fermer',
+            onPressed: () => Navigator.of(context).pop(),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _searchController,
-              decoration: const InputDecoration(
-                hintText: 'Rechercher un exercice...',
-                prefixIcon: Icon(Icons.search),
+      body: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  labelText: 'Rechercher un exercice',
+                  hintText: 'Nom, muscle ou équipement',
+                  prefixIcon: Icon(Icons.search),
+                ),
+                textInputAction: TextInputAction.search,
+                onChanged: (_) => _onFilterChanged(),
               ),
-              onChanged: (_) => _onFilterChanged(),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 36,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: ChoiceChip(
-                      label: const Text('Tous'),
-                      selected: _selectedMuscleGroup == null,
-                      onSelected: (_) {
-                        setState(() => _selectedMuscleGroup = null);
-                        _onFilterChanged();
-                      },
-                    ),
-                  ),
-                  for (final muscleGroup in _muscleGroups)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 6),
-                      child: ChoiceChip(
-                        label: Text(muscleGroup),
-                        selected: _selectedMuscleGroup == muscleGroup,
-                        onSelected: (_) {
-                          setState(() => _selectedMuscleGroup = muscleGroup);
-                          _onFilterChanged();
-                        },
+              const SizedBox(height: 8),
+              Semantics(
+                container: true,
+                label: 'Filtrer par groupe musculaire',
+                child: SizedBox(
+                  height: filterHeight,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: ChoiceChip(
+                          label: const Text('Tous'),
+                          selected: _selectedMuscleGroup == null,
+                          onSelected: (_) {
+                            setState(() => _selectedMuscleGroup = null);
+                            _onFilterChanged();
+                          },
+                        ),
                       ),
-                    ),
-                ],
+                      for (final muscleGroup in _muscleGroups)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: ChoiceChip(
+                            label: Text(muscleGroup),
+                            selected: _selectedMuscleGroup == muscleGroup,
+                            onSelected: (_) {
+                              setState(
+                                () => _selectedMuscleGroup = muscleGroup,
+                              );
+                              _onFilterChanged();
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: CardExerciseList(
-                selectedExercises: _selected,
-                onToggle: _toggle,
+              const SizedBox(height: 12),
+              Expanded(
+                child: CardExerciseList(
+                  selectedExercises: _selected,
+                  onToggle: _toggle,
+                ),
               ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: ElevatedButton.icon(
+            onPressed: _done,
+            icon: const Icon(Icons.check),
+            label: Text(
+              _selected.isEmpty
+                  ? 'Valider sans exercice'
+                  : 'Valider ${_selected.length} exercice${_selected.length > 1 ? 's' : ''}',
             ),
-          ],
+          ),
         ),
       ),
     );

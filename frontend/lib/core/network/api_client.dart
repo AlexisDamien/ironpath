@@ -12,6 +12,14 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 });
 
 class ApiClient {
+  static const Set<String> _publicAuthPaths = {
+    '/api/auth/login',
+    '/api/auth/register',
+    '/api/auth/verify-email',
+    '/api/auth/refresh',
+    '/api/auth/forgot-password',
+  };
+
   final TokenStorage tokenStorage;
 
   late final Dio dio;
@@ -57,6 +65,12 @@ class ApiClient {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    final isPublicAuthRequest = _publicAuthPaths.any(options.path.endsWith);
+    if (isPublicAuthRequest) {
+      handler.next(options);
+      return;
+    }
+
     final accessToken = await tokenStorage.getAccessToken();
 
     if (accessToken != null && accessToken.isNotEmpty) {
@@ -72,16 +86,7 @@ class ApiClient {
   ) async {
     final request = error.requestOptions;
 
-    final publicAuthPaths = {
-      '/api/auth/login',
-      '/api/auth/register',
-      '/api/auth/verify-email',
-      '/api/auth/refresh',
-    };
-
-    final isPublicAuthRequest = publicAuthPaths.any(
-      request.path.endsWith,
-    );
+    final isPublicAuthRequest = _publicAuthPaths.any(request.path.endsWith);
 
     final alreadyRetried = request.extra['retriedAfterRefresh'] == true;
 
@@ -105,9 +110,7 @@ class ApiClient {
     try {
       final response = await _refreshDio.post<Map<String, dynamic>>(
         '/api/auth/refresh',
-        data: {
-          'refreshToken': refreshToken,
-        },
+        data: {'refreshToken': refreshToken},
       );
 
       final responseData = response.data;
@@ -120,12 +123,14 @@ class ApiClient {
 
       final newRefreshToken =
           returnedRefreshToken is String && returnedRefreshToken.isNotEmpty
-              ? returnedRefreshToken
-              : refreshToken;
+          ? returnedRefreshToken
+          : refreshToken;
 
+      final persistSession = await tokenStorage.shouldRestoreSession();
       await tokenStorage.saveTokens(
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
+        persist: persistSession,
       );
 
       request.headers['Authorization'] = 'Bearer $newAccessToken';
@@ -147,30 +152,15 @@ class ApiClient {
     String path, {
     Map<String, dynamic>? queryParameters,
   }) {
-    return dio.get<dynamic>(
-      path,
-      queryParameters: queryParameters,
-    );
+    return dio.get<dynamic>(path, queryParameters: queryParameters);
   }
 
-  Future<Response<dynamic>> post(
-    String path, {
-    Map<String, dynamic>? data,
-  }) {
-    return dio.post<dynamic>(
-      path,
-      data: data,
-    );
+  Future<Response<dynamic>> post(String path, {Map<String, dynamic>? data}) {
+    return dio.post<dynamic>(path, data: data);
   }
 
-  Future<Response<dynamic>> put(
-    String path, {
-    Map<String, dynamic>? data,
-  }) {
-    return dio.put<dynamic>(
-      path,
-      data: data,
-    );
+  Future<Response<dynamic>> put(String path, {Map<String, dynamic>? data}) {
+    return dio.put<dynamic>(path, data: data);
   }
 
   Future<Response<dynamic>> delete(String path) {

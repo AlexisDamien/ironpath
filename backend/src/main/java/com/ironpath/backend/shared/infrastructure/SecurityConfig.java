@@ -1,7 +1,6 @@
 package com.ironpath.backend.shared.infrastructure;
 
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,12 +25,19 @@ import java.time.Duration;
 import java.util.List;
 
 @Configuration
-@RequiredArgsConstructor
 @EnableConfigurationProperties(AppProperties.class)
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AppProperties appProperties;
+
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            AppProperties appProperties
+    ) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.appProperties = appProperties;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -40,13 +46,12 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+        CorsConfiguration apiConfiguration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(
+        apiConfiguration.setAllowedOriginPatterns(
                 appProperties.getCors().getAllowedOriginPatterns()
         );
-
-        configuration.setAllowedMethods(
+        apiConfiguration.setAllowedMethods(
                 List.of(
                         HttpMethod.GET.name(),
                         HttpMethod.POST.name(),
@@ -55,8 +60,7 @@ public class SecurityConfig {
                         HttpMethod.OPTIONS.name()
                 )
         );
-
-        configuration.setAllowedHeaders(
+        apiConfiguration.setAllowedHeaders(
                 List.of("Authorization", "Content-Type", "Accept")
         );
 
@@ -64,11 +68,42 @@ public class SecurityConfig {
          * Les JWT sont envoyés dans l'en-tête Authorization,
          * et non dans des cookies de session.
          */
-        configuration.setAllowCredentials(false);
-        configuration.setMaxAge(Duration.ofHours(1));
+        apiConfiguration.setAllowCredentials(false);
+        apiConfiguration.setMaxAge(Duration.ofHours(1));
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        /*
+         * Le formulaire HTML de réinitialisation est public et protégé par
+         * un jeton aléatoire, temporaire et à usage unique. Cette configuration
+         * évite que Spring rejette son POST lorsque la page est ouverte via
+         * un tunnel local ou un reverse proxy utilisant une origine différente.
+         */
+        CorsConfiguration passwordResetConfiguration = new CorsConfiguration();
+        passwordResetConfiguration.setAllowedOriginPatterns(List.of("*"));
+        passwordResetConfiguration.setAllowedMethods(
+                List.of(
+                        HttpMethod.GET.name(),
+                        HttpMethod.POST.name(),
+                        HttpMethod.OPTIONS.name()
+                )
+        );
+        passwordResetConfiguration.setAllowedHeaders(
+                List.of("Content-Type", "Accept", "Origin")
+        );
+        passwordResetConfiguration.setAllowCredentials(false);
+        passwordResetConfiguration.setMaxAge(Duration.ofHours(1));
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration(
+                "/api/auth/reset-password-page",
+                passwordResetConfiguration
+        );
+        source.registerCorsConfiguration(
+                "/api/auth/reset-password-form",
+                passwordResetConfiguration
+        );
+        source.registerCorsConfiguration("/**", apiConfiguration);
 
         return source;
     }
@@ -83,7 +118,10 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(this::configureExceptionHandling)
                 .authorizeHttpRequests(this::configureAuthorization)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }
@@ -109,7 +147,8 @@ public class SecurityConfig {
     }
 
     private void configureAuthorization(
-            AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
+            AuthorizeHttpRequestsConfigurer<HttpSecurity>
+                    .AuthorizationManagerRequestMatcherRegistry auth
     ) {
         auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
 
@@ -117,12 +156,17 @@ public class SecurityConfig {
                 HttpMethod.POST,
                 "/api/auth/register",
                 "/api/auth/login",
-                "/api/auth/refresh"
+                "/api/auth/refresh",
+                "/api/auth/forgot-password",
+                "/api/auth/reset-password",
+                "/api/auth/reset-password-form"
         ).permitAll();
 
         auth.requestMatchers(
                 HttpMethod.GET,
                 "/api/auth/verify-email",
+                "/api/auth/reset-password-page",
+                "/password-reset/**",
                 "/actuator/health"
         ).permitAll();
 

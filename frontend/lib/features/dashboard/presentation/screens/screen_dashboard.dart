@@ -68,9 +68,7 @@ class _ScreenDashboardState extends ConsumerState<ScreenDashboard> {
           padding: const EdgeInsets.all(16),
           children: [
             if (trainingState.activeSession != null)
-              CardActiveSession(
-                onTap: () => context.go('/session'),
-              ),
+              CardActiveSession(onTap: () => context.go('/session')),
             if (trainingState.activeSession != null) const SizedBox(height: 16),
             CardLastMetrics(
               lastMeasurement: lastMeasurement,

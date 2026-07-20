@@ -19,7 +19,8 @@ class WorkoutProgram {
       name: json['name'],
       description: json['description'],
       isActive: json['isActive'] ?? false,
-      exercises: (json['exercises'] as List<dynamic>?)
+      exercises:
+          (json['exercises'] as List<dynamic>?)
               ?.map((e) => ProgramExercise.fromJson(e))
               .toList() ??
           [],
@@ -77,7 +78,8 @@ class ProgramExercise {
       exerciseId: json['exerciseId'],
       exerciseOrder: json['exerciseOrder'],
       sameConfigForAllSets: json['sameConfigForAllSets'] ?? true,
-      sets: (json['sets'] as List<dynamic>?)
+      sets:
+          (json['sets'] as List<dynamic>?)
               ?.map((s) => ProgramExerciseSetModel.fromJson(s))
               .toList() ??
           [],

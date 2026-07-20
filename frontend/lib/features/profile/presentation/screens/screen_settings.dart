@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/enums.dart';
 import '../../../../core/constants/legal_texts.dart';
 import '../../../../core/providers/provider_enums.dart';
+import '../../../../core/providers/provider_theme.dart';
 import '../../../identity/presentation/providers/provider_identity.dart';
 import '../widgets/card_settings_section.dart';
 import '../widgets/popup_delete_account.dart';
@@ -13,6 +13,39 @@ import 'screen_legal.dart';
 
 class ScreenSettings extends ConsumerWidget {
   const ScreenSettings({super.key});
+
+  Future<void> _deleteAccount(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final notifier = ref.read(providerIdentity.notifier);
+    final deleted = await showDeleteAccountDialog(context, ref);
+    if (!deleted) return;
+
+    // Laisse le temps au dialogue puis à l'écran Paramètres de quitter le
+    // Navigator avant que GoRouter ne reconstruise l'arbre d'authentification.
+    await Future<void>.delayed(kThemeAnimationDuration);
+    if (context.mounted && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      await Future<void>.delayed(kThemeAnimationDuration);
+    }
+
+    notifier.completeAccountDeletion();
+  }
+
+  Future<void> _logout(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final notifier = ref.read(providerIdentity.notifier);
+
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      await Future<void>.delayed(kThemeAnimationDuration);
+    }
+
+    await notifier.logout();
+  }
 
   void _openLegalScreen(
     BuildContext context, {
@@ -33,6 +66,7 @@ class ScreenSettings extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unitSystem = ref.watch(providerUnitSystem);
+    final themeMode = ref.watch(providerThemeMode);
     final errorColor = Theme.of(context).colorScheme.error;
 
     return Scaffold(
@@ -43,10 +77,14 @@ class ScreenSettings extends ConsumerWidget {
           'Paramètres',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            tooltip: 'Fermer',
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -75,7 +113,7 @@ class ScreenSettings extends ConsumerWidget {
                   style: TextStyle(color: errorColor),
                 ),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () => showDeleteAccountDialog(context, ref),
+                onTap: () => _deleteAccount(context, ref),
               ),
             ],
           ),
@@ -88,10 +126,47 @@ class ScreenSettings extends ConsumerWidget {
                 title: Text('Notifications'),
                 trailing: _WipLabel(),
               ),
-              const ListTile(
-                leading: Icon(Icons.dark_mode_outlined),
-                title: Text('Thème'),
-                trailing: _WipLabel(),
+              ListTile(
+                leading: Icon(
+                  themeMode == ThemeMode.light
+                      ? Icons.light_mode_outlined
+                      : themeMode == ThemeMode.dark
+                          ? Icons.dark_mode_outlined
+                          : Icons.brightness_auto_outlined,
+                ),
+                title: const Text('Thème'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Clair, sombre ou réglage du système'),
+                    DropdownButton<ThemeMode>(
+                      value: themeMode,
+                      isExpanded: true,
+                      underline: const SizedBox(),
+                      items: const [
+                        DropdownMenuItem(
+                          value: ThemeMode.system,
+                          child: Text('Système'),
+                        ),
+                        DropdownMenuItem(
+                          value: ThemeMode.light,
+                          child: Text('Clair'),
+                        ),
+                        DropdownMenuItem(
+                          value: ThemeMode.dark,
+                          child: Text('Sombre'),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          ref
+                              .read(providerThemeMode.notifier)
+                              .setThemeMode(value);
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
               const ListTile(
                 leading: Icon(Icons.language_outlined),
@@ -140,23 +215,25 @@ class ScreenSettings extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 24),
-          const CardSettingsSection(
+          CardSettingsSection(
             title: 'Application',
             children: [
               ListTile(
-                leading: Icon(Icons.info_outlined),
-                title: Text('Version'),
+                leading: const Icon(Icons.info_outlined),
+                title: const Text('Version'),
                 trailing: Text(
                   '1.0.0',
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
-              ListTile(
+              const ListTile(
                 leading: Icon(Icons.update_outlined),
                 title: Text('Notes de version'),
                 trailing: _WipLabel(),
               ),
-              ListTile(
+              const ListTile(
                 leading: Icon(Icons.bug_report_outlined),
                 title: Text('Signaler un bug'),
                 trailing: _WipLabel(),
@@ -199,12 +276,7 @@ class ScreenSettings extends ConsumerWidget {
                   'Se déconnecter',
                   style: TextStyle(color: errorColor),
                 ),
-                onTap: () async {
-                  await ref.read(providerIdentity.notifier).logout();
-                  if (context.mounted) {
-                    context.go('/login');
-                  }
-                },
+                onTap: () => _logout(context, ref),
               ),
             ],
           ),
@@ -220,10 +292,10 @@ class _WipLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Text(
+    return Text(
       'WIP',
       style: TextStyle(
-        color: Colors.grey,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
         fontSize: 12,
       ),
     );

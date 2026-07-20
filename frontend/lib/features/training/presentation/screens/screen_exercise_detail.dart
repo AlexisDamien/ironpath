@@ -15,95 +15,109 @@ class ScreenExerciseDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: colorScheme.surface,
         title: Text(
           exercise.name,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            tooltip: 'Fermer',
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.fitness_center,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    exercise.name,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+      body: SafeArea(
+        top: false,
+        bottom: !showAddButton,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    Semantics(
+                      label: 'Exercice de musculation',
+                      child: Icon(
+                        Icons.fitness_center,
+                        size: 64,
+                        color: colorScheme.primary,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    Text(
+                      exercise.name,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            _buildInfoRow(
-              context,
-              icon: Icons.sports,
-              label: 'Groupe musculaire',
-              value: exercise.muscleGroup ?? 'Non défini',
-            ),
-            const Divider(height: 32),
-            _buildInfoRow(
-              context,
-              icon: Icons.sports_gymnastics,
-              label: 'Équipement',
-              value: exercise.equipment ?? 'Aucun',
-            ),
-            if (exercise.description != null) ...[
+              const SizedBox(height: 24),
+              _buildInfoRow(
+                context,
+                icon: Icons.sports,
+                label: 'Groupe musculaire',
+                value: exercise.muscleGroup ?? 'Non défini',
+              ),
               const Divider(height: 32),
-              const Text(
-                'Description',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+              _buildInfoRow(
+                context,
+                icon: Icons.sports_gymnastics,
+                label: 'Équipement',
+                value: exercise.equipment ?? 'Aucun',
               ),
-              const SizedBox(height: 8),
-              Text(
-                exercise.description!,
-                style: const TextStyle(
-                  fontSize: 15,
-                  height: 1.5,
-                  color: Colors.grey,
+              if (exercise.description != null &&
+                  exercise.description!.trim().isNotEmpty) ...[
+                const Divider(height: 32),
+                Semantics(
+                  header: true,
+                  child: const Text(
+                    'Description',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 8),
+                Text(
+                  exercise.description!,
+                  style: TextStyle(
+                    fontSize: 15,
+                    height: 1.5,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
       bottomNavigationBar: showAddButton
-          ? Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                width: double.infinity,
+          ? SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
                 child: ElevatedButton.icon(
-                  onPressed: () => Navigator.of(context).pop(
-                    isSelected ? 'remove_from_program' : 'add_to_program',
-                  ),
+                  onPressed: () => Navigator.of(
+                    context,
+                  ).pop(isSelected ? 'remove_from_program' : 'add_to_program'),
                   icon: Icon(
                     isSelected
                         ? Icons.remove_circle_outline
@@ -127,34 +141,41 @@ class ScreenExerciseDetail extends StatelessWidget {
     required String label,
     required String value,
   }) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          color: Theme.of(context).colorScheme.primary,
-          size: 24,
-        ),
-        const SizedBox(width: 12),
-        Column(
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Semantics(
+      container: true,
+      label: '$label : $value',
+      child: ExcludeSemantics(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
-            ),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+            Icon(icon, color: colorScheme.primary, size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
-      ],
+      ),
     );
   }
 }

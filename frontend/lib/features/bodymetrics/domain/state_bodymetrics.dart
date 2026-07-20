@@ -31,8 +31,9 @@ class StateBodyMetrics {
       status: status ?? this.status,
       measurements: measurements ?? this.measurements,
       compositions: compositions ?? this.compositions,
-      errorMessage:
-          clearErrorMessage ? null : errorMessage ?? this.errorMessage,
+      errorMessage: clearErrorMessage
+          ? null
+          : errorMessage ?? this.errorMessage,
       isInitialized: isInitialized ?? this.isInitialized,
     );
   }

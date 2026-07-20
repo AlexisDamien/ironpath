@@ -80,28 +80,22 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
       return;
     }
 
-    final selected = await showSelectProgramSheet(
-      context,
-      programs: programs,
-    );
+    final selected = await showSelectProgramSheet(context, programs: programs);
 
     if (selected == null) {
       return;
     }
 
-    await ref.read(providerTraining.notifier).startSession(
-          programId: selected.id,
-          name: selected.name,
-        );
+    await ref
+        .read(providerTraining.notifier)
+        .startSession(programId: selected.id, name: selected.name);
   }
 
   Future<void> _addFreeExercises() async {
     final result = await Navigator.of(context).push<List<ExerciseConfig>>(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (context) => const ScreenSelectExercises(
-          initialSelection: [],
-        ),
+        builder: (context) => const ScreenSelectExercises(initialSelection: []),
       ),
     );
 
@@ -141,10 +135,13 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
                   const Text('Session active'),
                   if (trainingState.activeSession != null) ...[
                     const SizedBox(width: 6),
-                    const Icon(
-                      Icons.local_fire_department,
-                      size: 16,
-                      color: Colors.orange,
+                    Tooltip(
+                      message: 'Une séance est en cours',
+                      child: Icon(
+                        Icons.local_fire_department,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.tertiary,
+                      ),
                     ),
                   ],
                 ],
@@ -171,13 +168,24 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
     _syncFreeExercisesWithSession(activeSession?.id);
 
     if (activeSession == null) {
-      return CardSessionStart(
-        canWrite: canWrite,
-        onStartFree: () => ref
-            .read(providerTraining.notifier)
-            .startSession(name: 'Session libre'),
-        onStartProgram: () => _pickProgramAndStart(trainingState.programs),
-        onRequiresVerification: _showVerifyEmailSnack,
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: EdgeInsets.zero,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: CardSessionStart(
+                canWrite: canWrite,
+                onStartFree: () => ref
+                    .read(providerTraining.notifier)
+                    .startSession(name: 'Session libre'),
+                onStartProgram: () =>
+                    _pickProgramAndStart(trainingState.programs),
+                onRequiresVerification: _showVerifyEmailSnack,
+              ),
+            ),
+          );
+        },
       );
     }
 
@@ -208,9 +216,7 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
             ],
           ),
         ),
-        Expanded(
-          child: _buildSessionContent(activeSession, trainingState),
-        ),
+        Expanded(child: _buildSessionContent(activeSession, trainingState)),
       ],
     );
   }
@@ -222,8 +228,9 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
     final plannedExerciseIds = activeSession.plannedExercises
         .map((exercise) => exercise.exerciseId)
         .toSet();
-    final freeConfiguredIds =
-        _freeExerciseConfigs.map((config) => config.exercise.id).toSet();
+    final freeConfiguredIds = _freeExerciseConfigs
+        .map((config) => config.exercise.id)
+        .toSet();
     final orphanFreeSets = activeSession.sets
         .where(
           (set) =>
@@ -309,23 +316,26 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
           )
           .toList(),
       loggedSets: loggedSets,
-      onLogSet: ({
-        required setOrder,
-        required reps,
-        required weightKg,
-        required restSeconds,
-        required isWarmup,
-      }) {
-        ref.read(providerTraining.notifier).addSet(
-              sessionId: activeSession.id,
-              exerciseId: plannedExercise.exerciseId,
-              setOrder: setOrder,
-              reps: reps,
-              weightKg: weightKg,
-              restSeconds: restSeconds,
-              isWarmup: isWarmup,
-            );
-      },
+      onLogSet:
+          ({
+            required setOrder,
+            required reps,
+            required weightKg,
+            required restSeconds,
+            required isWarmup,
+          }) {
+            ref
+                .read(providerTraining.notifier)
+                .addSet(
+                  sessionId: activeSession.id,
+                  exerciseId: plannedExercise.exerciseId,
+                  setOrder: setOrder,
+                  reps: reps,
+                  weightKg: weightKg,
+                  restSeconds: restSeconds,
+                  isWarmup: isWarmup,
+                );
+          },
     );
   }
 
@@ -353,30 +363,30 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
           )
           .toList(),
       loggedSets: loggedSets,
-      onLogSet: ({
-        required setOrder,
-        required reps,
-        required weightKg,
-        required restSeconds,
-        required isWarmup,
-      }) {
-        ref.read(providerTraining.notifier).addSet(
-              sessionId: activeSession.id,
-              exerciseId: config.exercise.id,
-              setOrder: setOrder,
-              reps: reps,
-              weightKg: weightKg,
-              restSeconds: restSeconds,
-              isWarmup: isWarmup,
-            );
-      },
+      onLogSet:
+          ({
+            required setOrder,
+            required reps,
+            required weightKg,
+            required restSeconds,
+            required isWarmup,
+          }) {
+            ref
+                .read(providerTraining.notifier)
+                .addSet(
+                  sessionId: activeSession.id,
+                  exerciseId: config.exercise.id,
+                  setOrder: setOrder,
+                  reps: reps,
+                  weightKg: weightKg,
+                  restSeconds: restSeconds,
+                  isWarmup: isWarmup,
+                );
+          },
     );
   }
 
-  Exercise? _findExercise(
-    String exerciseId,
-    List<Exercise> exercises,
-  ) {
+  Exercise? _findExercise(String exerciseId, List<Exercise> exercises) {
     for (final exercise in exercises) {
       if (exercise.id == exerciseId) {
         return exercise;
@@ -386,10 +396,7 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
     return null;
   }
 
-  String _exerciseName(
-    String exerciseId,
-    List<Exercise> exercises,
-  ) {
+  String _exerciseName(String exerciseId, List<Exercise> exercises) {
     return _findExercise(exerciseId, exercises)?.name ?? exerciseId;
   }
 

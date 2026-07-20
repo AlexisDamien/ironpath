@@ -14,9 +14,9 @@ final providerProfileRepository = Provider<RepositoryProfile>((ref) {
 
 final providerProfile =
     StateNotifierProvider<ProviderProfileNotifier, StateProfile>((ref) {
-  final repository = ref.watch(providerProfileRepository);
-  return ProviderProfileNotifier(repository);
-});
+      final repository = ref.watch(providerProfileRepository);
+      return ProviderProfileNotifier(repository);
+    });
 
 class ProviderProfileNotifier extends StateNotifier<StateProfile> {
   final RepositoryProfile _repository;

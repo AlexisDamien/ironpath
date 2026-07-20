@@ -24,10 +24,7 @@ class _ScreenSessionHistoryState extends ConsumerState<ScreenSessionHistory> {
     );
   }
 
-  String _exerciseName(
-    List<Exercise> exercises,
-    String exerciseId,
-  ) {
+  String _exerciseName(List<Exercise> exercises, String exerciseId) {
     for (final exercise in exercises) {
       if (exercise.id == exerciseId) {
         return exercise.name;
@@ -49,10 +46,7 @@ class _ScreenSessionHistoryState extends ConsumerState<ScreenSessionHistory> {
     return '$formattedDate • ${duration.inMinutes} min';
   }
 
-  Widget _buildSetLine(
-    ExerciseSet set,
-    List<Exercise> exercises,
-  ) {
+  Widget _buildSetLine(ExerciseSet set, List<Exercise> exercises) {
     final name = _exerciseName(exercises, set.exerciseId);
 
     return Padding(
@@ -65,6 +59,7 @@ class _ScreenSessionHistoryState extends ConsumerState<ScreenSessionHistory> {
   }
 
   Widget _buildSection(
+    BuildContext context,
     String title,
     List<ExerciseSet> sets,
     List<Exercise> exercises,
@@ -80,10 +75,10 @@ class _ScreenSessionHistoryState extends ConsumerState<ScreenSessionHistory> {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: Colors.grey,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 2),
@@ -103,8 +98,7 @@ class _ScreenSessionHistoryState extends ConsumerState<ScreenSessionHistory> {
         child: Text(
           'Aucune session terminée pour le moment',
           style: TextStyle(
-            color:
-                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       );
@@ -146,24 +140,31 @@ class _ScreenSessionHistoryState extends ConsumerState<ScreenSessionHistory> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: session.sets.isEmpty
-                      ? const [
+                      ? [
                           Text(
                             'Aucun set enregistré',
-                            style: TextStyle(color: Colors.grey),
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
                           ),
                         ]
                       : [
                           _buildSection(
+                            context,
                             'Échauffement',
                             warmupSets,
                             trainingState.exercises,
                           ),
                           _buildSection(
+                            context,
                             'Programme',
                             programSets,
                             trainingState.exercises,
                           ),
                           _buildSection(
+                            context,
                             'Libre',
                             freeSets,
                             trainingState.exercises,

@@ -50,9 +50,9 @@ class UpdatePasswordUseCaseTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("oldPassword", "oldHash")).thenReturn(true);
-        when(passwordEncoder.encode("newPassword")).thenReturn("newHash");
+        when(passwordEncoder.encode("NewPassword123!")).thenReturn("newHash");
 
-        updatePasswordUseCase.execute(userId, "oldPassword", "newPassword");
+        updatePasswordUseCase.execute(userId, "oldPassword", "NewPassword123!");
 
         assertEquals("newHash", user.getPasswordHash());
         verify(userRepository, times(1)).save(user);
@@ -68,7 +68,7 @@ class UpdatePasswordUseCaseTest {
         when(passwordEncoder.matches("wrongPassword", "oldHash")).thenReturn(false);
 
         assertThrows(IllegalArgumentException.class, () ->
-                updatePasswordUseCase.execute(userId, "wrongPassword", "newPassword")
+                updatePasswordUseCase.execute(userId, "wrongPassword", "NewPassword123!")
         );
         verify(userRepository, never()).save(any());
         verify(refreshTokenRepository, never()).revokeAllByUserId(any());

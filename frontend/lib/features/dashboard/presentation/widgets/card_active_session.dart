@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 class CardActiveSession extends StatelessWidget {
   final VoidCallback onTap;
 
-  const CardActiveSession({
-    super.key,
-    required this.onTap,
-  });
+  const CardActiveSession({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

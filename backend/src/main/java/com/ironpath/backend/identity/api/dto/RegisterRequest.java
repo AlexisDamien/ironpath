@@ -12,7 +12,7 @@ public record RegisterRequest(
         String email,
 
         @NotBlank(message = "Mot de passe obligatoire")
-        @Size(min = 8, message = "Mot de passe minimum 8 caractères")
+        @Size(min = 12, message = "Mot de passe minimum 12 caractères")
         String password,
 
         @AssertTrue (message = "Consentement RGPD obligatoire")

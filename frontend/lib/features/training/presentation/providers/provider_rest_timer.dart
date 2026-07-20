@@ -4,8 +4,8 @@ import '../../domain/state_rest_timer.dart';
 
 final providerRestTimer =
     StateNotifierProvider<ProviderRestTimerNotifier, StateRestTimer>((ref) {
-  return ProviderRestTimerNotifier();
-});
+      return ProviderRestTimerNotifier();
+    });
 
 class ProviderRestTimerNotifier extends StateNotifier<StateRestTimer> {
   Timer? _timer;
