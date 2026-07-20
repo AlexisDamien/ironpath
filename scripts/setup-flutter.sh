@@ -114,6 +114,15 @@ esac
 echo
 
 export PATH="$SDK_DIR/bin:$PATH"
+
+echo "Premier démarrage : téléchargement des artefacts Dart/moteur Flutter"
+echo "(peut prendre plusieurs minutes selon la connexion et l'antivirus)..."
+if [ "$PLATFORM" = "windows" ]; then
+  echo "Astuce Windows : si c'est anormalement long, excluez $SDK_DIR de"
+  echo "l'analyse temps réel de votre antivirus (Windows Defender notamment)."
+fi
+flutter precache
+
 flutter --version
 
 INSTALLED_VERSION="$(flutter --version 2>/dev/null | head -n1 | awk '{print $2}')"
