@@ -1,0 +1,2 @@
+ALTER TABLE users DROP COLUMN IF EXISTS status;
+DROP TYPE IF EXISTS user_status;

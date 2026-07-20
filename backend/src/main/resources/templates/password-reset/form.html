@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>Nouveau mot de passe — IronPath</title>
+    <link rel="stylesheet" href="/password-reset/password-reset.css">
+    <script src="/password-reset/password-reset.js" defer></script>
+</head>
+<body>
+<main class="card" aria-labelledby="page-title">
+    <div class="brand" aria-label="IronPath">
+        <span class="brand-mark" aria-hidden="true">IP</span>
+        <span>IRONPATH</span>
+    </div>
+
+    <h1 id="page-title">Nouveau mot de passe</h1>
+    <p class="intro">
+        Choisissez un nouveau mot de passe sécurisé pour votre compte.
+    </p>
+
+    {{ERROR_BLOCK}}
+
+    <form id="reset-form" method="post"
+          action="/api/auth/reset-password-form" novalidate>
+        <input type="hidden" name="token" value="{{TOKEN}}">
+
+        <div class="field-group">
+            <label for="password">Nouveau mot de passe</label>
+            <div class="password-control">
+                <input id="password" name="newPassword" type="password"
+                       minlength="12" required autocomplete="new-password"
+                       aria-describedby="password-help strength-status criteria-list">
+                <button class="visibility-button" type="button"
+                        data-toggle-password="password"
+                        aria-controls="password" aria-pressed="false">
+                    Afficher
+                </button>
+            </div>
+            <p id="password-help" class="help">
+                Utilisez les cinq critères ci-dessous.
+            </p>
+        </div>
+
+        <section class="security-panel" aria-labelledby="security-title">
+            <div class="strength-row">
+                <h2 id="security-title">Sécurité du mot de passe</h2>
+                <output id="strength-status" for="password"
+                        aria-live="polite">Très faible — 0/5</output>
+            </div>
+            <progress id="strength-progress" max="5" value="0">
+                0 critère sur 5
+            </progress>
+            <ul id="criteria-list" class="criteria-list">
+                <li data-criterion="length" data-label="Au moins 12 caractères">
+                    <span class="criterion-icon" aria-hidden="true">○</span>
+                    Au moins 12 caractères
+                </li>
+                <li data-criterion="uppercase" data-label="Au moins une majuscule">
+                    <span class="criterion-icon" aria-hidden="true">○</span>
+                    Au moins une majuscule
+                </li>
+                <li data-criterion="lowercase" data-label="Au moins une minuscule">
+                    <span class="criterion-icon" aria-hidden="true">○</span>
+                    Au moins une minuscule
+                </li>
+                <li data-criterion="digit" data-label="Au moins un chiffre">
+                    <span class="criterion-icon" aria-hidden="true">○</span>
+                    Au moins un chiffre
+                </li>
+                <li data-criterion="special" data-label="Au moins un caractère spécial">
+                    <span class="criterion-icon" aria-hidden="true">○</span>
+                    Au moins un caractère spécial
+                </li>
+            </ul>
+        </section>
+
+        <div class="field-group">
+            <label for="confirmation">Confirmer le mot de passe</label>
+            <div class="password-control">
+                <input id="confirmation" name="confirmPassword"
+                       type="password" minlength="12" required
+                       autocomplete="new-password"
+                       aria-describedby="confirmation-status">
+                <button class="visibility-button" type="button"
+                        data-toggle-password="confirmation"
+                        aria-controls="confirmation" aria-pressed="false">
+                    Afficher
+                </button>
+            </div>
+            <p id="confirmation-status" class="field-status"
+               aria-live="polite"></p>
+        </div>
+
+        <button id="submit-button" class="primary-button" type="submit">
+            Enregistrer le mot de passe
+        </button>
+    </form>
+
+    <p class="security-note">
+        Le lien est temporaire et ne peut être utilisé qu’une seule fois.
+    </p>
+</main>
+</body>
+</html>

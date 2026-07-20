@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<module name="Checker">
+    <property name="severity" value="error"/>
+    <property name="fileExtensions" value="java"/>
+
+    <module name="TreeWalker">
+        <!-- Nommage — MethodName supprimé pour autoriser le pattern test_should_when -->
+        <module name="TypeName"/>
+        <module name="ParameterName"/>
+        <module name="LocalVariableName"/>
+        <module name="MemberName"/>
+        <module name="ConstantName"/>
+        <module name="PackageName">
+            <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]*)*$"/>
+        </module>
+
+        <!-- Imports -->
+        <module name="AvoidStarImport">
+            <property name="excludes" value="jakarta.persistence,lombok,org.springframework.web.bind.annotation,org.mockito,org.mockito.Mockito,org.mockito.junit.jupiter,org.junit.jupiter.api,org.junit.jupiter.api.Assertions,com.ironpath.backend.training.application"/>
+        </module>
+        <module name="UnusedImports"/>
+
+        <!-- Longueur -->
+        <module name="MethodLength">
+            <property name="max" value="80"/>
+        </module>
+        <module name="ParameterNumber">
+            <property name="max" value="7"/>
+        </module>
+
+        <!-- Qualité -->
+        <module name="EmptyBlock"/>
+        <module name="NeedBraces"/>
+        <module name="EqualsHashCode"/>
+        <module name="SimplifyBooleanExpression"/>
+        <module name="SimplifyBooleanReturn"/>
+    </module>
+
+    <module name="LineLength">
+        <property name="max" value="150"/>
+    </module>
+</module>

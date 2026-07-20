@@ -3,7 +3,6 @@ backend/build/
 backend/.gradle/
 backend/bin/
 backend/*.class
-backend/application-prod.properties
 
 # Flutter
 frontend/.dart_tool/
@@ -20,3 +19,8 @@ frontend/.packages
 # OS
 .DS_Store
 Thumbs.db
+
+.env
+.env.*
+!.env.example
+docker-ci.log

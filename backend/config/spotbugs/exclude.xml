@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- Exclut les DTOs (records) -->
+    <Match>
+        <Package name="~com\.ironpath\.backend\..*\.dto"/>
+    </Match>
+
+    <!-- Exclut les entités JPA -->
+    <Match>
+        <Package name="~com\.ironpath\.backend\..*\.model"/>
+    </Match>
+</FindBugsFilter>

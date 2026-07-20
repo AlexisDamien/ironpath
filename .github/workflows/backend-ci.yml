@@ -1,0 +1,91 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Backend / Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: ironpath_test
+          POSTGRES_USER: ironpath_user
+          POSTGRES_PASSWORD: ironpath_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ironpath_user -d ironpath_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ironpath_test
+      SPRING_DATASOURCE_USERNAME: ironpath_user
+      SPRING_DATASOURCE_PASSWORD: ironpath_pass
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradle wrapper executable
+        working-directory: backend
+        run: chmod +x gradlew
+
+      - name: Compile, test, lint and package
+        working-directory: backend
+        run: ./gradlew --no-daemon --stacktrace clean check spotbugsMain bootJar
+
+      - name: Enforce 80% line coverage
+        run: >-
+          python scripts/check_jacoco.py
+          backend/build/reports/jacoco/test/jacocoTestReport.xml
+          80
+
+      - name: Upload backend reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: backend-reports-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            backend/build/reports/tests/
+            backend/build/reports/jacoco/
+            backend/build/reports/checkstyle/
+            backend/build/reports/spotbugs/
+
+      - name: Upload backend JAR
+        if: success()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ironpath-backend-jar-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: backend/build/libs/*.jar

@@ -1,0 +1,157 @@
+import '../../../core/network/api_client.dart';
+import '../domain/models/exercise.dart';
+import '../domain/models/exercise_config.dart';
+import '../domain/models/workout_program.dart';
+import '../domain/models/training_session.dart';
+
+class RepositoryTraining {
+  final ApiClient _apiClient;
+
+  RepositoryTraining(this._apiClient);
+
+  Future<List<WorkoutProgram>> getPrograms() async {
+    final response = await _apiClient.get('/api/training/programs');
+    return (response.data as List)
+        .map((programData) => WorkoutProgram.fromJson(programData))
+        .toList();
+  }
+
+  Future<WorkoutProgram> createProgram({
+    required String name,
+    String? description,
+    List<ExerciseConfig> exercises = const [],
+  }) async {
+    final response = await _apiClient.post(
+      '/api/training/programs',
+      data: {
+        'name': name,
+        'description': description,
+        'exercises': _serializeExercises(exercises),
+      },
+    );
+    return WorkoutProgram.fromJson(response.data);
+  }
+
+  Future<WorkoutProgram> updateProgram({
+    required String programId,
+    required String name,
+    String? description,
+    List<ExerciseConfig> exercises = const [],
+  }) async {
+    final response = await _apiClient.put(
+      '/api/training/programs/$programId',
+      data: {
+        'name': name,
+        'description': description,
+        'exercises': _serializeExercises(exercises),
+      },
+    );
+    return WorkoutProgram.fromJson(response.data);
+  }
+
+  List<Map<String, dynamic>> _serializeExercises(
+    List<ExerciseConfig> exercises,
+  ) {
+    return exercises
+        .asMap()
+        .entries
+        .map(
+          (entry) => {
+            'exerciseId': entry.value.exercise.id,
+            'exerciseOrder': entry.key + 1,
+            'sameConfigForAllSets': entry.value.sameConfigForAllSets,
+            'sets': entry.value.sets
+                .map(
+                  (set) => {
+                    'setOrder': set.setOrder,
+                    'targetReps': set.targetReps,
+                    'targetWeightKg': set.targetWeight,
+                    'restSeconds': set.restSeconds,
+                    'isWarmup': set.isWarmup,
+                  },
+                )
+                .toList(),
+          },
+        )
+        .toList();
+  }
+
+  Future<void> deleteProgram(String programId) async {
+    await _apiClient.delete('/api/training/programs/$programId');
+  }
+
+  Future<TrainingSession> startSession({
+    String? programId,
+    String? name,
+  }) async {
+    final response = await _apiClient.post(
+      '/api/training/sessions',
+      data: {'programId': programId, 'name': name},
+    );
+    return TrainingSession.fromJson(response.data);
+  }
+
+  Future<TrainingSession?> getActiveSession() async {
+    try {
+      final response = await _apiClient.get('/api/training/sessions/active');
+      if (response.statusCode == 204) return null;
+      return TrainingSession.fromJson(response.data);
+    } catch (exception) {
+      return null;
+    }
+  }
+
+  Future<TrainingSession> addSet({
+    required String sessionId,
+    required String exerciseId,
+    required int setOrder,
+    int? reps,
+    double? weightKg,
+    int? restSeconds,
+    bool isWarmup = false,
+  }) async {
+    final response = await _apiClient.post(
+      '/api/training/sessions/$sessionId/sets',
+      data: {
+        'exerciseId': exerciseId,
+        'setOrder': setOrder,
+        'reps': reps,
+        'weightKg': weightKg,
+        'restSeconds': restSeconds,
+        'isWarmup': isWarmup,
+      },
+    );
+    return TrainingSession.fromJson(response.data);
+  }
+
+  Future<TrainingSession> endSession(String sessionId) async {
+    final response = await _apiClient.put(
+      '/api/training/sessions/$sessionId/end',
+    );
+    return TrainingSession.fromJson(response.data);
+  }
+
+  Future<List<TrainingSession>> getSessionHistory() async {
+    final response = await _apiClient.get('/api/training/sessions');
+    return (response.data as List)
+        .map((sessionData) => TrainingSession.fromJson(sessionData))
+        .toList();
+  }
+
+  Future<List<Exercise>> getExercises({
+    String? search,
+    String? muscleGroup,
+  }) async {
+    final Map<String, dynamic> queryParameters = {};
+    if (search != null) queryParameters['search'] = search;
+    if (muscleGroup != null) queryParameters['muscleGroup'] = muscleGroup;
+
+    final response = await _apiClient.get(
+      '/api/exercises',
+      queryParameters: queryParameters,
+    );
+    return (response.data as List)
+        .map((exerciseData) => Exercise.fromJson(exerciseData))
+        .toList();
+  }
+}
