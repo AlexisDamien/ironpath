@@ -43,10 +43,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Java 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -70,7 +70,7 @@ jobs:
 
       - name: Upload backend reports
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: backend-reports-${{ github.run_id }}
           retention-days: 14
@@ -83,7 +83,7 @@ jobs:
 
       - name: Upload backend JAR
         if: success()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ironpath-backend-jar-${{ github.run_id }}
           retention-days: 14
