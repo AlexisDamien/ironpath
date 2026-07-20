@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Flutter 3.44.2
         uses: subosito/flutter-action@v2
@@ -59,7 +59,7 @@ jobs:
 
       - name: Upload frontend coverage
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-coverage-${{ github.run_id }}
           retention-days: 14
@@ -68,7 +68,7 @@ jobs:
 
       - name: Upload jury APK
         if: success()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ironpath-jury-apk-${{ github.run_id }}
           retention-days: 14
