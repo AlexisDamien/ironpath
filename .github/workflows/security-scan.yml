@@ -54,7 +54,7 @@ jobs:
 
       - name: Upload OWASP report
         if: always() && steps.nvd.outputs.enabled == 'true'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: owasp-dependency-check-${{ github.run_id }}
           retention-days: 30
