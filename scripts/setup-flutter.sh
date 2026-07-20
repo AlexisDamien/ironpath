@@ -20,6 +20,10 @@ version_ok() {
 
 if version_ok; then
   echo "Flutter $REQUIRED_VERSION déjà installé et actif : $(command -v flutter)"
+  if [ -t 0 ]; then
+    echo
+    read -rp "Appuyez sur Entrée pour fermer cette fenêtre..." _
+  fi
   exit 0
 fi
 
@@ -132,4 +136,9 @@ if [ "$INSTALLED_VERSION" != "$REQUIRED_VERSION" ]; then
   echo "($REQUIRED_VERSION). L'archive téléchargée ou l'extraction semble incorrecte." >&2
   echo "Supprimez $SDK_DIR manuellement et relancez ce script." >&2
   exit 1
+fi
+
+if [ -t 0 ]; then
+  echo
+  read -rp "Terminé. Appuyez sur Entrée pour fermer cette fenêtre..." _
 fi
