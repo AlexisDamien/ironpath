@@ -21,6 +21,13 @@ updates:
       timezone: Europe/Paris
     open-pull-requests-limit: 5
     labels: [dependencies, frontend]
+    ignore:
+      - dependency-name: flutter_riverpod
+        update-types: [version-update:semver-major]
+      - dependency-name: riverpod
+        update-types: [version-update:semver-major]
+      - dependency-name: go_router
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker
     directory: /backend
