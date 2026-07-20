@@ -72,37 +72,37 @@ class _ScreenProfileState extends ConsumerState<ScreenProfile> {
       ),
       body: switch (stateProfile.status) {
         StatusProfile.loading when stateProfile.profile == null => const Center(
-          child: CircularProgressIndicator(),
-        ),
+            child: CircularProgressIndicator(),
+          ),
         StatusProfile.error when stateProfile.profile == null => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  stateProfile.errorMessage ?? 'Une erreur est survenue',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () =>
+                      ref.read(providerProfile.notifier).loadProfile(),
+                  child: const Text('Réessayer'),
+                ),
+              ],
+            ),
+          ),
+        _ => ListView(
+            padding: const EdgeInsets.all(16),
             children: [
-              Text(
-                stateProfile.errorMessage ?? 'Une erreur est survenue',
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              CardProfile(
+                profile: stateProfile.profile,
+                onEdit: _openProfileForm,
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () =>
-                    ref.read(providerProfile.notifier).loadProfile(),
-                child: const Text('Réessayer'),
-              ),
+              if (lastComposition != null)
+                CardStats(composition: lastComposition),
             ],
           ),
-        ),
-        _ => ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            CardProfile(
-              profile: stateProfile.profile,
-              onEdit: _openProfileForm,
-            ),
-            const SizedBox(height: 16),
-            if (lastComposition != null)
-              CardStats(composition: lastComposition),
-          ],
-        ),
       },
     );
   }

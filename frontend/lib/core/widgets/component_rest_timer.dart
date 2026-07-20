@@ -24,20 +24,20 @@ class ComponentRestTimer extends ConsumerWidget {
 
     final displayText = isOwner
         ? (isOvertime
-              ? '+${formatClockDuration(timerState.overtimeSeconds)}'
-              : formatClockDuration(timerState.remainingSeconds))
+            ? '+${formatClockDuration(timerState.overtimeSeconds)}'
+            : formatClockDuration(timerState.remainingSeconds))
         : formatClockDuration(initialSeconds);
 
     final color = isOvertime
         ? Theme.of(context).colorScheme.error
         : (isOwner
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.onSurface);
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.onSurface);
 
     final semanticLabel = isOwner
         ? (isOvertime
-              ? 'Temps de repos. Dépassement de ${formatClockDuration(timerState.overtimeSeconds)}.'
-              : 'Temps de repos restant : ${formatClockDuration(timerState.remainingSeconds)}.')
+            ? 'Temps de repos. Dépassement de ${formatClockDuration(timerState.overtimeSeconds)}.'
+            : 'Temps de repos restant : ${formatClockDuration(timerState.remainingSeconds)}.')
         : 'Temps de repos planifié : ${formatClockDuration(initialSeconds)}.';
 
     return ConstrainedBox(

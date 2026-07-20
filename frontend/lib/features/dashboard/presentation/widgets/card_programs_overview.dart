@@ -37,9 +37,7 @@ class CardProgramsOverview extends StatelessWidget {
                 ),
               )
             else
-              ...programs
-                  .take(3)
-                  .map(
+              ...programs.take(3).map(
                     (program) => ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(program.name),

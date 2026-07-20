@@ -80,9 +80,7 @@ class _SheetAddSetState extends ConsumerState<SheetAddSet> {
     FocusScope.of(context).unfocus();
     setState(() => _isSaving = true);
     try {
-      await ref
-          .read(providerTraining.notifier)
-          .addSet(
+      await ref.read(providerTraining.notifier).addSet(
             sessionId: widget.activeSession.id,
             exerciseId: _selectedExercise!.id,
             setOrder: widget.activeSession.sets.length + 1,

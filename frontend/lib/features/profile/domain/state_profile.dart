@@ -24,9 +24,8 @@ class StateProfile {
     return StateProfile(
       status: status ?? this.status,
       profile: clearProfile ? null : profile ?? this.profile,
-      errorMessage: clearErrorMessage
-          ? null
-          : errorMessage ?? this.errorMessage,
+      errorMessage:
+          clearErrorMessage ? null : errorMessage ?? this.errorMessage,
     );
   }
 }

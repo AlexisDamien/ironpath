@@ -204,17 +204,17 @@ class _ScreenEditProfileState extends ConsumerState<ScreenEditProfile> {
             onPressed: _isLoading ? null : _submit,
             icon: _isLoading
                 ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
                 : const Icon(Icons.save_outlined),
             label: Text(
               _isLoading
                   ? 'Enregistrement…'
                   : _isCreating
-                  ? 'Créer le profil'
-                  : 'Enregistrer les modifications',
+                      ? 'Créer le profil'
+                      : 'Enregistrer les modifications',
             ),
           ),
         ),

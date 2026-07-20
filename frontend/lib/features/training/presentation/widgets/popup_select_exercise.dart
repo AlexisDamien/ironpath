@@ -81,29 +81,31 @@ class _PopupSelectExerciseState extends ConsumerState<PopupSelectExercise> {
                       ),
                     )
                   : exercises.isEmpty
-                  ? const Center(child: Text('Aucun exercice trouvé'))
-                  : ListView.builder(
-                      itemCount: exercises.length,
-                      itemBuilder: (context, index) {
-                        final exercise = exercises[index];
-                        final details =
-                            [exercise.muscleGroup, exercise.equipment]
+                      ? const Center(child: Text('Aucun exercice trouvé'))
+                      : ListView.builder(
+                          itemCount: exercises.length,
+                          itemBuilder: (context, index) {
+                            final exercise = exercises[index];
+                            final details = [
+                              exercise.muscleGroup,
+                              exercise.equipment
+                            ]
                                 .whereType<String>()
                                 .where((value) => value.isNotEmpty);
 
-                        return ListTile(
-                          title: Text(exercise.name),
-                          subtitle: details.isEmpty
-                              ? null
-                              : Text(details.join(' • ')),
-                          trailing: const Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                          ),
-                          onTap: () => Navigator.of(context).pop(exercise),
-                        );
-                      },
-                    ),
+                            return ListTile(
+                              title: Text(exercise.name),
+                              subtitle: details.isEmpty
+                                  ? null
+                                  : Text(details.join(' • ')),
+                              trailing: const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                              ),
+                              onTap: () => Navigator.of(context).pop(exercise),
+                            );
+                          },
+                        ),
             ),
           ],
         ),

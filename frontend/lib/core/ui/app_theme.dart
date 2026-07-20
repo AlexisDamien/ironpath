@@ -60,20 +60,16 @@ ThemeData _buildTheme(Brightness brightness) {
   final elevated = isDark ? IronColors.darkElevated : IronColors.lightElevated;
   final accent = isDark ? IronColors.darkAccent : IronColors.lightAccent;
   final error = isDark ? IronColors.darkError : IronColors.lightError;
-  final textPri = isDark
-      ? IronColors.darkTextPrimary
-      : IronColors.lightTextPrimary;
-  final textSec = isDark
-      ? IronColors.darkTextSecondary
-      : IronColors.lightTextSecondary;
+  final textPri =
+      isDark ? IronColors.darkTextPrimary : IronColors.lightTextPrimary;
+  final textSec =
+      isDark ? IronColors.darkTextSecondary : IronColors.lightTextSecondary;
   final border = isDark ? IronColors.darkBorder : IronColors.lightBorder;
   final warning = isDark ? IronColors.warningDark : IronColors.warningLight;
-  final accentContainer = isDark
-      ? const Color(0xFF44241B)
-      : const Color(0xFFF5DED5);
-  final onAccentContainer = isDark
-      ? IronColors.darkTextPrimary
-      : const Color(0xFF5E1C09);
+  final accentContainer =
+      isDark ? const Color(0xFF44241B) : const Color(0xFFF5DED5);
+  final onAccentContainer =
+      isDark ? IronColors.darkTextPrimary : const Color(0xFF5E1C09);
 
   final onAccent = isDark ? IronColors.darkSurface : Colors.white;
   final onError = isDark ? IronColors.darkBackground : Colors.white;
@@ -90,9 +86,8 @@ ThemeData _buildTheme(Brightness brightness) {
     secondaryContainer: accentContainer,
     onSecondaryContainer: onAccentContainer,
     tertiary: warning,
-    onTertiary: isDark
-        ? IronColors.darkBackground
-        : IronColors.lightTextPrimary,
+    onTertiary:
+        isDark ? IronColors.darkBackground : IronColors.lightTextPrimary,
     error: error,
     onError: onError,
     onSurface: textPri,

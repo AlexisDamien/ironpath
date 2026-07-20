@@ -86,8 +86,7 @@ class _ScreenProgramsState extends ConsumerState<ScreenPrograms> {
     final hasActiveSession = trainingState.activeSession != null;
     final hasPrograms = trainingState.programs.isNotEmpty;
 
-    final canStart =
-        canWrite &&
+    final canStart = canWrite &&
         !hasActiveSession &&
         !_isCheckingActiveSession &&
         selectedProgram != null &&

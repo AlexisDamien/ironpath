@@ -96,9 +96,7 @@ class _FormMeasurementState extends ConsumerState<FormMeasurement> {
     setState(() => _isLoading = true);
     try {
       if (widget.measurementToEdit != null) {
-        await ref
-            .read(providerBodyMetrics.notifier)
-            .updateMeasurement(
+        await ref.read(providerBodyMetrics.notifier).updateMeasurement(
               measurementId: widget.measurementToEdit!.id,
               weight: parseDecimal(_weightController.text),
               chest: parseDecimal(_chestController.text),
@@ -115,9 +113,7 @@ class _FormMeasurementState extends ConsumerState<FormMeasurement> {
                   : _notesController.text.trim(),
             );
       } else {
-        await ref
-            .read(providerBodyMetrics.notifier)
-            .saveMeasurement(
+        await ref.read(providerBodyMetrics.notifier).saveMeasurement(
               weight: parseDecimal(_weightController.text),
               chest: parseDecimal(_chestController.text),
               waist: parseDecimal(_waistController.text),
@@ -172,9 +168,8 @@ class _FormMeasurementState extends ConsumerState<FormMeasurement> {
       keyboardType: maxLines > 1
           ? TextInputType.multiline
           : const TextInputType.numberWithOptions(decimal: true),
-      textInputAction: maxLines > 1
-          ? TextInputAction.newline
-          : TextInputAction.next,
+      textInputAction:
+          maxLines > 1 ? TextInputAction.newline : TextInputAction.next,
       maxLines: maxLines,
       validator: readOnly || maxLines > 1
           ? null

@@ -60,9 +60,8 @@ class _SheetAddMetricsState extends State<SheetAddMetrics>
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 12, 8, 0),
                 child: ComponentModalHeader(
-                  title: isEditing
-                      ? 'Modifier la mesure'
-                      : 'Ajouter une mesure',
+                  title:
+                      isEditing ? 'Modifier la mesure' : 'Ajouter une mesure',
                 ),
               ),
               TabBar(

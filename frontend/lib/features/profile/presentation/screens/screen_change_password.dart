@@ -155,9 +155,7 @@ class _ScreenChangePasswordState extends ConsumerState<ScreenChangePassword> {
                   )
                 : const Icon(Icons.save_outlined),
             label: Text(
-              _isLoading
-                  ? 'Enregistrement…'
-                  : 'Enregistrer le mot de passe',
+              _isLoading ? 'Enregistrement…' : 'Enregistrer le mot de passe',
             ),
           ),
         ),

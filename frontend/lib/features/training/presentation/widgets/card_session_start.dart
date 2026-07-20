@@ -56,9 +56,8 @@ class CardSessionStart extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: canWrite
-                        ? onStartProgram
-                        : onRequiresVerification,
+                    onPressed:
+                        canWrite ? onStartProgram : onRequiresVerification,
                     icon: const Icon(Icons.list_alt),
                     label: const Text('Depuis un programme'),
                   ),

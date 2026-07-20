@@ -168,9 +168,9 @@ class FormProfile extends StatelessWidget {
         const SizedBox(height: 16),
         DropdownMenu<String>(
           initialSelection:
-          const ['MALE', 'FEMALE', 'OTHER'].contains(selectedGender)
-              ? selectedGender
-              : null,
+              const ['MALE', 'FEMALE', 'OTHER'].contains(selectedGender)
+                  ? selectedGender
+                  : null,
           label: Text(_label('Genre', required: true)),
           leadingIcon: const Icon(Icons.person_outline),
           expandedInsets: EdgeInsets.zero,

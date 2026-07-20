@@ -228,9 +228,8 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
     final plannedExerciseIds = activeSession.plannedExercises
         .map((exercise) => exercise.exerciseId)
         .toSet();
-    final freeConfiguredIds = _freeExerciseConfigs
-        .map((config) => config.exercise.id)
-        .toSet();
+    final freeConfiguredIds =
+        _freeExerciseConfigs.map((config) => config.exercise.id).toSet();
     final orphanFreeSets = activeSession.sets
         .where(
           (set) =>
@@ -316,26 +315,23 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
           )
           .toList(),
       loggedSets: loggedSets,
-      onLogSet:
-          ({
-            required setOrder,
-            required reps,
-            required weightKg,
-            required restSeconds,
-            required isWarmup,
-          }) {
-            ref
-                .read(providerTraining.notifier)
-                .addSet(
-                  sessionId: activeSession.id,
-                  exerciseId: plannedExercise.exerciseId,
-                  setOrder: setOrder,
-                  reps: reps,
-                  weightKg: weightKg,
-                  restSeconds: restSeconds,
-                  isWarmup: isWarmup,
-                );
-          },
+      onLogSet: ({
+        required setOrder,
+        required reps,
+        required weightKg,
+        required restSeconds,
+        required isWarmup,
+      }) {
+        ref.read(providerTraining.notifier).addSet(
+              sessionId: activeSession.id,
+              exerciseId: plannedExercise.exerciseId,
+              setOrder: setOrder,
+              reps: reps,
+              weightKg: weightKg,
+              restSeconds: restSeconds,
+              isWarmup: isWarmup,
+            );
+      },
     );
   }
 
@@ -363,26 +359,23 @@ class _ScreenSessionsState extends ConsumerState<ScreenSessions>
           )
           .toList(),
       loggedSets: loggedSets,
-      onLogSet:
-          ({
-            required setOrder,
-            required reps,
-            required weightKg,
-            required restSeconds,
-            required isWarmup,
-          }) {
-            ref
-                .read(providerTraining.notifier)
-                .addSet(
-                  sessionId: activeSession.id,
-                  exerciseId: config.exercise.id,
-                  setOrder: setOrder,
-                  reps: reps,
-                  weightKg: weightKg,
-                  restSeconds: restSeconds,
-                  isWarmup: isWarmup,
-                );
-          },
+      onLogSet: ({
+        required setOrder,
+        required reps,
+        required weightKg,
+        required restSeconds,
+        required isWarmup,
+      }) {
+        ref.read(providerTraining.notifier).addSet(
+              sessionId: activeSession.id,
+              exerciseId: config.exercise.id,
+              setOrder: setOrder,
+              reps: reps,
+              weightKg: weightKg,
+              restSeconds: restSeconds,
+              isWarmup: isWarmup,
+            );
+      },
     );
   }
 

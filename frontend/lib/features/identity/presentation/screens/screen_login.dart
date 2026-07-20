@@ -322,7 +322,8 @@ class _ScreenLoginState extends ConsumerState<ScreenLogin> {
                                     Center(
                                       child: Semantics(
                                         label: 'Connexion en cours',
-                                        child: const CircularProgressIndicator(),
+                                        child:
+                                            const CircularProgressIndicator(),
                                       ),
                                     )
                                   else

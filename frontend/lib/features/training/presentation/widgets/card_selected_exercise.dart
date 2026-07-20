@@ -45,15 +45,13 @@ class CardSelectedExercise extends StatelessWidget {
     final semanticActions = <CustomSemanticsAction, VoidCallback>{};
     if (onMoveUp != null) {
       semanticActions[const CustomSemanticsAction(
-            label: 'Monter dans la liste',
-          )] =
-          onMoveUp!;
+        label: 'Monter dans la liste',
+      )] = onMoveUp!;
     }
     if (onMoveDown != null) {
       semanticActions[const CustomSemanticsAction(
-            label: 'Descendre dans la liste',
-          )] =
-          onMoveDown!;
+        label: 'Descendre dans la liste',
+      )] = onMoveDown!;
     }
 
     return Card(

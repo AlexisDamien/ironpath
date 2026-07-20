@@ -202,9 +202,8 @@ class _ScreenRestTimerState extends ConsumerState<ScreenRestTimer> {
                             iconSize: 48,
                             icon: const Icon(Icons.replay),
                             tooltip: 'Recommencer le minuteur',
-                            onPressed: timerState.isActive
-                                ? notifier.reset
-                                : null,
+                            onPressed:
+                                timerState.isActive ? notifier.reset : null,
                           ),
                           IconButton(
                             iconSize: 64,

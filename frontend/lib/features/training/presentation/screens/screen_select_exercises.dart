@@ -45,12 +45,9 @@ class _ScreenSelectExercisesState extends ConsumerState<ScreenSelectExercises> {
   }
 
   void _onFilterChanged() {
-    ref
-        .read(providerTraining.notifier)
-        .loadExercises(
-          search: _searchController.text.isEmpty
-              ? null
-              : _searchController.text,
+    ref.read(providerTraining.notifier).loadExercises(
+          search:
+              _searchController.text.isEmpty ? null : _searchController.text,
           muscleGroup: _selectedMuscleGroup,
         );
   }

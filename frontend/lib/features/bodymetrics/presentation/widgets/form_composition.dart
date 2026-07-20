@@ -103,9 +103,7 @@ class _FormCompositionState extends ConsumerState<FormComposition> {
           ? null
           : _notesController.text.trim();
       if (widget.compositionToEdit != null) {
-        await ref
-            .read(providerBodyMetrics.notifier)
-            .updateComposition(
+        await ref.read(providerBodyMetrics.notifier).updateComposition(
               compositionId: widget.compositionToEdit!.id,
               bodyFat: parseDecimal(_bodyFatController.text),
               skeletalMuscle: parseDecimal(_skeletalMuscleController.text),
@@ -124,9 +122,7 @@ class _FormCompositionState extends ConsumerState<FormComposition> {
               notes: notes,
             );
       } else {
-        await ref
-            .read(providerBodyMetrics.notifier)
-            .saveComposition(
+        await ref.read(providerBodyMetrics.notifier).saveComposition(
               bodyFat: parseDecimal(_bodyFatController.text),
               skeletalMuscle: parseDecimal(_skeletalMuscleController.text),
               fatFreeMass: parseDecimal(_fatFreeMassController.text),
@@ -176,15 +172,14 @@ class _FormCompositionState extends ConsumerState<FormComposition> {
       keyboardType: maxLines > 1
           ? TextInputType.multiline
           : TextInputType.numberWithOptions(decimal: !integer),
-      textInputAction: maxLines > 1
-          ? TextInputAction.newline
-          : TextInputAction.next,
+      textInputAction:
+          maxLines > 1 ? TextInputAction.newline : TextInputAction.next,
       maxLines: maxLines,
       validator: maxLines > 1
           ? null
           : (value) => integer
-                ? _validateInteger(value, label)
-                : _validateDecimal(value, label),
+              ? _validateInteger(value, label)
+              : _validateDecimal(value, label),
     );
   }
 

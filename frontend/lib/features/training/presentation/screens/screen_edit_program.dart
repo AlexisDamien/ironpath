@@ -82,9 +82,7 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
     setState(() => _isLoading = true);
     try {
       if (widget.program != null) {
-        await ref
-            .read(providerTraining.notifier)
-            .updateProgram(
+        await ref.read(providerTraining.notifier).updateProgram(
               programId: widget.program!.id,
               name: _nameController.text.trim(),
               description: _descriptionController.text.trim().isEmpty
@@ -93,9 +91,7 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
               exercises: _selectedExercises,
             );
       } else {
-        await ref
-            .read(providerTraining.notifier)
-            .createProgram(
+        await ref.read(providerTraining.notifier).createProgram(
               name: _nameController.text.trim(),
               description: _descriptionController.text.trim().isEmpty
                   ? null
@@ -291,9 +287,8 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
                           config: config,
                           onEdit: () => _editExercise(config),
                           onRemove: () => _removeExercise(config),
-                          onMoveUp: index > 0
-                              ? () => _moveExercise(index, -1)
-                              : null,
+                          onMoveUp:
+                              index > 0 ? () => _moveExercise(index, -1) : null,
                           onMoveDown: index < _selectedExercises.length - 1
                               ? () => _moveExercise(index, 1)
                               : null,
@@ -321,8 +316,8 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
               _isLoading
                   ? 'Enregistrement…'
                   : widget.program != null
-                  ? 'Enregistrer les modifications'
-                  : 'Créer le programme',
+                      ? 'Enregistrer les modifications'
+                      : 'Créer le programme',
             ),
           ),
         ),

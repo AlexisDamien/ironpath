@@ -123,8 +123,8 @@ class ApiClient {
 
       final newRefreshToken =
           returnedRefreshToken is String && returnedRefreshToken.isNotEmpty
-          ? returnedRefreshToken
-          : refreshToken;
+              ? returnedRefreshToken
+              : refreshToken;
 
       final persistSession = await tokenStorage.shouldRestoreSession();
       await tokenStorage.saveTokens(

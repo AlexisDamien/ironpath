@@ -35,13 +35,11 @@ class StateTraining {
     return StateTraining(
       status: status ?? this.status,
       programs: programs ?? this.programs,
-      activeSession: clearActiveSession
-          ? null
-          : activeSession ?? this.activeSession,
+      activeSession:
+          clearActiveSession ? null : activeSession ?? this.activeSession,
       sessionHistory: sessionHistory ?? this.sessionHistory,
-      errorMessage: clearErrorMessage
-          ? null
-          : errorMessage ?? this.errorMessage,
+      errorMessage:
+          clearErrorMessage ? null : errorMessage ?? this.errorMessage,
       exercises: exercises ?? this.exercises,
     );
   }

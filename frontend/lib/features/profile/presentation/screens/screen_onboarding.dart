@@ -227,13 +227,13 @@ class _ScreenOnboardingState extends ConsumerState<ScreenOnboarding> {
                   onPressed: _isLoading ? null : _submit,
                   child: _isLoading
                       ? Semantics(
-                    label: 'Enregistrement du profil en cours',
-                    child: const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
+                          label: 'Enregistrement du profil en cours',
+                          child: const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
                       : const Text('Continuer'),
                 ),
               ),

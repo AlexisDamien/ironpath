@@ -33,8 +33,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final stateProfile = ref.read(providerProfile);
 
       final isAuthenticated = stateIdentity.status == StatusAuth.authenticated;
-      final isAuthRoute =
-          routerState.matchedLocation == '/login' ||
+      final isAuthRoute = routerState.matchedLocation == '/login' ||
           routerState.matchedLocation == '/register';
       final isOnboardingRoute = routerState.matchedLocation == '/onboarding';
 

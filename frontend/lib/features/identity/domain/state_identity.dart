@@ -27,9 +27,8 @@ class StateIdentity {
   }) {
     return StateIdentity(
       status: status ?? this.status,
-      errorMessage: clearErrorMessage
-          ? null
-          : errorMessage ?? this.errorMessage,
+      errorMessage:
+          clearErrorMessage ? null : errorMessage ?? this.errorMessage,
       userId: userId ?? this.userId,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
       isRestoringSession: isRestoringSession ?? this.isRestoringSession,

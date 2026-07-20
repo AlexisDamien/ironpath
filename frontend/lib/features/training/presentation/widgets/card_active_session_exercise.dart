@@ -6,14 +6,13 @@ import '../providers/provider_rest_timer.dart';
 import '../../../../core/widgets/component_rest_timer.dart';
 import '../../../../core/utils/format_duration.dart';
 
-typedef LogSetCallback =
-    void Function({
-      required int setOrder,
-      required int? reps,
-      required double? weightKg,
-      required int? restSeconds,
-      required bool isWarmup,
-    });
+typedef LogSetCallback = void Function({
+  required int setOrder,
+  required int? reps,
+  required double? weightKg,
+  required int? restSeconds,
+  required bool isWarmup,
+});
 
 class CardActiveSessionExercise extends StatelessWidget {
   final String exerciseKey;

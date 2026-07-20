@@ -72,9 +72,9 @@ class _ScreenRegisterState extends ConsumerState<ScreenRegister> {
 
     FocusScope.of(context).unfocus();
     ref.read(providerIdentity.notifier).register(
-      _emailController.text.trim(),
-      _passwordController.text,
-    );
+          _emailController.text.trim(),
+          _passwordController.text,
+        );
   }
 
   Widget _buildConsentSection({
@@ -156,7 +156,8 @@ class _ScreenRegisterState extends ConsumerState<ScreenRegister> {
                   controller: _emailController,
                   decoration: const InputDecoration(
                     labelText: 'Adresse email *',
-                    helperText: 'Utilisée pour vérifier et récupérer votre compte',
+                    helperText:
+                        'Utilisée pour vérifier et récupérer votre compte',
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
                   keyboardType: TextInputType.emailAddress,
@@ -190,7 +191,7 @@ class _ScreenRegisterState extends ConsumerState<ScreenRegister> {
                     }
                   }),
                   consentText:
-                  'J’ai lu et j’accepte les Conditions Générales d’Utilisation.',
+                      'J’ai lu et j’accepte les Conditions Générales d’Utilisation.',
                   linkText: 'Lire les Conditions Générales d’Utilisation',
                   legalTitle: 'Conditions Générales d’Utilisation',
                   legalContent: LegalTexts.cgu,
@@ -205,7 +206,7 @@ class _ScreenRegisterState extends ConsumerState<ScreenRegister> {
                     }
                   }),
                   consentText:
-                  'J’accepte le traitement de mes données personnelles de santé conformément à la politique de confidentialité.',
+                      'J’accepte le traitement de mes données personnelles de santé conformément à la politique de confidentialité.',
                   linkText: 'Lire la politique de confidentialité',
                   legalTitle: 'Politique de confidentialité',
                   legalContent: LegalTexts.rgpd,
@@ -242,15 +243,15 @@ class _ScreenRegisterState extends ConsumerState<ScreenRegister> {
                   width: double.infinity,
                   child: authState.status == StatusAuth.loading
                       ? Center(
-                    child: Semantics(
-                      label: 'Création du compte en cours',
-                      child: const CircularProgressIndicator(),
-                    ),
-                  )
+                          child: Semantics(
+                            label: 'Création du compte en cours',
+                            child: const CircularProgressIndicator(),
+                          ),
+                        )
                       : ElevatedButton(
-                    onPressed: _submit,
-                    child: const Text('Créer mon compte'),
-                  ),
+                          onPressed: _submit,
+                          child: const Text('Créer mon compte'),
+                        ),
                 ),
                 const SizedBox(height: 16),
                 Center(

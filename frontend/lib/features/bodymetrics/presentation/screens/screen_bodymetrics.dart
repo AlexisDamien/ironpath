@@ -63,14 +63,12 @@ class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: canWrite ? () => _showAddSheet(context) : null,
-            tooltip: canWrite
-                ? null
-                : 'Vérifie ton email pour ajouter une mesure',
+            tooltip:
+                canWrite ? null : 'Vérifie ton email pour ajouter une mesure',
           ),
         ],
       ),
-      body:
-          bodyMetricsState.status == StatusBodyMetrics.loading &&
+      body: bodyMetricsState.status == StatusBodyMetrics.loading &&
               !bodyMetricsState.isInitialized
           ? const Center(child: CircularProgressIndicator())
           : TabBarView(
