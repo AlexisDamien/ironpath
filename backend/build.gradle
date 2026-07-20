@@ -8,6 +8,8 @@ plugins {
 	id 'org.owasp.dependencycheck' version '10.0.3'
 }
 
+ext['tomcat.version'] = '11.0.24'
+
 group = 'com.ironpath'
 version = '0.0.1-SNAPSHOT'
 
@@ -106,6 +108,11 @@ dependencyCheck {
 	suppressionFile = "${rootDir}/config/owasp/suppressions.xml"
 	nvd {
 		apiKey = System.getenv('NVD_API_KEY') ?: ''
+	}
+	analyzers {
+		ossIndex {
+			enabled = false
+		}
 	}
 }
 

@@ -13,17 +13,10 @@ Application mobile de suivi d'entraînement musculaire.
 | Outil | Version | Lien |
 |---|---|---|
 | Docker Desktop (avec Compose v2) | récente | https://www.docker.com/products/docker-desktop/ |
-| Flutter SDK | 3.44.2 | https://docs.flutter.dev/get-started/install |
+| Git | récente | https://git-scm.com/downloads |
+| Flutter SDK | 3.44.2 | https://docs.flutter.dev/get-started/install (ou script automatique, voir étape 2 ci-dessous) |
 
 Le JDK 21 n'est **pas nécessaire** en local si vous utilisez Docker (le backend est compilé et exécuté dans le conteneur).
-
-**Installation automatique du SDK Flutter** (si vous ne l'avez pas encore, ou une version différente) :
-
-```bash
-bash scripts/setup-flutter.sh
-```
-
-Détecte votre OS, télécharge et installe la version 3.44.2 sans écraser une installation existante ailleurs sur la machine.
 
 **Optionnel** — uniquement pour tester sur émulateur Android ou téléphone en USB : Android Platform Tools (`adb`), inclus avec Android Studio ou seul : https://developer.android.com/tools/releases/platform-tools. Non requis pour lancer l'app sur desktop ou navigateur (Windows, Chrome, Edge).
 
@@ -38,7 +31,15 @@ git clone https://github.com/AlexisDamien/ironpath.git
 cd ironpath
 ```
 
-### 2. Configurer l'environnement
+### 2. Installer le SDK Flutter (si pas déjà fait)
+
+```bash
+bash scripts/setup-flutter.sh
+```
+
+Détecte votre OS, télécharge et installe la version 3.44.2 sans écraser une installation existante ailleurs sur la machine. Si Flutter est déjà installé dans la bonne version, le script ne fait rien.
+
+### 3. Configurer l'environnement
 
 ```bash
 cp .env.example .env
@@ -46,7 +47,7 @@ cp .env.example .env
 
 *(Sous PowerShell : `Copy-Item .env.example .env`)*
 
-### 3. Lancer le backend, PostgreSQL et Mailpit
+### 4. Lancer le backend, PostgreSQL et Mailpit
 
 ```bash
 docker compose up --build --wait --wait-timeout 240
@@ -67,7 +68,7 @@ Doit retourner `{"status":"UP"}`.
 | Swagger | http://localhost:8080/swagger-ui/index.html |
 | Emails reçus (Mailpit) | http://localhost:8025 |
 
-### 4. Lancer l'application Flutter
+### 5. Lancer l'application Flutter
 
 ```bash
 cd frontend

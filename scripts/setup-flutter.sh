@@ -70,7 +70,17 @@ echo "Téléchargement de $ARCHIVE depuis $URL ..."
 curl --fail --location --progress-bar -o "$TMP_ARCHIVE" "$URL"
 
 echo "Extraction dans $INSTALL_DIR ..."
-rm -rf "$SDK_DIR"
+if [ -d "$SDK_DIR" ]; then
+  rm -rf "$SDK_DIR"
+  if [ -d "$SDK_DIR" ]; then
+    echo "Erreur : impossible de supprimer entièrement $SDK_DIR (fichier verrouillé par un" >&2
+    echo "processus en cours, ou permissions insuffisantes). Fermez tout terminal/IDE utilisant" >&2
+    echo "Flutter, puis relancez ce script. Abandon pour éviter un mélange d'anciens et de" >&2
+    echo "nouveaux fichiers SDK." >&2
+    rm -f "$TMP_ARCHIVE"
+    exit 1
+  fi
+fi
 case "$ARCHIVE" in
   *.tar.xz) tar -xJf "$TMP_ARCHIVE" -C "$INSTALL_DIR" ;;
   *.zip)    unzip -q "$TMP_ARCHIVE" -d "$INSTALL_DIR" ;;
@@ -78,14 +88,39 @@ esac
 rm -f "$TMP_ARCHIVE"
 
 echo
+echo "=================================================================="
 echo "== Flutter $REQUIRED_VERSION installé dans $SDK_DIR =="
+echo "=================================================================="
 echo
-echo "Pour l'utiliser dans ce terminal :"
-echo "  export PATH=\"$SDK_DIR/bin:\$PATH\""
+echo "!! ATTENTION : ce PATH n'est actif QUE dans ce terminal, pour cette"
+echo "!! session. Si vous fermez cette fenêtre et en ouvrez une nouvelle,"
+echo "!! 'flutter' pointera de nouveau vers une autre installation si vous"
+echo "!! en avez une, ou ne sera plus trouvé du tout."
 echo
-echo "Pour le rendre permanent, ajoutez la ligne ci-dessus à votre ~/.bashrc, ~/.zshrc"
-echo "(ou, sous Windows, ajoutez $SDK_DIR\\bin aux variables d'environnement PATH)."
+echo "ETAPE OBLIGATOIRE pour une utilisation permanente :"
+echo
+case "$PLATFORM" in
+  windows)
+    echo "  Windows : ajoutez ce chemin à vos Variables d'environnement (PATH) :"
+    echo "    $SDK_DIR/bin" | sed 's#/#\\\\#g'
+    echo "  (Panneau de configuration > Variables d'environnement > PATH utilisateur)"
+    echo "  Fermez ENSUITE tous vos terminaux et rouvrez-en un nouveau."
+    ;;
+  *)
+    echo "  export PATH=\"$SDK_DIR/bin:\$PATH\""
+    echo "  A ajouter à votre ~/.bashrc ou ~/.zshrc, puis rouvrez un terminal."
+    ;;
+esac
 echo
 
 export PATH="$SDK_DIR/bin:$PATH"
 flutter --version
+
+INSTALLED_VERSION="$(flutter --version 2>/dev/null | head -n1 | awk '{print $2}')"
+if [ "$INSTALLED_VERSION" != "$REQUIRED_VERSION" ]; then
+  echo
+  echo "ATTENTION : version installée ($INSTALLED_VERSION) différente de celle attendue" >&2
+  echo "($REQUIRED_VERSION). L'archive téléchargée ou l'extraction semble incorrecte." >&2
+  echo "Supprimez $SDK_DIR manuellement et relancez ce script." >&2
+  exit 1
+fi
