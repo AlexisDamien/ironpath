@@ -1,0 +1,123 @@
+name: Release IronPath
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  publish-backend-image:
+    name: Release / Publish backend image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/ironpath-backend
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-jury-apk:
+    name: Release / Build jury APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Flutter 3.44.2
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.2'
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        working-directory: frontend
+        run: flutter pub get
+
+      - name: Build jury debug APK
+        working-directory: frontend
+        run: >-
+          flutter build apk --debug
+          --dart-define=APP_ENV=local
+          --dart-define=API_BASE_URL=http://127.0.0.1:8080
+
+      - name: Prepare release file
+        run: |
+          mkdir -p release-files
+          cp frontend/build/app/outputs/flutter-apk/app-debug.apk \
+            release-files/ironpath-jury-${GITHUB_REF_NAME}.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: jury-apk
+          retention-days: 30
+          path: release-files/*.apk
+
+  create-release:
+    name: Release / Create GitHub Release
+    needs: [publish-backend-image, build-jury-apk]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download APK artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: jury-apk
+          path: release-files
+
+      - name: Add deployment files
+        run: |
+          cp compose.yaml compose.ghcr.yaml .env.example README-JURY.md release-files/
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" release-files/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" release-files/* \
+              --generate-notes \
+              --title "IronPath ${GITHUB_REF_NAME}"
+          fi

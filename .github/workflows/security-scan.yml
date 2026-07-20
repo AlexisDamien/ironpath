@@ -1,0 +1,62 @@
+name: Dependency Security Scan
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 5 * * 1'
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  backend-dependencies:
+    name: Security / Backend dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradle wrapper executable
+        working-directory: backend
+        run: chmod +x gradlew
+
+      - name: Check NVD API key
+        id: nvd
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          if [ -z "$NVD_API_KEY" ]; then
+            echo 'enabled=false' >> "$GITHUB_OUTPUT"
+            echo '::warning::NVD_API_KEY absent: OWASP Dependency-Check est ignoré.'
+          else
+            echo 'enabled=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run OWASP Dependency-Check
+        if: steps.nvd.outputs.enabled == 'true'
+        working-directory: backend
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: ./gradlew --no-daemon --stacktrace dependencyCheckAnalyze
+
+      - name: Upload OWASP report
+        if: always() && steps.nvd.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v6
+        with:
+          name: owasp-dependency-check-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: warn
+          path: backend/build/reports/dependency-check-report.*
