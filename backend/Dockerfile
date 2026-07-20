@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM eclipse-temurin:21-jdk-jammy AS build
+FROM eclipse-temurin:25-jdk-jammy AS build
 WORKDIR /workspace
 
 COPY gradlew gradlew
@@ -12,7 +12,7 @@ COPY config config
 COPY src src
 RUN ./gradlew --no-daemon clean bootJar
 
-FROM eclipse-temurin:21-jre-jammy AS runtime
+FROM eclipse-temurin:25-jre-jammy AS runtime
 
 LABEL org.opencontainers.image.title="IronPath Backend"
 LABEL org.opencontainers.image.description="API Spring Boot de l'application IronPath"
