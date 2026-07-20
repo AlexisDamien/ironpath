@@ -13,7 +13,8 @@ echo "== Vérification du SDK Flutter (version requise : $REQUIRED_VERSION) =="
 version_ok() {
   command -v flutter >/dev/null 2>&1 || return 1
   local current
-  current="$(flutter --version --machine 2>/dev/null | grep -o '"frameworkVersion":"[^"]*"' | cut -d'"' -f4 || true)"
+  # Ligne type : "Flutter 3.44.2 • channel stable • ..."
+  current="$(flutter --version 2>/dev/null | head -n1 | awk '{print $2}')"
   [ "$current" = "$REQUIRED_VERSION" ]
 }
 
