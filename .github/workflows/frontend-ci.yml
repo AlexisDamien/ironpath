@@ -2,51 +2,75 @@ name: Frontend CI
 
 on:
   push:
-    branches: [ main, develop ]
-    paths:
-      - 'frontend/**'
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
-    paths:
-      - 'frontend/**'
+    branches: [main, develop]
+  workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-test:
-    name: Build & Test Flutter
+  quality:
+    name: Frontend / Quality
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v6
 
-      - name: Set up Flutter
+      - name: Set up Flutter 3.44.2
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.44.2'
-          channel: 'stable'
+          channel: stable
+          cache: true
 
-      - name: Get dependencies
+      - name: Resolve dependencies
         working-directory: frontend
         run: flutter pub get
 
       - name: Check formatting
         working-directory: frontend
-        run: dart format --output=none --set-exit-if-changed .
+        run: dart format --output=none --set-exit-if-changed lib test
 
-      - name: Analyze code
+      - name: Analyze
         working-directory: frontend
-        run: flutter analyze --no-fatal-infos
+        run: flutter analyze --fatal-infos --fatal-warnings
 
-      - name: Run tests
+      - name: Run tests with coverage
         working-directory: frontend
         run: flutter test --coverage
 
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+      - name: Enforce 75% line coverage
+        run: python scripts/check_lcov.py frontend/coverage/lcov.info 75
+
+      - name: Build jury debug APK
+        working-directory: frontend
+        run: >-
+          flutter build apk --debug
+          --dart-define=APP_ENV=local
+          --dart-define=API_BASE_URL=http://127.0.0.1:8080
+
+      - name: Upload frontend coverage
         if: always()
+        uses: actions/upload-artifact@v6
         with:
-          name: flutter-coverage
+          name: frontend-coverage-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: warn
           path: frontend/coverage/lcov.info
+
+      - name: Upload jury APK
+        if: success()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ironpath-jury-apk-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: frontend/build/app/outputs/flutter-apk/app-debug.apk

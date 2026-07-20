@@ -1,26 +1,28 @@
-name: Backend CI/CD
+name: Backend CI
 
 on:
   push:
-    branches: [ main, develop ]
-    paths:
-      - 'backend/**'
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
-    paths:
-      - 'backend/**'
+    branches: [main, develop]
+  workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-test:
-    name: Build & Test Spring Boot
+  quality:
+    name: Backend / Quality
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     services:
       postgres:
-        image: postgres:17
+        image: postgres:17-alpine
         env:
           POSTGRES_DB: ironpath_test
           POSTGRES_USER: ironpath_user
@@ -28,96 +30,62 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
+          --health-cmd "pg_isready -U ironpath_user -d ironpath_test"
+          --health-interval 5s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 12
+
+    env:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ironpath_test
+      SPRING_DATASOURCE_USERNAME: ironpath_user
+      SPRING_DATASOURCE_PASSWORD: ironpath_pass
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v6
 
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
+          distribution: temurin
           java-version: '21'
-          distribution: 'temurin'
 
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ hashFiles('backend/**/*.gradle*') }}
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Grant execute permission for gradlew
+      - name: Make Gradle wrapper executable
         working-directory: backend
         run: chmod +x gradlew
 
-      - name: Build with Gradle
+      - name: Compile, test, lint and package
         working-directory: backend
-        run: ./gradlew build -x test
+        run: ./gradlew --no-daemon --stacktrace clean check spotbugsMain bootJar
 
-      - name: Grant PostgreSQL permissions
-        run: |
-          PGPASSWORD=ironpath_pass psql -h localhost -U ironpath_user -d ironpath_test -c "GRANT ALL ON SCHEMA public TO ironpath_user;"
+      - name: Enforce 80% line coverage
+        run: >-
+          python scripts/check_jacoco.py
+          backend/build/reports/jacoco/test/jacocoTestReport.xml
+          80
 
-      - name: Run tests
-        working-directory: backend
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ironpath_test
-          SPRING_DATASOURCE_USERNAME: ironpath_user
-          SPRING_DATASOURCE_PASSWORD: ironpath_pass
-        run: ./gradlew test
-
-      - name: Checkstyle
-        working-directory: backend
-        run: ./gradlew checkstyleMain checkstyleTest
-
-      - name: SpotBugs
-        working-directory: backend
-        run: ./gradlew spotbugsMain
-
-      - name: JaCoCo Coverage Report
-        working-directory: backend
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ironpath_test
-          SPRING_DATASOURCE_USERNAME: ironpath_user
-          SPRING_DATASOURCE_PASSWORD: ironpath_pass
-        run: ./gradlew jacocoTestReport jacocoTestCoverageVerification
-
-      - name: OWASP Dependency Check
-        working-directory: backend
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-        run: ./gradlew dependencyCheckAnalyze
-        continue-on-error: true
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
+      - name: Upload backend reports
         if: always()
+        uses: actions/upload-artifact@v6
         with:
-          name: test-results
-          path: backend/build/reports/tests/
+          name: backend-reports-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            backend/build/reports/tests/
+            backend/build/reports/jacoco/
+            backend/build/reports/checkstyle/
+            backend/build/reports/spotbugs/
 
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        if: always()
+      - name: Upload backend JAR
+        if: success()
+        uses: actions/upload-artifact@v6
         with:
-          name: coverage-report
-          path: backend/build/reports/jacoco/
-
-      - name: Upload SpotBugs report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: spotbugs-report
-          path: backend/build/reports/spotbugs/
-
-      - name: Upload OWASP report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: owasp-report
-          path: backend/build/reports/dependency-check-report.html
+          name: ironpath-backend-jar-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: backend/build/libs/*.jar
