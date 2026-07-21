@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v6
 
       - name: Set up Flutter 3.44.2
         uses: subosito/flutter-action@v2
@@ -50,7 +50,18 @@ jobs:
       - name: Enforce 75% line coverage
         run: python scripts/check_lcov.py frontend/coverage/lcov.info 75
 
-      - name: Build jury debug APK
+      - name: Cache Gradle (Android build)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            frontend/android/.gradle
+          key: gradle-android-${{ runner.os }}-${{ hashFiles('frontend/android/gradle/wrapper/gradle-wrapper.properties', 'frontend/android/build.gradle', 'frontend/android/app/build.gradle') }}
+          restore-keys: |
+            gradle-android-${{ runner.os }}-
+
+      - name: Build debug APK
         working-directory: frontend
         run: >-
           flutter build apk --debug
@@ -59,18 +70,18 @@ jobs:
 
       - name: Upload frontend coverage
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
           name: frontend-coverage-${{ github.run_id }}
           retention-days: 14
           if-no-files-found: warn
           path: frontend/coverage/lcov.info
 
-      - name: Upload jury APK
+      - name: Upload debug APK
         if: success()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
-          name: ironpath-jury-apk-${{ github.run_id }}
+          name: ironpath-apk-${{ github.run_id }}
           retention-days: 14
           if-no-files-found: error
           path: frontend/build/app/outputs/flutter-apk/app-debug.apk

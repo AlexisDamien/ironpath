@@ -20,10 +20,7 @@ public class SaveProfileUseCase {
     private final UserRepository userRepository;
 
     @Transactional
-    public ProfileResponse execute(
-            UUID userId,
-            UpdateProfileRequest request
-    ) {
+    public ProfileResponse execute(UUID userId, UpdateProfileRequest request) {
         var user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new UnauthorizedException("Utilisateur introuvable")
@@ -58,11 +55,7 @@ public class SaveProfileUseCase {
         return toResponse(savedProfile);
     }
 
-    private void updateUsername(
-            Profile profile,
-            UUID userId,
-            String rawUsername
-    ) {
+    private void updateUsername(Profile profile, UUID userId, String rawUsername) {
         String username = normalizeNullable(rawUsername);
 
         if (username == null) {

@@ -10,12 +10,8 @@ import java.util.Map;
 @Component
 public class HtmlTemplateRenderer {
 
-    public String render(
-            String classpathLocation,
-            Map<String, String> variables
-    ) {
-        String template = load(classpathLocation);
-        String rendered = template;
+    public String render(String classpathLocation, Map<String, String> variables) {
+        String rendered = load(classpathLocation);
 
         for (Map.Entry<String, String> variable : variables.entrySet()) {
             rendered = rendered.replace(

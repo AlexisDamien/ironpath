@@ -31,10 +31,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AppProperties appProperties;
 
-    public SecurityConfig(
-            JwtAuthenticationFilter jwtAuthenticationFilter,
-            AppProperties appProperties
-    ) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, AppProperties appProperties) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.appProperties = appProperties;
     }
@@ -126,9 +123,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private void configureExceptionHandling(
-            ExceptionHandlingConfigurer<HttpSecurity> exceptions
-    ) {
+    private void configureExceptionHandling(ExceptionHandlingConfigurer<HttpSecurity> exceptions) {
         exceptions
                 .authenticationEntryPoint((request, response, exception) ->
                         writeJsonError(
@@ -183,11 +178,8 @@ public class SecurityConfig {
         auth.anyRequest().authenticated();
     }
 
-    private static void writeJsonError(
-            HttpServletResponse response,
-            int status,
-            String message
-    ) throws IOException {
+    private static void writeJsonError(HttpServletResponse response, int status, String message)
+            throws IOException {
         response.setStatus(status);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());

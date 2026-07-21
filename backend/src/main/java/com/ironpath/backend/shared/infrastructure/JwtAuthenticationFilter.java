@@ -6,6 +6,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -20,6 +22,8 @@ import java.util.Collections;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final Logger SECURITY_LOG = LoggerFactory.getLogger("SECURITY");
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
@@ -40,6 +44,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         if (!jwtService.isTokenValid(token)) {
+            SECURITY_LOG.warn(
+                    "Token invalide ou expiré sur {} {}",
+                    request.getMethod(),
+                    request.getRequestURI()
+            );
             filterChain.doFilter(request, response);
             return;
         }

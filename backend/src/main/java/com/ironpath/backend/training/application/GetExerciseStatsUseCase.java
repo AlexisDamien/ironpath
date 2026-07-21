@@ -24,10 +24,7 @@ public class GetExerciseStatsUseCase {
     private final OneRepMaxRepository oneRepMaxRepository;
 
     @Transactional(readOnly = true)
-    public ExerciseStatsResponse execute(
-            UUID userId,
-            String exerciseId
-    ) {
+    public ExerciseStatsResponse execute(UUID userId, String exerciseId) {
         List<ExerciseSet> allSets = sessionRepository
                 .findByUserIdOrderByStartedAtDesc(userId)
                 .stream()

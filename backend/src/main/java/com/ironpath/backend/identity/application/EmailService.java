@@ -33,20 +33,13 @@ public class EmailService {
     private final AppProperties appProperties;
     private final HtmlTemplateRenderer templateRenderer;
 
-    public EmailService(
-            JavaMailSender mailSender,
-            AppProperties appProperties,
-            HtmlTemplateRenderer templateRenderer
-    ) {
+    public EmailService(JavaMailSender mailSender, AppProperties appProperties, HtmlTemplateRenderer templateRenderer) {
         this.mailSender = mailSender;
         this.appProperties = appProperties;
         this.templateRenderer = templateRenderer;
     }
 
-    public void sendVerificationEmail(
-            String to,
-            String token
-    ) {
+    public void sendVerificationEmail(String to, String token) {
         validateConfiguration();
 
         String verificationUrl = buildUrl(
@@ -74,16 +67,10 @@ public class EmailService {
         );
     }
 
-    public void sendPasswordResetEmail(
-            String to,
-            String token
-    ) {
+    public void sendPasswordResetEmail(String to, String token) {
         validateConfiguration();
 
-        String resetUrl = buildUrl(
-                "/api/auth/reset-password-page",
-                token
-        );
+        String resetUrl = buildUrl("/api/auth/reset-password-page", token);
         String plainText = "Bonjour,\n\n"
                 + "Une réinitialisation de votre mot de passe IronPath "
                 + "a été demandée.\n\n"
@@ -99,12 +86,7 @@ public class EmailService {
                 Map.of("ACTION_URL", HtmlUtils.htmlEscape(resetUrl))
         );
 
-        sendHtmlEmail(
-                to,
-                "Réinitialisez votre mot de passe IronPath",
-                plainText,
-                html
-        );
+        sendHtmlEmail(to, "Réinitialisez votre mot de passe IronPath", plainText, html);
     }
 
     private String buildUrl(String path, String token) {
@@ -116,12 +98,7 @@ public class EmailService {
                 .toUriString();
     }
 
-    private void sendHtmlEmail(
-            String to,
-            String subject,
-            String plainText,
-            String html
-    ) {
+    private void sendHtmlEmail(String to, String subject, String plainText, String html) {
         MimeMessage message = mailSender.createMimeMessage();
         String from = appProperties.getMail().getFrom().trim();
 
