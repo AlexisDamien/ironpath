@@ -22,11 +22,7 @@ public class UpdatePasswordUseCase {
     private final EmailVerificationGuard emailVerificationGuard;
 
     @Transactional
-    public void execute(
-            UUID userId,
-            String currentPassword,
-            String newPassword
-    ) {
+    public void execute(UUID userId, String currentPassword, String newPassword) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new UnauthorizedException("Utilisateur introuvable")

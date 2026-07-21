@@ -2,32 +2,39 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ironpath/features/profile/domain/models/profile_input.dart';
 
 void main() {
-  test('toJson expose tous les champs attendus', () {
-    const input = ProfileInput(
-      firstName: 'Alex',
-      lastName: 'Martin',
-      username: 'alexmartin',
-      birthDate: '1990-02-03',
-      height: 178,
-      gender: 'MALE',
-      objective: 'STRENGTH',
-    );
+  group('ProfileInput.toJson', () {
+    test('serializes all provided fields', () {
+      const input = ProfileInput(
+        firstName: 'Alexis',
+        lastName: 'Damien',
+        username: 'alexisd',
+        birthDate: '2000-01-15',
+        height: 180.0,
+        gender: 'M',
+        objective: 'MUSCLE_GAIN',
+      );
 
-    expect(input.toJson(), {
-      'firstName': 'Alex',
-      'lastName': 'Martin',
-      'username': 'alexmartin',
-      'birthDate': '1990-02-03',
-      'height': 178,
-      'gender': 'MALE',
-      'objective': 'STRENGTH',
+      final json = input.toJson();
+
+      expect(json['firstName'], 'Alexis');
+      expect(json['lastName'], 'Damien');
+      expect(json['username'], 'alexisd');
+      expect(json['birthDate'], '2000-01-15');
+      expect(json['height'], 180.0);
+      expect(json['gender'], 'M');
+      expect(json['objective'], 'MUSCLE_GAIN');
     });
-  });
 
-  test('toJson conserve les valeurs nulles', () {
-    expect(
-      const ProfileInput().toJson().values.every((value) => value == null),
-      isTrue,
-    );
+    test('serializes unset fields as null rather than omitting them', () {
+      const input = ProfileInput();
+
+      final json = input.toJson();
+
+      expect(json.containsKey('firstName'), isTrue);
+      expect(json['firstName'], isNull);
+      expect(json.containsKey('height'), isTrue);
+      expect(json['height'], isNull);
+      expect(json.length, 7);
+    });
   });
 }

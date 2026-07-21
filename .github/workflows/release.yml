@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -32,7 +32,7 @@ jobs:
 
       - name: Extract image metadata
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/ironpath-backend
           tags: |
@@ -51,14 +51,14 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  build-jury-apk:
-    name: Release / Build jury APK
+  build-apk:
+    name: Release / Build APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v6
 
       - name: Set up Flutter 3.44.2
         uses: subosito/flutter-action@v2
@@ -71,7 +71,7 @@ jobs:
         working-directory: frontend
         run: flutter pub get
 
-      - name: Build jury debug APK
+      - name: Build APK
         working-directory: frontend
         run: >-
           flutter build apk --debug
@@ -82,33 +82,33 @@ jobs:
         run: |
           mkdir -p release-files
           cp frontend/build/app/outputs/flutter-apk/app-debug.apk \
-            release-files/ironpath-jury-${GITHUB_REF_NAME}.apk
+            release-files/ironpath-${GITHUB_REF_NAME}.apk
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
-          name: jury-apk
+          name: apk
           retention-days: 30
           path: release-files/*.apk
 
   create-release:
     name: Release / Create GitHub Release
-    needs: [publish-backend-image, build-jury-apk]
+    needs: [publish-backend-image, build-apk]
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v6
 
       - name: Download APK artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v5
         with:
-          name: jury-apk
+          name: apk
           path: release-files
 
       - name: Add deployment files
         run: |
-          cp compose.yaml compose.ghcr.yaml .env.example README-JURY.md release-files/
+          cp compose.yaml compose.ghcr.yaml .env.example README.md release-files/
 
       - name: Create or update GitHub Release
         env:

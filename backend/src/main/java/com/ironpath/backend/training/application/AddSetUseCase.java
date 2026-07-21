@@ -22,11 +22,7 @@ public class AddSetUseCase {
     private final EmailVerificationGuard emailVerificationGuard;
 
     @Transactional
-    public SessionResponse execute(
-            UUID userId,
-            UUID sessionId,
-            AddSetRequest request
-    ) {
+    public SessionResponse execute(UUID userId, UUID sessionId, AddSetRequest request) {
         TrainingSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Session introuvable")

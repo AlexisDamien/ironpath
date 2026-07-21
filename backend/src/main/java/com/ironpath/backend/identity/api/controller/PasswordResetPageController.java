@@ -37,9 +37,7 @@ public class PasswordResetPageController {
             value = "/api/auth/reset-password-page",
             produces = MediaType.TEXT_HTML_VALUE
     )
-    public ResponseEntity<String> resetPasswordPage(
-            @RequestParam String token
-    ) {
+    public ResponseEntity<String> resetPasswordPage(@RequestParam String token) {
         return htmlResponse(renderForm(token, null));
     }
 
@@ -69,10 +67,7 @@ public class PasswordResetPageController {
         }
     }
 
-    private static String validatePasswords(
-            String password,
-            String confirmation
-    ) {
+    private static String validatePasswords(String password, String confirmation) {
         String passwordError = PasswordPolicy.validate(password);
         if (passwordError != null) {
             return passwordError;

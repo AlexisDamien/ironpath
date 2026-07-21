@@ -5,6 +5,8 @@ import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.identity.domain.repository.RefreshTokenRepository;
 import com.ironpath.backend.identity.domain.repository.UserRepository;
 import com.ironpath.backend.shared.infrastructure.JwtService;
+import com.ironpath.backend.shared.infrastructure.LoginRateLimiter;
+import com.ironpath.backend.shared.infrastructure.TooManyAttemptsException;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +43,9 @@ class LoginUserUseCaseTest {
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
+
+    @Mock
+    private LoginRateLimiter loginRateLimiter;
 
     @InjectMocks
     private LoginUserUseCase loginUserUseCase;
@@ -106,5 +114,55 @@ class LoginUserUseCaseTest {
 
         assertNotNull(response.token());
         assertFalse(response.emailVerified());
+    }
+
+    @Test
+    void execute_shouldThrowTooManyAttemptsException_whenRateLimitExceeded() {
+        doThrow(new TooManyAttemptsException("Trop de tentatives"))
+                .when(loginRateLimiter).checkAllowed(anyString());
+
+        assertThrows(TooManyAttemptsException.class, () ->
+                loginUserUseCase.execute("test@ironpath.com", "password123")
+        );
+
+        verifyNoInteractions(userRepository);
+    }
+
+    @Test
+    void execute_shouldRecordFailedAttempt_whenWrongPassword() {
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .email("test@ironpath.com")
+                .passwordHash("hashedPassword")
+                .emailVerifiedAt(LocalDateTime.now())
+                .build();
+
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+
+        assertThrows(UnauthorizedException.class, () ->
+                loginUserUseCase.execute("test@ironpath.com", "wrongpassword")
+        );
+
+        verify(loginRateLimiter).recordFailedAttempt("test@ironpath.com");
+    }
+
+    @Test
+    void execute_shouldRecordSuccessfulAttempt_whenLoginSucceeds() {
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .email("test@ironpath.com")
+                .passwordHash("hashedPassword")
+                .emailVerifiedAt(LocalDateTime.now())
+                .build();
+
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+        when(jwtService.generateToken(any(UUID.class), anyString())).thenReturn("accessToken");
+        when(refreshTokenRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        loginUserUseCase.execute("test@ironpath.com", "password123");
+
+        verify(loginRateLimiter).recordSuccessfulAttempt("test@ironpath.com");
     }
 }
