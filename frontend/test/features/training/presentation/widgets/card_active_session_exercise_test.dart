@@ -72,7 +72,9 @@ void main() {
         CardActiveSessionExercise(
           exerciseKey: 'ex-1',
           exerciseName: 'Squat',
-          plannedSets: [SetTarget(setOrder: 1, targetReps: 10, targetWeight: 50)],
+          plannedSets: [
+            SetTarget(setOrder: 1, targetReps: 10, targetWeight: 50)
+          ],
           loggedSets: [loggedSet],
           onLogSet: noopLogSet,
         ),
@@ -96,7 +98,9 @@ void main() {
         CardActiveSessionExercise(
           exerciseKey: 'ex-1',
           exerciseName: 'Squat',
-          plannedSets: [SetTarget(setOrder: 1, targetReps: 8, targetWeight: 40)],
+          plannedSets: [
+            SetTarget(setOrder: 1, targetReps: 8, targetWeight: 40)
+          ],
           loggedSets: const [],
           onLogSet: ({
             required setOrder,

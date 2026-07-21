@@ -57,8 +57,8 @@ void main() {
   });
 
   testWidgets('displays plural set count when more than one set', (
-      tester,
-      ) async {
+    tester,
+  ) async {
     final config = ExerciseConfig(
       exercise: exercise,
       sets: [
@@ -83,8 +83,8 @@ void main() {
   });
 
   testWidgets('calls onEdit when "Modifier" is selected from the menu', (
-      tester,
-      ) async {
+    tester,
+  ) async {
     var editTapped = false;
     final config = ExerciseConfig(
       exercise: exercise,
@@ -111,8 +111,8 @@ void main() {
   });
 
   testWidgets('calls onRemove when "Supprimer" is selected from the menu', (
-      tester,
-      ) async {
+    tester,
+  ) async {
     var removeTapped = false;
     final config = ExerciseConfig(
       exercise: exercise,
