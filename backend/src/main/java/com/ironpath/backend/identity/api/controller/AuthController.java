@@ -14,20 +14,31 @@ import com.ironpath.backend.identity.application.RefreshTokenUseCase;
 import com.ironpath.backend.identity.application.RegisterUserUseCase;
 import com.ironpath.backend.identity.application.ResetPasswordUseCase;
 import com.ironpath.backend.identity.application.ResendVerificationEmailUseCase;
+import com.ironpath.backend.identity.application.VerifyEmailUseCase;
+import com.ironpath.backend.shared.infrastructure.HtmlTemplateRenderer;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.HtmlUtils;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
+
+    private static final String VERIFY_SUCCESS_TEMPLATE =
+            "templates/email-verification/success.html";
+    private static final String VERIFY_EXPIRED_TEMPLATE =
+            "templates/email-verification/expired.html";
 
     private final RegisterUserUseCase registerUserUseCase;
     private final LoginUserUseCase loginUserUseCase;
@@ -36,6 +47,8 @@ public class AuthController {
     private final ResendVerificationEmailUseCase resendVerificationEmailUseCase;
     private final ForgotPasswordUseCase forgotPasswordUseCase;
     private final ResetPasswordUseCase resetPasswordUseCase;
+    private final VerifyEmailUseCase verifyEmailUseCase;
+    private final HtmlTemplateRenderer templateRenderer;
 
     @PostMapping("/register")
     public ResponseEntity<LoginResponse> register(
@@ -96,5 +109,39 @@ public class AuthController {
         UUID userId = UUID.fromString(authentication.getName());
         resendVerificationEmailUseCase.execute(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(value = "/verify-email", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+        try {
+            verifyEmailUseCase.execute(token);
+            return verifyEmailHtmlResponse(
+                    templateRenderer.render(VERIFY_SUCCESS_TEMPLATE, Map.of())
+            );
+        } catch (IllegalArgumentException exception) {
+            String message = HtmlUtils.htmlEscape(exception.getMessage());
+            return verifyEmailHtmlResponse(
+                    templateRenderer.render(
+                            VERIFY_EXPIRED_TEMPLATE,
+                            Map.of("MESSAGE", message)
+                    )
+            );
+        }
+    }
+
+    private static ResponseEntity<String> verifyEmailHtmlResponse(String body) {
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .header("Referrer-Policy", "no-referrer")
+                .header("X-Content-Type-Options", "nosniff")
+                .header("Permissions-Policy", "camera=(), microphone=()")
+                .header(
+                        "Content-Security-Policy",
+                        "default-src 'none'; style-src 'self'; "
+                                + "form-action 'self'; base-uri 'none'; "
+                                + "frame-ancestors 'none'"
+                )
+                .contentType(MediaType.TEXT_HTML)
+                .body(body);
     }
 }
