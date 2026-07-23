@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/decimal_input_formatter.dart';
 import '../../../../core/widgets/component_modal_header.dart';
 import '../../domain/models/exercise.dart';
 import '../../domain/models/exercise_config.dart';
@@ -235,6 +236,7 @@ class _PopupExerciseConfigState extends State<PopupExerciseConfig> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
+                  inputFormatters: twoDecimalInputFormatters,
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -274,6 +276,7 @@ class _PopupExerciseConfigState extends State<PopupExerciseConfig> {
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
+                          inputFormatters: twoDecimalInputFormatters,
                         ),
                         const SizedBox(height: 8),
                         TextField(

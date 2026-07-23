@@ -22,8 +22,6 @@ class ScreenSettings extends ConsumerWidget {
     final deleted = await showDeleteAccountDialog(context, ref);
     if (!deleted) return;
 
-    // Laisse le temps au dialogue puis à l'écran Paramètres de quitter le
-    // Navigator avant que GoRouter ne reconstruise l'arbre d'authentification.
     await Future<void>.delayed(kThemeAnimationDuration);
     if (context.mounted && Navigator.of(context).canPop()) {
       Navigator.of(context).pop();

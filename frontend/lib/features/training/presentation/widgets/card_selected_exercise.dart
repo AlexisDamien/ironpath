@@ -73,9 +73,26 @@ class CardSelectedExercise extends StatelessWidget {
             ),
           ),
         ),
-        title: Text(
-          config.exercise.name,
-          style: const TextStyle(fontWeight: FontWeight.w600),
+        title: Row(
+          children: [
+            Flexible(
+              child: Text(
+                config.exercise.name,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            if (config.sets.any((set) => set.isWarmup)) ...[
+              const SizedBox(width: 6),
+              Tooltip(
+                message: 'Contient une série d\'échauffement',
+                child: Icon(
+                  Icons.local_fire_department,
+                  size: 16,
+                  color: colorScheme.tertiary,
+                ),
+              ),
+            ],
+          ],
         ),
         subtitle: Text(
           '${config.sets.length} série${config.sets.length > 1 ? 's' : ''}'
@@ -135,6 +152,7 @@ class CardSelectedExercise extends StatelessWidget {
                       container: true,
                       label: [
                         'Série ${set.setOrder}',
+                        if (set.isWarmup) 'échauffement',
                         if (set.targetReps != null)
                           '${set.targetReps} répétitions',
                         if (set.targetWeight != null)
@@ -148,12 +166,30 @@ class CardSelectedExercise extends StatelessWidget {
                           children: [
                             SizedBox(
                               width: 70,
-                              child: Text(
-                                'Série ${set.setOrder}',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      'Série ${set.setOrder}',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                  if (set.isWarmup) ...[
+                                    const SizedBox(width: 4),
+                                    Tooltip(
+                                      message: 'Série d\'échauffement',
+                                      child: Icon(
+                                        Icons.local_fire_department,
+                                        size: 14,
+                                        color: colorScheme.tertiary,
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                             ),
                             Expanded(

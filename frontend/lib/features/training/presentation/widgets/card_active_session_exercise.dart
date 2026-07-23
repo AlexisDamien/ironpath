@@ -4,6 +4,7 @@ import '../../domain/models/training_session.dart';
 import '../../domain/models/set_target.dart';
 import '../providers/provider_rest_timer.dart';
 import '../../../../core/widgets/component_rest_timer.dart';
+import '../../../../core/utils/decimal_input_formatter.dart';
 import '../../../../core/utils/format_duration.dart';
 
 typedef LogSetCallback = void Function({
@@ -200,6 +201,7 @@ class _SetRowState extends ConsumerState<_SetRow> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
+                      inputFormatters: twoDecimalInputFormatters,
                     ),
                   ),
                 ],

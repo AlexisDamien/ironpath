@@ -11,6 +11,7 @@ import '../widgets/popup_delete_measurement.dart';
 import '../widgets/popup_delete_composition.dart';
 import '../widgets/popup_connected_device.dart';
 import '../../../identity/presentation/providers/provider_identity.dart';
+import '../../../../core/widgets/component_date_range_filter.dart';
 
 class ScreenBodyMetrics extends ConsumerStatefulWidget {
   const ScreenBodyMetrics({super.key});
@@ -22,6 +23,7 @@ class ScreenBodyMetrics extends ConsumerStatefulWidget {
 class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  DateTimeRange? _dateFilter;
 
   @override
   void initState() {
@@ -71,18 +73,48 @@ class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
       body: bodyMetricsState.status == StatusBodyMetrics.loading &&
               !bodyMetricsState.isInitialized
           ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
+          : Column(
               children: [
-                _buildMeasurementsList(
-                  context,
-                  bodyMetricsState.measurements,
-                  canWrite,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: ComponentDateRangeFilter(
+                      selectedRange: _dateFilter,
+                      onChanged: (range) => setState(() => _dateFilter = range),
+                    ),
+                  ),
                 ),
-                _buildCompositionsList(
-                  context,
-                  bodyMetricsState.compositions,
-                  canWrite,
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildMeasurementsList(
+                        context,
+                        bodyMetricsState.measurements
+                            .where(
+                              (measurement) => isDateWithinRange(
+                                measurement.recordedAt,
+                                _dateFilter,
+                              ),
+                            )
+                            .toList(),
+                        canWrite,
+                      ),
+                      _buildCompositionsList(
+                        context,
+                        bodyMetricsState.compositions
+                            .where(
+                              (composition) => isDateWithinRange(
+                                composition.recordedAt,
+                                _dateFilter,
+                              ),
+                            )
+                            .toList(),
+                        canWrite,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -95,6 +127,7 @@ class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
     bool canWrite,
   ) {
     if (measurements.isEmpty) {
+      final filterActive = _dateFilter != null;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -105,13 +138,20 @@ class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Aucune mensuration',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              filterActive
+                  ? 'Aucune mensuration sur cette période'
+                  : 'Aucune mensuration',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Ajoute ta première mesure',
+              filterActive
+                  ? 'Essaie une autre plage de dates'
+                  : 'Ajoute ta première mesure',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -121,14 +161,32 @@ class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
       );
     }
 
+    final hasHistory = measurements.length > 1;
+
     return RefreshIndicator(
       onRefresh: () =>
           ref.read(providerBodyMetrics.notifier).loadMeasurements(),
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: measurements.length,
+        itemCount: measurements.length + (hasHistory ? 1 : 0),
         itemBuilder: (context, index) {
-          final measurement = measurements[index];
+          if (hasHistory && index == 1) {
+            return Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 12),
+              child: Text(
+                'Historique',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            );
+          }
+
+          final measurementIndex =
+              (hasHistory && index > 1) ? index - 1 : index;
+          final measurement = measurements[measurementIndex];
           return CardMeasurement(
             key: ValueKey(measurement.id),
             measurement: measurement,
@@ -148,6 +206,7 @@ class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
     bool canWrite,
   ) {
     if (compositions.isEmpty) {
+      final filterActive = _dateFilter != null;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -158,13 +217,20 @@ class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Aucune composition',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              filterActive
+                  ? 'Aucune composition sur cette période'
+                  : 'Aucune composition',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Ajoute ta première composition corporelle',
+              filterActive
+                  ? 'Essaie une autre plage de dates'
+                  : 'Ajoute ta première composition corporelle',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -174,14 +240,32 @@ class _ScreenBodyMetricsState extends ConsumerState<ScreenBodyMetrics>
       );
     }
 
+    final hasHistory = compositions.length > 1;
+
     return RefreshIndicator(
       onRefresh: () =>
           ref.read(providerBodyMetrics.notifier).loadCompositions(),
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: compositions.length,
+        itemCount: compositions.length + (hasHistory ? 1 : 0),
         itemBuilder: (context, index) {
-          final composition = compositions[index];
+          if (hasHistory && index == 1) {
+            return Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 12),
+              child: Text(
+                'Historique',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            );
+          }
+
+          final compositionIndex =
+              (hasHistory && index > 1) ? index - 1 : index;
+          final composition = compositions[compositionIndex];
           return CardComposition(
             key: ValueKey(composition.id),
             composition: composition,

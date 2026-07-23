@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/utils/decimal_input_formatter.dart';
 import '../../../../core/utils/parse_input.dart';
 import '../../../../core/widgets/component_modal_header.dart';
 import '../../domain/models/exercise.dart';
@@ -182,6 +183,7 @@ class _SheetAddSetState extends ConsumerState<SheetAddSet> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
+                inputFormatters: twoDecimalInputFormatters,
                 textInputAction: TextInputAction.next,
                 validator: (value) =>
                     _validatePositiveDecimal(value, 'Le poids'),
