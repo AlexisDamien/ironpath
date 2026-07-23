@@ -6,34 +6,19 @@ Application mobile de suivi d'entraînement musculaire.
 - **Frontend** : Flutter 3.44 (Android)
 - **Email** : Mailpit (démo locale)
 
-Trois façons de lancer l'application pour la tester : Chrome/desktop, téléphone Android en USB, ou émulateur Android.
+Deux façons de lancer l'application pour la tester : Chrome/desktop, ou téléphone Android en USB — détail à l'étape 5.
 
 ---
 
 ## Prérequis à installer
 
-| Outil | Version | Lien |
+| Outil | Version | Installation |
 |---|---|---|
 | Docker Desktop (avec Compose v2) | récente | https://www.docker.com/products/docker-desktop/ |
 | Git | récente | https://git-scm.com/downloads |
-| Flutter SDK | 3.44.2 | https://docs.flutter.dev/get-started/install (ou script automatique, voir étape 2 ci-dessous) |
+| Flutter SDK | 3.44.2 | Automatique, voir étape 2 ci-dessous |
 
-Le JDK 21 n'est **pas nécessaire** en local si vous utilisez Docker (le backend est compilé et exécuté dans le conteneur).
-
-**Pour lancer sur téléphone Android (USB) ou émulateur** : le SDK Android est nécessaire pour compiler l'application (pas seulement l'outil `adb`). Deux façons de l'obtenir :
-
-- **Le plus simple** : installer Android Studio (https://developer.android.com/studio), qui inclut le SDK Manager avec interface graphique.
-- **Alternative plus légère, sans IDE complet** : installer uniquement les *Android command-line tools* (https://developer.android.com/studio#command-tools), puis accepter les licences :
-  ```bash
-  flutter doctor --android-licenses
-  ```
-
-Dans les deux cas, vérifiez que tout est en ordre avec :
-```bash
-flutter doctor
-```
-
-Non requis pour lancer l'app sur desktop ou navigateur (Windows, Chrome, Edge).
+Le JDK 21 n'est **pas nécessaire** en local si vous utilisez Docker (le backend est compilé et exécuté dans le conteneur). Non requis pour lancer l'app sur desktop ou navigateur (Windows, Chrome, Edge).
 
 ---
 
@@ -53,6 +38,16 @@ bash scripts/setup-flutter.sh
 ```
 
 Détecte votre OS, télécharge et installe la version 3.44.2 sans écraser une installation existante ailleurs sur la machine. Si Flutter est déjà installé dans la bonne version, le script ne fait rien.
+
+Vérifiez ensuite que l'ensemble de l'environnement est en ordre :
+```bash
+flutter doctor
+```
+Si la commande `flutter` (ou `flutter doctor`) n'est pas reconnue, vérifiez vos variables d'environnement et ajoutez le dossier d'installation à votre `PATH` :
+- Windows : `C:\Users\<votre_nom_utilisateur>\dev\flutter\bin`
+- Linux/Mac : `~/dev/flutter/bin`
+
+Le script est censé le faire automatiquement (voir plus haut) — fermez et rouvrez votre terminal si ce n'est pas déjà pris en compte.
 
 ### 3. Configurer l'environnement
 
@@ -93,7 +88,7 @@ flutter pub get
 
 **Sous Windows**, si le mode développeur n'est pas déjà activé sur la machine, Flutter vous le demandera automatiquement (lien direct vers les paramètres Windows concernés) — nécessaire pour builder la cible desktop. Acceptez l'activation puis relancez la commande.
 
-Choisissez ensuite l'une des trois cibles ci-dessous selon votre besoin.
+Choisissez ensuite l'une des deux cibles ci-dessous selon votre besoin.
 
 #### Option A — Chrome ou desktop Windows (le plus simple, aucune config réseau)
 
@@ -107,8 +102,10 @@ flutter run \
 
 #### Option B — Téléphone Android en USB
 
-1. Activez le débogage USB sur le téléphone (Paramètres → Options développeur) et branchez-le.
-2. Lancez la commande avec l'IP locale de votre PC (pas `127.0.0.1`, qui désignerait le téléphone lui-même) :
+1. **Avant de brancher le téléphone**, activez manuellement le débogage USB : Paramètres → À propos du téléphone → tapez 7 fois sur "Numéro de build" pour activer les options développeur, puis Paramètres → Options développeur → activez "Débogage USB".
+2. Branchez le téléphone au PC en USB.
+3. Le téléphone et le PC doivent être sur le **même réseau WiFi** pour que l'IP locale soit joignable.
+4. Lancez la commande avec l'IP locale de votre PC (pas `127.0.0.1`, qui désignerait le téléphone lui-même) :
    ```bash
    flutter run \
      --dart-define=APP_ENV=local \
@@ -117,20 +114,6 @@ flutter run \
    Trouver son IP locale :
    - Windows : `ipconfig` → ligne "Adresse IPv4"
    - Linux/Mac : `ip a` ou `ifconfig`
-3. **Le téléphone affiche une popup d'autorisation de débogage USB** au premier branchement/lancement — acceptez-la sur l'écran du téléphone.
-4. **Relancez la commande après avoir accepté** : au premier essai, le téléphone n'est pas encore reconnu comme autorisé au moment où `flutter run` construit la liste des cibles, donc seuls Windows/Chrome/Edge sont proposés. Un second lancement après acceptation détecte correctement le téléphone.
-5. Le téléphone et le PC doivent être sur le **même réseau WiFi** pour que l'IP locale soit joignable.
-
-#### Option C — Émulateur Android
-
-```bash
-adb reverse tcp:8080 tcp:8080
-flutter run \
-  --dart-define=APP_ENV=local \
-  --dart-define=API_BASE_URL=http://127.0.0.1:8080
-```
-
-Le `adb reverse` redirige le port 8080 de l'émulateur vers celui de votre machine, permettant de garder `127.0.0.1`.
 
 ---
 
