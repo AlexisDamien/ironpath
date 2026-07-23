@@ -21,6 +21,8 @@ public class PasswordResetPageController {
             "templates/password-reset/form.html";
     private static final String SUCCESS_TEMPLATE =
             "templates/password-reset/success.html";
+    private static final String EXPIRED_TEMPLATE =
+            "templates/password-reset/expired.html";
 
     private final ResetPasswordUseCase resetPasswordUseCase;
     private final HtmlTemplateRenderer templateRenderer;
@@ -37,7 +39,12 @@ public class PasswordResetPageController {
             value = "/api/auth/reset-password-page",
             produces = MediaType.TEXT_HTML_VALUE
     )
-    public ResponseEntity<String> resetPasswordPage(@RequestParam String token) {
+    public ResponseEntity<String> resetPasswordPage(
+            @RequestParam String token
+    ) {
+        if (!resetPasswordUseCase.isTokenValid(token)) {
+            return htmlResponse(renderExpired());
+        }
         return htmlResponse(renderForm(token, null));
     }
 
@@ -67,7 +74,10 @@ public class PasswordResetPageController {
         }
     }
 
-    private static String validatePasswords(String password, String confirmation) {
+    private static String validatePasswords(
+            String password,
+            String confirmation
+    ) {
         String passwordError = PasswordPolicy.validate(password);
         if (passwordError != null) {
             return passwordError;
@@ -113,5 +123,9 @@ public class PasswordResetPageController {
 
     private String renderSuccess() {
         return templateRenderer.render(SUCCESS_TEMPLATE, Map.of());
+    }
+
+    private String renderExpired() {
+        return templateRenderer.render(EXPIRED_TEMPLATE, Map.of());
     }
 }

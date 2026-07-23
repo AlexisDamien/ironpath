@@ -14,7 +14,6 @@ import com.ironpath.backend.identity.application.RefreshTokenUseCase;
 import com.ironpath.backend.identity.application.RegisterUserUseCase;
 import com.ironpath.backend.identity.application.ResetPasswordUseCase;
 import com.ironpath.backend.identity.application.ResendVerificationEmailUseCase;
-import com.ironpath.backend.identity.application.VerifyEmailUseCase;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +30,6 @@ import java.util.UUID;
 public class AuthController {
 
     private final RegisterUserUseCase registerUserUseCase;
-    private final VerifyEmailUseCase verifyEmailUseCase;
     private final LoginUserUseCase loginUserUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
     private final GetEmailVerificationStatusUseCase getEmailVerificationStatusUseCase;
@@ -48,12 +46,6 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
-        verifyEmailUseCase.execute(token);
-        return ResponseEntity.ok("Email vérifié avec succès !");
-    }
-
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = loginUserUseCase.execute(request.email(), request.password());
@@ -61,13 +53,17 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+    public ResponseEntity<Void> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request
+    ) {
         forgotPasswordUseCase.execute(request.email());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<Void> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request
+    ) {
         resetPasswordUseCase.execute(
                 request.token(),
                 request.newPassword()

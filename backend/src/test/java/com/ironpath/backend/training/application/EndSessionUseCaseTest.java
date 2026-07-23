@@ -2,7 +2,7 @@ package com.ironpath.backend.training.application;
 
 import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
-import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
+import com.ironpath.backend.shared.infrastructure.ForbiddenException;
 import com.ironpath.backend.training.api.dto.SessionResponse;
 import com.ironpath.backend.training.domain.model.TrainingSession;
 import com.ironpath.backend.training.domain.repository.TrainingSessionRepository;
@@ -74,7 +74,7 @@ class EndSessionUseCaseTest {
     }
 
     @Test
-    void execute_shouldThrowUnauthorizedException_whenNotOwner() {
+    void execute_shouldThrowForbiddenException_whenNotOwner() {
         UUID userId = UUID.randomUUID();
         UUID otherUserId = UUID.randomUUID();
         UUID sessionId = UUID.randomUUID();
@@ -89,7 +89,7 @@ class EndSessionUseCaseTest {
 
         when(sessionRepository.findById(sessionId)).thenReturn(Optional.of(session));
 
-        assertThrows(UnauthorizedException.class, () ->
+        assertThrows(ForbiddenException.class, () ->
                 endSessionUseCase.execute(userId, sessionId)
         );
     }

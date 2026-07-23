@@ -36,6 +36,17 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void handleForbidden_shouldReturn403WithMessage() {
+        ForbiddenException exception = new ForbiddenException("Ce programme ne vous appartient pas");
+
+        ResponseEntity<Map<String, String>> response = handler.handleForbidden(exception);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Ce programme ne vous appartient pas", response.getBody().get("error"));
+    }
+
+    @Test
     void handleTooManyAttempts_shouldReturn429WithMessage() {
         TooManyAttemptsException exception = new TooManyAttemptsException(
                 "Trop de tentatives de connexion. Réessayez dans quelques minutes."

@@ -5,7 +5,7 @@ import com.ironpath.backend.bodymetrics.api.dto.SaveMeasurementRequest;
 import com.ironpath.backend.bodymetrics.domain.model.BodyMeasurement;
 import com.ironpath.backend.bodymetrics.domain.repository.BodyMeasurementRepository;
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
-import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
+import com.ironpath.backend.shared.infrastructure.ForbiddenException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ public class UpdateMeasurementUseCase {
                 .orElseThrow(() -> new IllegalArgumentException("Mesure introuvable"));
 
         if (!measurement.getUser().getId().equals(userId)) {
-            throw new UnauthorizedException("Cette mesure ne vous appartient pas");
+            throw new ForbiddenException("Cette mesure ne vous appartient pas");
         }
         emailVerificationGuard.check(measurement.getUser());
 

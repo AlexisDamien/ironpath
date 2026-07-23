@@ -2,7 +2,7 @@ package com.ironpath.backend.training.application;
 
 import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
-import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
+import com.ironpath.backend.shared.infrastructure.ForbiddenException;
 import com.ironpath.backend.training.api.dto.CreateProgramRequest;
 import com.ironpath.backend.training.api.dto.ProgramExerciseRequest;
 import com.ironpath.backend.training.api.dto.ProgramExerciseSetRequest;
@@ -148,7 +148,7 @@ class UpdateProgramUseCaseTest {
     }
 
     @Test
-    void execute_shouldThrowUnauthorized_whenProgramBelongsToAnotherUser() {
+    void execute_shouldThrowForbidden_whenProgramBelongsToAnotherUser() {
         UUID userId = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
         UUID programId = UUID.randomUUID();
@@ -158,7 +158,7 @@ class UpdateProgramUseCaseTest {
 
         when(programRepository.findById(programId)).thenReturn(Optional.of(existing));
 
-        UnauthorizedException exception = assertThrows(UnauthorizedException.class, () ->
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () ->
                 updateProgramUseCase.execute(userId, programId, request)
         );
         assertEquals("Ce programme ne vous appartient pas", exception.getMessage());

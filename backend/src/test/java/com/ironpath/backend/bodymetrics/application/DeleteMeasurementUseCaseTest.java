@@ -4,6 +4,7 @@ import com.ironpath.backend.bodymetrics.domain.model.BodyMeasurement;
 import com.ironpath.backend.bodymetrics.domain.repository.BodyMeasurementRepository;
 import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
+import com.ironpath.backend.shared.infrastructure.ForbiddenException;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,7 +64,7 @@ class DeleteMeasurementUseCaseTest {
     }
 
     @Test
-    void execute_shouldThrowUnauthorized_whenMeasurementBelongsToAnotherUser() {
+    void execute_shouldThrowForbidden_whenMeasurementBelongsToAnotherUser() {
         UUID userId = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
         UUID measurementId = UUID.randomUUID();
@@ -72,7 +73,7 @@ class DeleteMeasurementUseCaseTest {
 
         when(measurementRepository.findById(measurementId)).thenReturn(Optional.of(measurement));
 
-        UnauthorizedException exception = assertThrows(UnauthorizedException.class, () ->
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () ->
                 deleteMeasurementUseCase.execute(userId, measurementId)
         );
         assertEquals("Cette mesure ne vous appartient pas", exception.getMessage());

@@ -9,7 +9,7 @@ import com.ironpath.backend.bodymetrics.domain.repository.BodyMeasurementReposit
 import com.ironpath.backend.profile.domain.model.Profile;
 import com.ironpath.backend.profile.domain.repository.ProfileRepository;
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
-import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
+import com.ironpath.backend.shared.infrastructure.ForbiddenException;
 import com.ironpath.backend.shared.utils.FormatUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class UpdateCompositionUseCase {
                 .orElseThrow(() -> new IllegalArgumentException("Composition introuvable"));
 
         if (!composition.getUser().getId().equals(userId)) {
-            throw new UnauthorizedException("Cette composition ne vous appartient pas");
+            throw new ForbiddenException("Cette composition ne vous appartient pas");
         }
         emailVerificationGuard.check(composition.getUser());
 

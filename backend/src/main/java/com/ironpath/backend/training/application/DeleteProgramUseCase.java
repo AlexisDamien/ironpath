@@ -2,7 +2,7 @@ package com.ironpath.backend.training.application;
 
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
 import com.ironpath.backend.training.domain.repository.WorkoutProgramRepository;
-import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
+import com.ironpath.backend.shared.infrastructure.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +21,7 @@ public class DeleteProgramUseCase {
                 .orElseThrow(() -> new IllegalArgumentException("Programme introuvable"));
 
         if (!program.getUser().getId().equals(userId)) {
-            throw new UnauthorizedException("Ce programme ne vous appartient pas");
+            throw new ForbiddenException("Ce programme ne vous appartient pas");
         }
         emailVerificationGuard.check(program.getUser());
 

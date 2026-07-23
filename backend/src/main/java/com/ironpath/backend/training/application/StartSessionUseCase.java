@@ -2,6 +2,7 @@ package com.ironpath.backend.training.application;
 
 import com.ironpath.backend.identity.domain.repository.UserRepository;
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
+import com.ironpath.backend.shared.infrastructure.ForbiddenException;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import com.ironpath.backend.training.api.dto.SessionResponse;
 import com.ironpath.backend.training.api.dto.StartSessionRequest;
@@ -52,7 +53,7 @@ public class StartSessionUseCase {
                     .orElseThrow(() -> new IllegalArgumentException("Programme introuvable"));
 
             if (!program.getUser().getId().equals(userId)) {
-                throw new UnauthorizedException("Ce programme ne vous appartient pas");
+                throw new ForbiddenException("Ce programme ne vous appartient pas");
             }
 
             sessionBuilder.program(program);

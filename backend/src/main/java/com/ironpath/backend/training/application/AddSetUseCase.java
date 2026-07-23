@@ -1,7 +1,7 @@
 package com.ironpath.backend.training.application;
 
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
-import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
+import com.ironpath.backend.shared.infrastructure.ForbiddenException;
 import com.ironpath.backend.training.api.dto.AddSetRequest;
 import com.ironpath.backend.training.api.dto.SessionResponse;
 import com.ironpath.backend.training.domain.model.ExerciseSet;
@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -22,14 +23,18 @@ public class AddSetUseCase {
     private final EmailVerificationGuard emailVerificationGuard;
 
     @Transactional
-    public SessionResponse execute(UUID userId, UUID sessionId, AddSetRequest request) {
+    public SessionResponse execute(
+            UUID userId,
+            UUID sessionId,
+            AddSetRequest request
+    ) {
         TrainingSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Session introuvable")
                 );
 
         if (!session.getUser().getId().equals(userId)) {
-            throw new UnauthorizedException(
+            throw new ForbiddenException(
                     "Cette session ne vous appartient pas"
             );
         }
@@ -42,20 +47,34 @@ public class AddSetUseCase {
             );
         }
 
-        ExerciseSet set = ExerciseSet.builder()
-                .session(session)
-                .exerciseId(request.exerciseId())
-                .setOrder(request.setOrder())
-                .reps(request.reps())
-                .weightKg(request.weightKg())
-                .restSeconds(request.restSeconds())
-                .isWarmup(
-                        request.isWarmup() != null
-                                && request.isWarmup()
-                )
-                .build();
+        boolean isWarmup = request.isWarmup() != null && request.isWarmup();
 
-        session.getSets().add(set);
+        Optional<ExerciseSet> existingSet = session.getSets().stream()
+                .filter(set ->
+                        set.getExerciseId().equals(request.exerciseId())
+                                && set.getSetOrder().equals(request.setOrder())
+                )
+                .findFirst();
+
+        if (existingSet.isPresent()) {
+            ExerciseSet set = existingSet.get();
+            set.setReps(request.reps());
+            set.setWeightKg(request.weightKg());
+            set.setRestSeconds(request.restSeconds());
+            set.setIsWarmup(isWarmup);
+        } else {
+            ExerciseSet set = ExerciseSet.builder()
+                    .session(session)
+                    .exerciseId(request.exerciseId())
+                    .setOrder(request.setOrder())
+                    .reps(request.reps())
+                    .weightKg(request.weightKg())
+                    .restSeconds(request.restSeconds())
+                    .isWarmup(isWarmup)
+                    .build();
+
+            session.getSets().add(set);
+        }
 
         TrainingSession savedSession = sessionRepository.save(session);
 
