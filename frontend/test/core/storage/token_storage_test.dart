@@ -113,4 +113,55 @@ void main() {
     verify(() => secureStorage.delete(key: 'access_token')).called(1);
     verify(() => secureStorage.delete(key: 'refresh_token')).called(1);
   });
+
+  test(
+      'getAccessToken retente une lecture après un premier échec transitoire du stockage sécurisé',
+      () async {
+    SharedPreferences.setMockInitialValues({'remember_session': true});
+    var callCount = 0;
+    when(() => secureStorage.read(key: 'access_token')).thenAnswer((_) async {
+      callCount++;
+      return callCount == 1 ? null : 'access-after-retry';
+    });
+    final storage = TokenStorage(secureStorage);
+
+    final token = await storage.getAccessToken();
+
+    expect(token, 'access-after-retry');
+    verify(() => secureStorage.read(key: 'access_token')).called(2);
+  });
+
+  test(
+      'getRefreshToken retente une lecture après une exception transitoire du stockage sécurisé',
+      () async {
+    SharedPreferences.setMockInitialValues({'remember_session': true});
+    var callCount = 0;
+    when(() => secureStorage.read(key: 'refresh_token')).thenAnswer((_) async {
+      callCount++;
+      if (callCount == 1) {
+        throw Exception('Erreur transitoire du stockage sécurisé');
+      }
+      return 'refresh-after-retry';
+    });
+    final storage = TokenStorage(secureStorage);
+
+    final token = await storage.getRefreshToken();
+
+    expect(token, 'refresh-after-retry');
+    verify(() => secureStorage.read(key: 'refresh_token')).called(2);
+  });
+
+  test(
+      'getAccessToken renvoie null si le stockage sécurisé reste vide après la nouvelle tentative',
+      () async {
+    SharedPreferences.setMockInitialValues({'remember_session': true});
+    when(() => secureStorage.read(key: 'access_token'))
+        .thenAnswer((_) async => null);
+    final storage = TokenStorage(secureStorage);
+
+    final token = await storage.getAccessToken();
+
+    expect(token, isNull);
+    verify(() => secureStorage.read(key: 'access_token')).called(2);
+  });
 }

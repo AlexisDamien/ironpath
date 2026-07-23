@@ -92,4 +92,59 @@ void main() {
     expect(edit.onPressed, isNull);
     expect(delete.onPressed, isNull);
   });
+
+  testWidgets(
+      'affiche le détail des exercices au clic sur "Voir le détail des exercices"',
+      (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: CardProgram(
+              program: programFixture(),
+              onSelect: () {},
+              onEdit: () {},
+              canWrite: true,
+              isSelected: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('1 série'), findsNothing);
+
+    await tester.tap(find.text('Voir le détail des exercices'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Masquer le détail'), findsOneWidget);
+    expect(find.text('1 série'), findsOneWidget);
+  });
+
+  testWidgets(
+      'le clic sur le dropdown n\'appelle pas onSelect (action indépendante)',
+      (tester) async {
+    var selected = false;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: CardProgram(
+              program: programFixture(),
+              onSelect: () => selected = true,
+              onEdit: () {},
+              canWrite: true,
+              isSelected: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Voir le détail des exercices'));
+    await tester.pumpAndSettle();
+
+    expect(selected, isFalse);
+  });
 }

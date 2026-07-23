@@ -1,7 +1,7 @@
 package com.ironpath.backend.training.application;
 
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
-import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
+import com.ironpath.backend.shared.infrastructure.ForbiddenException;
 import com.ironpath.backend.training.api.dto.SessionResponse;
 import com.ironpath.backend.training.domain.model.TrainingSession;
 import com.ironpath.backend.training.domain.repository.TrainingSessionRepository;
@@ -25,7 +25,7 @@ public class EndSessionUseCase {
                 .orElseThrow(() -> new IllegalArgumentException("Session introuvable"));
 
         if (!session.getUser().getId().equals(userId)) {
-            throw new UnauthorizedException("Cette session ne vous appartient pas");
+            throw new ForbiddenException("Cette session ne vous appartient pas");
         }
         emailVerificationGuard.check(session.getUser());
 

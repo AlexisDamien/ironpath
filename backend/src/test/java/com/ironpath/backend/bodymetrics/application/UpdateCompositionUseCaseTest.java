@@ -10,7 +10,7 @@ import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.profile.domain.model.Profile;
 import com.ironpath.backend.profile.domain.repository.ProfileRepository;
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
-import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
+import com.ironpath.backend.shared.infrastructure.ForbiddenException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -121,7 +121,7 @@ class UpdateCompositionUseCaseTest {
     }
 
     @Test
-    void execute_shouldThrowUnauthorized_whenCompositionBelongsToAnotherUser() {
+    void execute_shouldThrowForbidden_whenCompositionBelongsToAnotherUser() {
         UUID userId = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
         UUID compositionId = UUID.randomUUID();
@@ -133,7 +133,7 @@ class UpdateCompositionUseCaseTest {
 
         when(compositionRepository.findById(compositionId)).thenReturn(Optional.of(existing));
 
-        UnauthorizedException exception = assertThrows(UnauthorizedException.class, () ->
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () ->
                 updateCompositionUseCase.execute(userId, compositionId, request)
         );
         assertEquals("Cette composition ne vous appartient pas", exception.getMessage());

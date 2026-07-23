@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -112,5 +113,86 @@ class ResetPasswordUseCaseTest {
         );
         verify(tokenRepository, never()).findByTokenHash(any());
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void isTokenValid_shouldReturnTrue_whenTokenExistsAndIsValid() {
+        User user = User.builder().id(UUID.randomUUID()).build();
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .user(user)
+                .tokenHash("hashed-token")
+                .used(false)
+                .expiresAt(LocalDateTime.now().plusMinutes(10))
+                .build();
+
+        when(tokenCodec.hashToken("raw-token")).thenReturn("hashed-token");
+        when(tokenRepository.findByTokenHash("hashed-token"))
+                .thenReturn(Optional.of(resetToken));
+
+        assertTrue(resetPasswordUseCase.isTokenValid("raw-token"));
+    }
+
+    @Test
+    void isTokenValid_shouldReturnFalse_whenTokenExpired() {
+        User user = User.builder().id(UUID.randomUUID()).build();
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .user(user)
+                .tokenHash("hashed-token")
+                .used(false)
+                .expiresAt(LocalDateTime.now().minusMinutes(1))
+                .build();
+
+        when(tokenCodec.hashToken("raw-token")).thenReturn("hashed-token");
+        when(tokenRepository.findByTokenHash("hashed-token"))
+                .thenReturn(Optional.of(resetToken));
+
+        assertFalse(resetPasswordUseCase.isTokenValid("raw-token"));
+    }
+
+    @Test
+    void isTokenValid_shouldReturnFalse_whenTokenAlreadyUsed() {
+        User user = User.builder().id(UUID.randomUUID()).build();
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .user(user)
+                .tokenHash("hashed-token")
+                .used(true)
+                .expiresAt(LocalDateTime.now().plusMinutes(10))
+                .build();
+
+        when(tokenCodec.hashToken("raw-token")).thenReturn("hashed-token");
+        when(tokenRepository.findByTokenHash("hashed-token"))
+                .thenReturn(Optional.of(resetToken));
+
+        assertFalse(resetPasswordUseCase.isTokenValid("raw-token"));
+    }
+
+    @Test
+    void isTokenValid_shouldReturnFalse_whenTokenNotFound() {
+        when(tokenCodec.hashToken("raw-token")).thenReturn("hashed-token");
+        when(tokenRepository.findByTokenHash("hashed-token"))
+                .thenReturn(Optional.empty());
+
+        assertFalse(resetPasswordUseCase.isTokenValid("raw-token"));
+    }
+
+    @Test
+    void isTokenValid_shouldNotConsumeTheToken() {
+        User user = User.builder().id(UUID.randomUUID()).build();
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .user(user)
+                .tokenHash("hashed-token")
+                .used(false)
+                .expiresAt(LocalDateTime.now().plusMinutes(10))
+                .build();
+
+        when(tokenCodec.hashToken("raw-token")).thenReturn("hashed-token");
+        when(tokenRepository.findByTokenHash("hashed-token"))
+                .thenReturn(Optional.of(resetToken));
+
+        resetPasswordUseCase.isTokenValid("raw-token");
+
+        verify(tokenRepository, never()).save(any());
+        verify(userRepository, never()).save(any());
+        assertFalse(resetToken.getUsed());
     }
 }

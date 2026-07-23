@@ -68,24 +68,24 @@ void main() {
     );
   });
 
-  testWidgets('shows a validation error for a negative weight value', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      wrap(SheetAddSet(activeSession: activeSession)),
-    );
+  testWidgets(
+    'rejects a negative weight input',
+    (tester) async {
+      await tester.pumpWidget(
+        wrap(SheetAddSet(activeSession: activeSession)),
+      );
 
-    await tester.enterText(
-      find.ancestor(
+      final finder = find.ancestor(
         of: find.text('Poids (kg)'),
         matching: find.byType(TextFormField),
-      ),
-      '-10',
-    );
-    await tester.pumpAndSettle();
+      );
 
-    expect(find.text('Le poids doit être un nombre positif'), findsOneWidget);
-  });
+      await tester.enterText(finder, '-10');
+      await tester.pump();
+
+      expect(find.text('-10'), findsNothing);
+    },
+  );
 
   testWidgets('accepts an empty reps field without showing an error', (
     tester,

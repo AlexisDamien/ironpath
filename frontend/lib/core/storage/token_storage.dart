@@ -57,8 +57,6 @@ class TokenStorage {
 
     final preferences = await SharedPreferences.getInstance();
 
-    // Les anciennes versions stockaient déjà les jetons sans enregistrer
-    // explicitement ce choix. Par défaut, on tente donc une restauration.
     _rememberSession = preferences.getBool(_rememberSessionKey) ?? true;
     return _rememberSession!;
   }
@@ -74,7 +72,7 @@ class TokenStorage {
       final preferences = await SharedPreferences.getInstance();
       _sessionAccessToken = preferences.getString(_accessTokenKey);
     } else {
-      _sessionAccessToken = await _secureStorage.read(key: _accessTokenKey);
+      _sessionAccessToken = await _readSecureWithRetry(_accessTokenKey);
     }
 
     return _sessionAccessToken;
@@ -91,10 +89,36 @@ class TokenStorage {
       final preferences = await SharedPreferences.getInstance();
       _sessionRefreshToken = preferences.getString(_refreshTokenKey);
     } else {
-      _sessionRefreshToken = await _secureStorage.read(key: _refreshTokenKey);
+      _sessionRefreshToken = await _readSecureWithRetry(_refreshTokenKey);
     }
 
     return _sessionRefreshToken;
+  }
+
+  Future<String?> _readSecureWithRetry(
+    String key, {
+    int maxAttempts = 2,
+    Duration delayBetweenAttempts = const Duration(milliseconds: 200),
+  }) async {
+    String? value;
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        value = await _secureStorage.read(key: key);
+      } catch (_) {
+        value = null;
+      }
+
+      if (value != null && value.isNotEmpty) {
+        return value;
+      }
+
+      if (attempt < maxAttempts) {
+        await Future.delayed(delayBetweenAttempts);
+      }
+    }
+
+    return value;
   }
 
   Future<void> clearTokens() async {

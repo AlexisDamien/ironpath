@@ -4,6 +4,7 @@ import com.ironpath.backend.bodymetrics.domain.model.BodyComposition;
 import com.ironpath.backend.bodymetrics.domain.repository.BodyCompositionRepository;
 import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
+import com.ironpath.backend.shared.infrastructure.ForbiddenException;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,7 +63,7 @@ class DeleteCompositionUseCaseTest {
     }
 
     @Test
-    void execute_shouldThrowUnauthorized_whenCompositionBelongsToAnotherUser() {
+    void execute_shouldThrowForbidden_whenCompositionBelongsToAnotherUser() {
         UUID userId = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
         UUID compositionId = UUID.randomUUID();
@@ -71,7 +72,7 @@ class DeleteCompositionUseCaseTest {
 
         when(compositionRepository.findById(compositionId)).thenReturn(Optional.of(composition));
 
-        UnauthorizedException exception = assertThrows(UnauthorizedException.class, () ->
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () ->
                 deleteCompositionUseCase.execute(userId, compositionId)
         );
         assertEquals("Cette composition ne vous appartient pas", exception.getMessage());

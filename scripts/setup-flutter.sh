@@ -96,24 +96,47 @@ echo "=================================================================="
 echo "== Flutter $REQUIRED_VERSION installé dans $SDK_DIR =="
 echo "=================================================================="
 echo
-echo "!! ATTENTION : ce PATH n'est actif QUE dans ce terminal, pour cette"
-echo "!! session. Si vous fermez cette fenêtre et en ouvrez une nouvelle,"
-echo "!! 'flutter' pointera de nouveau vers une autre installation si vous"
-echo "!! en avez une, ou ne sera plus trouvé du tout."
-echo
-echo "ETAPE OBLIGATOIRE pour une utilisation permanente :"
-echo
+
+persist_path_windows() {
+  local sdk_bin_win
+  sdk_bin_win="$(cygpath -w "$SDK_DIR/bin" 2>/dev/null || echo "$SDK_DIR/bin" | sed 's#/#\\#g')"
+
+  echo "Ajout permanent au PATH utilisateur Windows..."
+  powershell.exe -NoProfile -Command "
+    \$sdkBin = '$sdk_bin_win'
+    \$currentPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+    if (\$currentPath -notlike \"*\$sdkBin*\") {
+      \$newPath = if ([string]::IsNullOrEmpty(\$currentPath)) { \$sdkBin } else { \"\$currentPath;\$sdkBin\" }
+      [Environment]::SetEnvironmentVariable('Path', \$newPath, 'User')
+      Write-Host 'PATH utilisateur mis à jour.'
+    } else {
+      Write-Host 'PATH utilisateur déjà à jour.'
+    }
+  " 2>/dev/null || echo "Échec de la mise à jour automatique (PowerShell indisponible) — ajout manuel requis, voir ci-dessous."
+
+  echo "Fermez ENSUITE tous vos terminaux et rouvrez-en un nouveau pour que 'flutter' soit reconnu partout."
+}
+
+persist_path_unix() {
+  local rc_file line
+  line="export PATH=\"$SDK_DIR/bin:\$PATH\""
+
+  for rc_file in "$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.profile"; do
+    [ -f "$rc_file" ] || continue
+    if ! grep -qF "$SDK_DIR/bin" "$rc_file" 2>/dev/null; then
+      echo "" >> "$rc_file"
+      echo "# Ajouté automatiquement par scripts/setup-flutter.sh" >> "$rc_file"
+      echo "$line" >> "$rc_file"
+      echo "PATH ajouté à $rc_file"
+    fi
+  done
+
+  echo "Ouvrez un nouveau terminal (ou lancez 'source ~/.bashrc') pour que 'flutter' soit reconnu."
+}
+
 case "$PLATFORM" in
-  windows)
-    echo "  Windows : ajoutez ce chemin à vos Variables d'environnement (PATH) :"
-    echo "    $SDK_DIR/bin" | sed 's#/#\\\\#g'
-    echo "  (Panneau de configuration > Variables d'environnement > PATH utilisateur)"
-    echo "  Fermez ENSUITE tous vos terminaux et rouvrez-en un nouveau."
-    ;;
-  *)
-    echo "  export PATH=\"$SDK_DIR/bin:\$PATH\""
-    echo "  A ajouter à votre ~/.bashrc ou ~/.zshrc, puis rouvrez un terminal."
-    ;;
+  windows) persist_path_windows ;;
+  *)       persist_path_unix ;;
 esac
 echo
 

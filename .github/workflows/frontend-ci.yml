@@ -76,12 +76,3 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
           path: frontend/coverage/lcov.info
-
-      - name: Upload debug APK
-        if: success()
-        uses: actions/upload-artifact@v6
-        with:
-          name: ironpath-apk-${{ github.run_id }}
-          retention-days: 14
-          if-no-files-found: error
-          path: frontend/build/app/outputs/flutter-apk/app-debug.apk

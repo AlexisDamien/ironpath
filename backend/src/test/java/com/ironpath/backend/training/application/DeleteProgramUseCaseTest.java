@@ -2,7 +2,7 @@ package com.ironpath.backend.training.application;
 
 import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
-import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
+import com.ironpath.backend.shared.infrastructure.ForbiddenException;
 import com.ironpath.backend.training.domain.model.WorkoutProgram;
 import com.ironpath.backend.training.domain.repository.WorkoutProgramRepository;
 import org.junit.jupiter.api.Test;
@@ -65,7 +65,7 @@ class DeleteProgramUseCaseTest {
         verify(programRepository, never()).delete(any(WorkoutProgram.class));    }
 
     @Test
-    void execute_shouldThrowUnauthorizedException_whenNotOwner() {
+    void execute_shouldThrowForbiddenException_whenNotOwner() {
         UUID userId = UUID.randomUUID();
         UUID otherUserId = UUID.randomUUID();
         UUID programId = UUID.randomUUID();
@@ -79,7 +79,7 @@ class DeleteProgramUseCaseTest {
 
         when(programRepository.findById(programId)).thenReturn(Optional.of(program));
 
-        assertThrows(UnauthorizedException.class, () ->
+        assertThrows(ForbiddenException.class, () ->
                 deleteProgramUseCase.execute(userId, programId)
         );
 

@@ -215,7 +215,7 @@ class _ScreenEditProgramState extends ConsumerState<ScreenEditProgram> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 const Text(
-                  'Exercices *',
+                  'Exercices',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 TextButton.icon(

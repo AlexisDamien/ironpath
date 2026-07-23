@@ -1,7 +1,7 @@
 package com.ironpath.backend.training.application;
 
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
-import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
+import com.ironpath.backend.shared.infrastructure.ForbiddenException;
 import com.ironpath.backend.training.api.dto.CreateProgramRequest;
 import com.ironpath.backend.training.api.dto.ProgramExerciseRequest;
 import com.ironpath.backend.training.api.dto.ProgramExerciseSetRequest;
@@ -31,7 +31,7 @@ public class UpdateProgramUseCase {
                 .orElseThrow(() -> new IllegalArgumentException("Programme introuvable"));
 
         if (!program.getUser().getId().equals(userId)) {
-            throw new UnauthorizedException("Ce programme ne vous appartient pas");
+            throw new ForbiddenException("Ce programme ne vous appartient pas");
         }
         emailVerificationGuard.check(program.getUser());
 

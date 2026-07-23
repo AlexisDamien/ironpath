@@ -52,7 +52,7 @@ class _FormMeasurementState extends ConsumerState<FormMeasurement> {
 
     Future.microtask(() {
       final profile = ref.read(providerProfile).profile;
-      if (profile?.height != null && widget.measurementToEdit == null) {
+      if (profile?.height != null) {
         _heightController.text = profile!.height.toString();
       }
     });

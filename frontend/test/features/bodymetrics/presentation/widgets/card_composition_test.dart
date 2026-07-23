@@ -53,7 +53,6 @@ void main() {
 
     expect(find.text('Masse grasse'), findsOneWidget);
     expect(find.text('15.0%'), findsOneWidget);
-    // Champs non renseignés dans baseComposition : pas de chip correspondant
     expect(find.text('Masse musculaire'), findsNothing);
   });
 

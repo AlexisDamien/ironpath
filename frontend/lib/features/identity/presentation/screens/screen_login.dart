@@ -210,13 +210,6 @@ class _ScreenLoginState extends ConsumerState<ScreenLogin> {
                                     style:
                                         Theme.of(context).textTheme.bodySmall,
                                   ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Tous les champs sont obligatoires.',
-                                    textAlign: TextAlign.center,
-                                    style:
-                                        Theme.of(context).textTheme.bodySmall,
-                                  ),
                                   const SizedBox(height: 28),
                                   TextFormField(
                                     controller: _emailController,

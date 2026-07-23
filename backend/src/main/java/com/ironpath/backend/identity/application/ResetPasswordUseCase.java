@@ -54,6 +54,19 @@ public class ResetPasswordUseCase {
         refreshTokenRepository.revokeAllByUserId(user.getId());
     }
 
+    /**
+     * Vérifie la validité d'un token sans le consommer, pour permettre
+     * d'afficher immédiatement un état "lien expiré" sur la page avant
+     * même que l'utilisateur ne tente de soumettre le formulaire.
+     */
+    @Transactional(readOnly = true)
+    public boolean isTokenValid(String token) {
+        String tokenHash = tokenCodec.hashToken(token);
+        return tokenRepository.findByTokenHash(tokenHash)
+                .map(PasswordResetToken::isValid)
+                .orElse(false);
+    }
+
     private static IllegalArgumentException invalidToken() {
         return new IllegalArgumentException(
                 "Le lien de réinitialisation est invalide ou expiré"

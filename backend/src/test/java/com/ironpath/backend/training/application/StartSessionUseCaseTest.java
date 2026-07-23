@@ -3,6 +3,7 @@ package com.ironpath.backend.training.application;
 import com.ironpath.backend.identity.domain.model.User;
 import com.ironpath.backend.identity.domain.repository.UserRepository;
 import com.ironpath.backend.shared.application.EmailVerificationGuard;
+import com.ironpath.backend.shared.infrastructure.ForbiddenException;
 import com.ironpath.backend.shared.infrastructure.UnauthorizedException;
 import com.ironpath.backend.training.api.dto.SessionResponse;
 import com.ironpath.backend.training.api.dto.StartSessionRequest;
@@ -140,7 +141,7 @@ class StartSessionUseCaseTest {
     }
 
     @Test
-    void execute_shouldThrowUnauthorized_whenProgramBelongsToAnotherUser() {
+    void execute_shouldThrowForbidden_whenProgramBelongsToAnotherUser() {
         UUID userId = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
         UUID programId = UUID.randomUUID();
@@ -153,7 +154,7 @@ class StartSessionUseCaseTest {
         when(sessionRepository.existsByUserIdAndStatus(userId, "IN_PROGRESS")).thenReturn(false);
         when(programRepository.findById(programId)).thenReturn(Optional.of(program));
 
-        UnauthorizedException exception = assertThrows(UnauthorizedException.class, () ->
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () ->
                 startSessionUseCase.execute(userId, request)
         );
         assertEquals("Ce programme ne vous appartient pas", exception.getMessage());

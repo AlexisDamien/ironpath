@@ -161,4 +161,80 @@ void main() {
     expect(find.text('Série 1'), findsOneWidget);
     expect(find.text('10 reps • 50.0 kg'), findsOneWidget);
   });
+
+  testWidgets('shows a warmup icon for sets marked as warmup', (
+    tester,
+  ) async {
+    final config = ExerciseConfig(
+      exercise: exercise,
+      sets: [
+        ExerciseSetConfig(setOrder: 1, targetReps: 10, isWarmup: true),
+        ExerciseSetConfig(setOrder: 2, targetReps: 8, isWarmup: false),
+      ],
+    );
+
+    await tester.pumpWidget(
+      wrap(
+        CardSelectedExercise(
+          index: 0,
+          config: config,
+          onEdit: () {},
+          onRemove: () {},
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Développé couché'));
+    await tester.pumpAndSettle();
+
+    // Une icône résumée dans le titre (visible replié, pendant le
+    // réordonnancement), et une seconde au niveau du détail de la série
+    // concernée une fois la carte dépliée.
+    expect(find.byIcon(Icons.local_fire_department), findsNWidgets(2));
+  });
+
+  testWidgets('shows the warmup icon on the collapsed card, without expanding',
+      (tester) async {
+    final config = ExerciseConfig(
+      exercise: exercise,
+      sets: [ExerciseSetConfig(setOrder: 1, isWarmup: true)],
+    );
+
+    await tester.pumpWidget(
+      wrap(
+        CardSelectedExercise(
+          index: 0,
+          config: config,
+          onEdit: () {},
+          onRemove: () {},
+        ),
+      ),
+    );
+
+    // Aucun tap pour déplier la carte : l'icône doit être visible telle
+    // quelle, notamment pendant le réordonnancement par glisser-déposer.
+    expect(find.byIcon(Icons.local_fire_department), findsOneWidget);
+  });
+
+  testWidgets(
+      'does not show a warmup icon on the collapsed card when no set is a warmup',
+      (tester) async {
+    final config = ExerciseConfig(
+      exercise: exercise,
+      sets: [ExerciseSetConfig(setOrder: 1, isWarmup: false)],
+    );
+
+    await tester.pumpWidget(
+      wrap(
+        CardSelectedExercise(
+          index: 0,
+          config: config,
+          onEdit: () {},
+          onRemove: () {},
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.local_fire_department), findsNothing);
+  });
 }
