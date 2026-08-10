@@ -5,7 +5,7 @@ plugins {
 	id 'checkstyle'
 	id 'com.github.spotbugs' version '6.5.9'
 	id 'jacoco'
-	id 'org.owasp.dependencycheck' version '10.0.3'
+	id 'org.owasp.dependencycheck' version '13.0.0'
 }
 
 ext['tomcat.version'] = '11.0.24'
