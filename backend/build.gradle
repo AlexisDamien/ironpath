@@ -11,7 +11,7 @@ plugins {
 ext['tomcat.version'] = '11.0.24'
 
 group = 'com.ironpath'
-version = '0.0.1-SNAPSHOT'
+version = '1.1.1'
 
 java {
 	toolchain {
@@ -123,4 +123,8 @@ tasks.named('test') {
 
 tasks.named('check') {
 	dependsOn jacocoTestCoverageVerification
+}
+
+springBoot {
+	buildInfo()
 }
