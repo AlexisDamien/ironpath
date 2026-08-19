@@ -24,7 +24,11 @@
         <packageUrl regex="true">^pkg:maven/org\.apache\.httpcomponents.*$</packageUrl>
         <vulnerabilityName regex="true">CVE-2026-54399|CVE-2026-54428</vulnerabilityName>
     </suppress>
-
+    <suppress>
+        <notes>DOMPurify est un JS embarqué dans l'interface Swagger UI (documentation dev), désactivée en production via springdoc.swagger-ui.enabled=false. Non exploitable en conditions réelles.</notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify@.*$</packageUrl>
+        <cve>CVE-2026-65898</cve>
+    </suppress>
     <suppress>
         <notes><![CDATA[
             commons-beanutils : dépendance de build tooling uniquement (Checkstyle),
