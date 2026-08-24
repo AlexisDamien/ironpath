@@ -54,7 +54,7 @@ dependencies {
 	testAnnotationProcessor 'org.projectlombok:lombok'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	spotbugs 'com.github.spotbugs:spotbugs:4.8.6'
+	spotbugs 'com.github.spotbugs:spotbugs:4.10.4'
 }
 checkstyle {
 	toolVersion = '10.17.0'
